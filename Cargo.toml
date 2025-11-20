@@ -1,0 +1,154 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/rak-core",
+    "crates/rak-model",
+    "crates/rak-session",
+    "crates/rak-agent",
+    "crates/rak-runner",
+    "crates/rak-server",
+    "crates/rak-tool",
+    "crates/rak-macros",
+    "crates/rak-artifact",
+    "crates/rak-memory",
+    "crates/rak-telemetry",
+    "crates/rak-openapi",
+    "crates/rak-web-tools",
+]
+
+[package]
+name = "rak-workspace"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+rak-core = { path = "crates/rak-core" }
+rak-model = { path = "crates/rak-model" }
+rak-session = { path = "crates/rak-session" }
+rak-agent = { path = "crates/rak-agent" }
+rak-runner = { path = "crates/rak-runner" }
+rak-server = { path = "crates/rak-server" }
+rak-tool = { path = "crates/rak-tool" }
+rak-artifact = { path = "crates/rak-artifact" }
+rak-memory = { path = "crates/rak-memory" }
+rak-telemetry = { path = "crates/rak-telemetry" }
+rak-openapi = { path = "crates/rak-openapi" }
+rak-web-tools = { path = "crates/rak-web-tools" }
+
+[dev-dependencies]
+tokio = { workspace = true }
+anyhow = { workspace = true }
+axum = { workspace = true }
+tempfile = "3.8"
+tower = { workspace = true }
+futures = { workspace = true }
+async-trait = { workspace = true }
+async-stream = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+tokio-tungstenite = { workspace = true }
+
+[[test]]
+name = "integration_test"
+path = "tests/integration_test.rs"
+
+[[example]]
+name = "quickstart"
+path = "examples/quickstart.rs"
+
+[[example]]
+name = "tool_usage"
+path = "examples/tool_usage.rs"
+
+[[example]]
+name = "workflow_agents"
+path = "examples/workflow_agents.rs"
+
+[[example]]
+name = "web_tools_usage"
+path = "examples/web_tools_usage.rs"
+
+[[example]]
+name = "config_usage"
+path = "examples/config_usage.rs"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["RAK Team"]
+license = "Apache-2.0"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+tokio-util = "0.7.17"
+futures = "0.3"
+async-stream = "0.3"
+async-trait = "0.1"
+
+# Web framework
+axum = { version = "0.7", features = ["ws"] }
+tower = { version = "0.5", features = ["full"] }
+tower-http = { version = "0.5", features = ["cors", "trace"] }
+tokio-tungstenite = "0.28"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Error handling
+anyhow = "1"
+thiserror = "1"
+
+# Database
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "sqlite", "json"] }
+
+# HTTP client
+reqwest = { version = "0.12", features = ["json", "stream", "multipart"] }
+
+# OpenAPI
+openapiv3 = "2.0"
+serde_yaml = "0.9"
+url = "2.5"
+
+# Config
+config = "0.14"
+dotenvy = "0.15"
+
+# Logging & tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["json", "env-filter"] }
+opentelemetry = "0.25"
+opentelemetry_sdk = "0.25"
+tracing-opentelemetry = "0.26"
+
+# UUID
+uuid = { version = "1", features = ["v4", "serde"] }
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# CLI
+clap = { version = "4", features = ["derive"] }
+
+# Testing
+mockall = "0.13"
+
+# Schema generation
+schemars = "0.8"
+
+# Math evaluation
+meval = "0.2"
+
+# Proc macros
+syn = "2.0"
+quote = "1.0"
+proc-macro2 = "1.0"
+
+# Encoding
+base64 = "0.22"
+
+# Concurrent collections
+dashmap = "6.0"
+

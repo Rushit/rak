@@ -1,0 +1,110 @@
+//! Example demonstrating OpenTelemetry integration with RAK
+//!
+//! This example shows how to:
+//! - Initialize telemetry with OpenTelemetry
+//! - Register custom span processors
+//! - Trace LLM calls and tool executions
+//!
+//! Run with:
+//! ```
+//! RUST_LOG=debug GEMINI_API_KEY=your-key cargo run --example telemetry_usage
+//! ```
+
+use rak_agent::LLMAgent;
+use rak_core::{Content, Part, RakConfig};
+use rak_model::GeminiModel;
+use rak_runner::Runner;
+use rak_session::inmemory::InMemorySessionService;
+use rak_telemetry::init_telemetry;
+use rak_tool::builtin::{create_calculator_tool, create_echo_tool};
+use futures::StreamExt;
+use std::sync::Arc;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    // Initialize telemetry with OpenTelemetry support
+    // This sets up:
+    // - OpenTelemetry tracer
+    // - Structured logging with tracing
+    // - Automatic span creation for LLM calls and tool executions
+    init_telemetry();
+
+    println!("RAK Telemetry Example");
+    println!("==========================\n");
+    println!("Watch the logs for structured tracing output!\n");
+
+    // Load configuration
+    let config = RakConfig::load()?;
+    let api_key = config.api_key()?;
+
+    // Create LLM model
+    let model = Arc::new(GeminiModel::new(api_key, config.model.model_name));
+
+    // Create agent with tools
+    let calculator = create_calculator_tool()?;
+    let echo = create_echo_tool()?;
+
+    let agent = LLMAgent::builder()
+        .name("telemetry_demo")
+        .description("Agent demonstrating telemetry integration")
+        .model(model)
+        .system_instruction("You are a helpful assistant with access to calculator and echo tools.")
+        .tool(Arc::new(calculator))
+        .tool(Arc::new(echo))
+        .build()?;
+
+    // Create session service and runner
+    let session_service = Arc::new(InMemorySessionService::new());
+    let runner = Runner::builder()
+        .app_name("telemetry-example")
+        .agent(Arc::new(agent))
+        .session_service(session_service)
+        .build()?;
+
+    // Run a query that will trigger tool usage
+    let user_id = "demo-user";
+    let session_id = "demo-session";
+    let message = Content::new_user_text("Calculate 15 * 7 and then echo the result back to me");
+
+    if let Some(Part::Text { text }) = message.parts.first() {
+        println!("User: {}", text);
+    }
+    println!("\nProcessing (check logs for detailed tracing)...\n");
+
+    let mut stream = runner
+        .run(
+            user_id.to_string(),
+            session_id.to_string(),
+            message,
+            Default::default(),
+        )
+        .await?;
+
+    // Collect response
+    let mut full_response = String::new();
+    while let Some(event_result) = stream.next().await {
+        let event = event_result?;
+
+        if let Some(content) = &event.content {
+            for part in &content.parts {
+                if let Part::Text { text } = part {
+                    if !text.is_empty() && !event.partial {
+                        full_response.push_str(text);
+                    }
+                }
+            }
+        }
+    }
+
+    println!("Assistant: {}", full_response);
+    println!("\n✅ Example complete!");
+    println!("\nKey telemetry features demonstrated:");
+    println!("  • Automatic LLM call tracing");
+    println!("  • Tool execution tracing");
+    println!("  • Structured log fields (invocation_id, session_id, etc.)");
+    println!("  • OpenTelemetry integration");
+    println!("\nCheck the logs above to see the structured tracing output!");
+
+    Ok(())
+}
+

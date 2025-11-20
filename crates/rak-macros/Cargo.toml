@@ -1,0 +1,26 @@
+[package]
+name = "rak-macros"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+# Proc macro dependencies
+syn = { version = "2.0", features = ["full", "extra-traits"] }
+quote = "1.0"
+proc-macro2 = "1.0"
+
+# Schema generation
+schemars = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+rak-core = { path = "../rak-core" }
+rak-tool = { path = "../rak-tool" }
+tokio = { workspace = true }
+

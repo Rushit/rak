@@ -1,0 +1,17 @@
+[package]
+name = "rak-runner"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+rak-core = { path = "../rak-core" }
+rak-session = { path = "../rak-session" }
+async-trait = { workspace = true }
+futures = { workspace = true }
+async-stream = { workspace = true }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+anyhow = { workspace = true }
+uuid = { workspace = true }
+

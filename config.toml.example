@@ -1,0 +1,56 @@
+# RAK Configuration Example
+#
+# 🔒 SECURITY: This file contains sensitive API keys
+#
+# Setup Instructions:
+# 1. Copy this file: cp config.toml.example config.toml
+# 2. Edit config.toml with your actual API keys
+# 3. config.toml is in .gitignore and will NOT be committed to git
+#
+# ⚙️  Configuration Priority (NEW):
+# 1. config.toml (highest priority)
+# 2. Environment variables (fallback)
+# 3. Defaults (lowest priority)
+#
+# This allows different configs for different environments:
+# - config.toml       (main/development)
+# - config.test.toml  (for tests)
+# - config.prod.toml  (for production)
+
+[model]
+provider = "gemini"
+# Option 1 (Recommended): Use environment variable
+api_key = "${GEMINI_API_KEY}"
+# Option 2: Direct value (only for local development, never commit!)
+# api_key = "your-gemini-api-key-here"
+model_name = "gemini-2.0-flash-exp"
+
+[server]
+host = "127.0.0.1"
+port = 8080
+
+[session]
+# using in-memory
+provider = "in-memory"
+
+# For production, use database
+# provider = "postgres"
+# connection_string = "${DATABASE_URL}"
+
+# Web Tools Configuration
+# -------------------------
+# Web tools use Gemini's built-in capabilities
+# ✅ NO additional API keys needed! Uses [model] api_key above
+#
+# Future: If you want to use Google Custom Search API instead:
+# [web_tools]
+# custom_search_api_key = "${GOOGLE_CUSTOM_SEARCH_API_KEY}"  # Optional
+# custom_search_engine_id = "your-search-engine-id"          # Optional
+
+# OpenAPI Tools Configuration
+# ----------------------------
+# Add API keys for any OpenAPI services you use
+# [openapi]
+# weather_api_key = "${WEATHER_API_KEY}"  # Example for weather API
+# stripe_api_key = "${STRIPE_API_KEY}"    # Example for Stripe API
+
