@@ -25,6 +25,14 @@ api_key = "${GEMINI_API_KEY}"
 # api_key = "your-gemini-api-key-here"
 model_name = "gemini-2.0-flash-exp"
 
+# OpenAI API Key (for OpenAI models)
+# -----------------------------------
+# Set this if you want to use OpenAI models (gpt-4o, gpt-4o-mini, etc.)
+# Option 1: Environment variable (recommended)
+openai_api_key = "${OPENAI_API_KEY}"
+# Option 2: Direct value (only for local development, never commit!)
+# openai_api_key = "sk-your-openai-api-key-here"
+
 [server]
 host = "127.0.0.1"
 port = 8080

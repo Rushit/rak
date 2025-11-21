@@ -25,6 +25,9 @@ pub struct RakConfig {
     
     #[serde(default)]
     pub observability: ObservabilityConfig,
+    
+    /// OpenAI API key (optional, for OpenAI models)
+    pub openai_api_key: Option<String>,
 }
 
 /// Model/LLM configuration
@@ -184,6 +187,19 @@ impl RakConfig {
             self.model.api_key = env::var("GEMINI_API_KEY").ok();
         }
 
+        // Resolve openai_api_key
+        if let Some(ref key) = self.openai_api_key {
+            if let Some(resolved) = Self::resolve_env_var(key) {
+                self.openai_api_key = Some(resolved);
+            } else if key.is_empty() || key == "${OPENAI_API_KEY}" {
+                // If not resolved and it's a reference, try env var directly
+                self.openai_api_key = env::var("OPENAI_API_KEY").ok();
+            }
+        } else {
+            // No openai_api_key in config, try environment variable as fallback
+            self.openai_api_key = env::var("OPENAI_API_KEY").ok();
+        }
+
         // Resolve session.connection_string
         if let Some(ref conn) = self.session.connection_string {
             if let Some(resolved) = Self::resolve_env_var(conn) {
@@ -229,6 +245,7 @@ impl RakConfig {
             server: ServerConfig::default(),
             session: SessionConfig::default(),
             observability: ObservabilityConfig::default(),
+            openai_api_key: Some("test-openai-key".to_string()),
         }
     }
 }
@@ -292,6 +309,7 @@ mod tests {
             server: ServerConfig::default(),
             session: SessionConfig::default(),
             observability: ObservabilityConfig::default(),
+            openai_api_key: None,
         };
 
         let result = config.api_key();
