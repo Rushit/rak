@@ -1,6 +1,6 @@
 use crate::builder::LLMAgentBuilder;
 use rak_core::{
-    Agent, Content, Event, FunctionCall, InvocationContext, LLMRequest, Part, Result, Tool, LLM,
+    Agent, Content, Event, FunctionCall, InvocationContext, LLMRequest, Part, Result, Tool, Toolset, LLM,
 };
 use rak_telemetry::{trace_llm_call, LLMSpanAttributes};
 use async_stream::stream;
@@ -16,6 +16,7 @@ pub struct LLMAgent {
     pub(crate) system_instruction: Option<String>,
     pub(crate) sub_agents: Vec<Arc<dyn Agent>>,
     pub(crate) tools: HashMap<String, Arc<dyn Tool>>,
+    pub(crate) toolsets: Vec<Arc<dyn Toolset>>,
 }
 
 impl LLMAgent {
@@ -36,6 +37,7 @@ impl LLMAgent {
             system_instruction,
             sub_agents: Vec::new(),
             tools: HashMap::new(),
+            toolsets: Vec::new(),
         }
     }
 }
@@ -57,9 +59,36 @@ impl Agent for LLMAgent {
         let model = self.model.clone();
         let agent_name = self.name.clone();
         let invocation_id = ctx.invocation_id().to_string();
-        let tools = self.tools.clone();
+        let mut tools = self.tools.clone();
+        let toolsets = self.toolsets.clone();
+        let ctx_clone = ctx.clone();
 
         Box::new(Box::pin(stream! {
+            // Load tools from toolsets
+            for toolset in &toolsets {
+                match toolset.get_tools(&*ctx_clone).await {
+                    Ok(toolset_tools) => {
+                        tracing::info!(
+                            invocation_id = %invocation_id,
+                            toolset = %toolset.name(),
+                            count = toolset_tools.len(),
+                            "Loaded tools from toolset"
+                        );
+                        for tool in toolset_tools {
+                            tools.insert(tool.name().to_string(), tool);
+                        }
+                    }
+                    Err(e) => {
+                        tracing::error!(
+                            invocation_id = %invocation_id,
+                            toolset = %toolset.name(),
+                            error = %e,
+                            "Failed to load toolset"
+                        );
+                    }
+                }
+            }
+
             // Build LLM request from context
             let mut conversation = Vec::new();
 

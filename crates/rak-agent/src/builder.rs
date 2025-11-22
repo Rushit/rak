@@ -1,5 +1,5 @@
 use crate::llm_agent::LLMAgent;
-use rak_core::{Agent, Error, Result, Tool, LLM};
+use rak_core::{Agent, Error, Result, Tool, Toolset, LLM};
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -10,6 +10,7 @@ pub struct LLMAgentBuilder {
     system_instruction: Option<String>,
     sub_agents: Vec<Arc<dyn Agent>>,
     tools: HashMap<String, Arc<dyn Tool>>,
+    toolsets: Vec<Arc<dyn Toolset>>,
 }
 
 impl LLMAgentBuilder {
@@ -21,6 +22,7 @@ impl LLMAgentBuilder {
             system_instruction: None,
             sub_agents: Vec::new(),
             tools: HashMap::new(),
+            toolsets: Vec::new(),
         }
     }
 
@@ -61,6 +63,11 @@ impl LLMAgentBuilder {
         self
     }
 
+    pub fn toolset(mut self, toolset: Arc<dyn Toolset>) -> Self {
+        self.toolsets.push(toolset);
+        self
+    }
+
     pub fn build(self) -> Result<LLMAgent> {
         let name = self
             .name
@@ -79,6 +86,7 @@ impl LLMAgentBuilder {
             system_instruction: self.system_instruction,
             sub_agents: self.sub_agents,
             tools: self.tools,
+            toolsets: self.toolsets,
         })
     }
 }

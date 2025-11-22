@@ -5,7 +5,9 @@ RAK - Rust Agent Kit for Rust - A code-first framework for building AI agents wi
 
 ## Features
 
-- **Web Tools**: Search the web and scrape content - ZERO additional API keys needed! 🌐 (NEW)
+- **Database Tools**: Native PostgreSQL and SQLite tools with security-first design 🗄️ (NEW)
+- **MCP Support**: Model Context Protocol integration for dynamic tool loading 🔌 (NEW)
+- **Web Tools**: Search the web and scrape content - ZERO additional API keys needed! 🌐
 - **OpenAPI Tools**: Automatically generate tools from OpenAPI specs - instant API integration! 🚀
 - **Async/Await**: Built on Tokio for high-performance async operations
 - **Streaming Support**: Real-time SSE and WebSocket streaming for agent responses
@@ -77,6 +79,8 @@ rak-memory = { path = "path/to/rak-rs/crates/rak-memory" }
 rak-telemetry = { path = "path/to/rak-rs/crates/rak-telemetry" }  # Optional: for OpenTelemetry
 rak-openapi = { path = "path/to/rak-rs/crates/rak-openapi" }  # Optional: for OpenAPI tool generation
 rak-web-tools = { path = "path/to/rak-rs/crates/rak-web-tools" }  # Optional: for web search & scraping
+rak-database-tools = { path = "path/to/rak-rs/crates/rak-database-tools" }  # Optional: for database access
+rak-mcp = { path = "path/to/rak-rs/crates/rak-mcp" }  # Optional: for MCP protocol support
 ```
 
 ### Example
@@ -282,6 +286,120 @@ write.send(Message::Text(serde_json::to_string(&cancel_msg)?)).await?;
 
 See [examples/websocket_usage.rs](examples/websocket_usage.rs) for a complete example.
 
+## Using Database Tools
+
+RAK provides native database tools with **security-first design** - read-only by default!
+
+```rust
+use rak_database_tools::{create_postgres_tools, create_sqlite_tools, DatabaseToolConfig};
+
+// Read-only mode (default) - safe for data analysts
+let readonly_tools = create_postgres_tools("postgresql://localhost/mydb").await?;
+
+let analyst_agent = LLMAgent::builder()
+    .name("data_analyst")
+    .model(model)
+    .tools(readonly_tools)  // Can only SELECT
+    .build()?;
+
+// Write-enabled mode (opt-in) - for administrators
+let config = DatabaseToolConfig::with_write_enabled();
+let write_tools = create_postgres_tools_with_config(
+    "postgresql://localhost/mydb",
+    config
+).await?;
+
+let admin_agent = LLMAgent::builder()
+    .name("data_admin")
+    .model(model)
+    .tools(write_tools)  // Can INSERT/UPDATE/DELETE
+    .build()?;
+```
+
+**🔒 Security Features**:
+- **Read-only by default** - Prevents accidental data modification
+- **Opt-in writes** - Explicit configuration required for INSERT/UPDATE/DELETE
+- **Parameter binding** - Prevents SQL injection attacks
+- **Query limits** - Automatic row limits (default: 1000 rows)
+- **Timeouts** - Per-query timeouts (default: 30 seconds)
+
+**Supported Databases**:
+- **PostgreSQL** - Full-featured PostgreSQL integration
+- **SQLite** - Complete SQLite support (including in-memory databases)
+
+**Tools included**:
+- `list_tables` - List all tables in the database
+- `describe_table` - Get detailed schema information
+- `query` - Execute SELECT queries (read-only default)
+- `execute` - Execute INSERT/UPDATE/DELETE (opt-in only)
+
+See [examples/database_tools_usage.rs](examples/database_tools_usage.rs) for a complete example.
+
+## Using MCP (Model Context Protocol)
+
+RAK supports MCP for **dynamic tool loading** from external servers!
+
+```rust
+use rak_mcp::{McpToolset, StdioConnectionParams};
+
+// Connect to PostgreSQL MCP server
+let postgres_mcp = Arc::new(
+    McpToolset::builder()
+        .name("postgres_mcp")
+        .connection(
+            StdioConnectionParams::new("uvx")
+                .arg("postgres-mcp")
+                .arg("--access-mode=unrestricted")
+                .env("DATABASE_URI", "postgresql://localhost/mydb")
+        )
+        .tool_filter(vec![
+            "list_tables".to_string(),
+            "query".to_string(),
+            "describe_table".to_string()
+        ])
+        .build()?
+);
+
+// Agent with MCP toolset - tools loaded dynamically!
+let agent = LLMAgent::builder()
+    .name("database_agent")
+    .model(model)
+    .toolset(postgres_mcp)  // Dynamic tool loading
+    .build()?;
+
+// When agent runs, it will:
+// 1. Spawn the MCP server as a subprocess
+// 2. Discover available tools
+// 3. Load filtered tools
+// 4. Execute tools as needed
+```
+
+**✨ Benefits**:
+- **Dynamic Loading** - Tools loaded at runtime, not compile-time
+- **External Servers** - Connect to any MCP-compatible server
+- **Language Agnostic** - Use tools written in Python, Node.js, etc.
+- **Zero Code Changes** - Add new tools without recompiling
+
+**How it works**:
+1. Agent starts and calls `toolset.get_tools()`
+2. MCP client spawns server subprocess
+3. Client discovers available tools via MCP protocol
+4. Tools are wrapped as native RAK tools
+5. Agent can call MCP tools like any other tool
+
+**Prerequisites**:
+```bash
+# Install uv (for Python MCP servers)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Set database connection
+export DATABASE_URI=postgresql://localhost/mydb
+
+# MCP server will be spawned automatically
+```
+
+See [examples/mcp_toolset_usage.rs](examples/mcp_toolset_usage.rs) for a complete example.
+
 ## Observability & Monitoring
 
 RAK provides comprehensive observability through OpenTelemetry and structured logging:
@@ -390,6 +508,13 @@ make example-quickstart
 
 # Tool usage example
 make example-tool_usage
+
+# Database tools example (NEW)
+cargo run --example database_tools_usage
+
+# MCP toolset example (NEW)
+export DATABASE_URI=postgresql://localhost/mydb
+cargo run --example mcp_toolset_usage
 
 # Workflow agents example
 make example-workflow_agents

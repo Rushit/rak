@@ -14,6 +14,8 @@ members = [
     "crates/rak-telemetry",
     "crates/rak-openapi",
     "crates/rak-web-tools",
+    "crates/rak-database-tools",
+    "crates/rak-mcp",
 ]
 
 [package]
@@ -34,6 +36,8 @@ rak-memory = { path = "crates/rak-memory" }
 rak-telemetry = { path = "crates/rak-telemetry" }
 rak-openapi = { path = "crates/rak-openapi" }
 rak-web-tools = { path = "crates/rak-web-tools" }
+rak-database-tools = { path = "crates/rak-database-tools" }
+rak-mcp = { path = "crates/rak-mcp" }
 
 [dev-dependencies]
 tokio = { workspace = true }

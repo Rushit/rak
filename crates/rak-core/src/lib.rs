@@ -17,4 +17,4 @@ pub use content::{Content, FunctionCall, FunctionResponse, InlineData, Part};
 pub use context::{InvocationContext, ReadonlyContext, ToolContext};
 pub use error::{Error, Result};
 pub use event::{Event, EventActions};
-pub use traits::{Agent, GenerateConfig, LLMRequest, LLMResponse, Tool, ToolResponse, LLM};
+pub use traits::{Agent, GenerateConfig, LLMRequest, LLMResponse, Tool, Toolset, ToolResponse, LLM};
