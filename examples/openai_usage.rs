@@ -6,6 +6,9 @@ use rak_session::{inmemory::InMemorySessionService, SessionService};
 use futures::StreamExt;
 use std::sync::Arc;
 
+#[path = "common.rs"]
+mod common;
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // Initialize tracing subscriber for structured logging
@@ -13,8 +16,7 @@ async fn main() -> anyhow::Result<()> {
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
 
-    println!("RAK OpenAI Example");
-    println!("============================\n");
+    common::print_header("RAK OpenAI Example");
 
     // Load configuration
     println!("Loading configuration...");

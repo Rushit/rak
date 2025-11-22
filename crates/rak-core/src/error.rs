@@ -7,6 +7,12 @@ pub enum Error {
     #[error("Agent not found: {0}")]
     AgentNotFound(String),
 
+    #[error("Authentication error: {0}")]
+    Auth(String),
+
+    #[error("Configuration error: {0}")]
+    Config(String),
+
     #[error("Tool '{tool}' execution failed: {source}")]
     ToolFailed {
         tool: String,

@@ -49,10 +49,16 @@ Examples:
 
 Example Categories:
     - Core examples: config_usage, quickstart, tool_usage
+    - Auth examples: gemini_gcloud_usage, openai_usage
     - Workflow examples: workflow_agents
     - Storage examples: artifact_usage, memory_usage, database_session
-    - Integration examples: telemetry_usage, openapi_usage, web_tools_usage
-    - Server examples: websocket_usage (requires server)
+    - Integration examples: telemetry_usage, web_tools_usage
+    - Server examples: server_usage (starts server), websocket_usage (requires server)
+
+Authentication:
+    Examples support both gcloud auth and API keys:
+    - gcloud: Run 'gcloud auth login' first (recommended)
+    - API key: Set in config.toml or environment variable
 
 Exit Codes:
     0 - All tests passed
@@ -219,16 +225,19 @@ get_category() {
         config_usage|quickstart|tool_usage)
             echo "Core"
             ;;
+        gemini_gcloud_usage|openai_usage)
+            echo "Authentication"
+            ;;
         workflow_agents)
             echo "Workflow"
             ;;
         artifact_usage|memory_usage|database_session)
             echo "Storage"
             ;;
-        telemetry_usage|openapi_usage|web_tools_usage)
+        telemetry_usage|web_tools_usage)
             echo "Integration"
             ;;
-        websocket_usage)
+        server_usage|websocket_usage)
             echo "Server"
             ;;
         *)
@@ -247,13 +256,15 @@ test_examples() {
         "config_usage"
         "quickstart"
         "tool_usage"
+        "gemini_gcloud_usage"
+        "openai_usage"
         "workflow_agents"
         "artifact_usage"
         "memory_usage"
         "database_session"
         "telemetry_usage"
-        "openapi_usage"
         "web_tools_usage"
+        "server_usage"
         "websocket_usage"
     )
     
@@ -297,12 +308,24 @@ print_summary() {
     local total=$((PASSED + FAILED + SKIPPED))
     
     print_status "$GREEN" "✅ Passed:  $PASSED / $total"
-    print_status "$RED"   "❌ Failed:  $FAILED / $total"
-    print_status "$YELLOW" "⏭️  Skipped: $SKIPPED / $total"
+    
+    # Only show failed/skipped if they're non-zero
+    if [ $FAILED -gt 0 ]; then
+        print_status "$RED" "❌ Failed:  $FAILED / $total"
+    fi
+    
+    if [ $SKIPPED -gt 0 ]; then
+        print_status "$YELLOW" "⏭️  Skipped: $SKIPPED / $total"
+    fi
+    
     echo ""
     
     if [ $FAILED -eq 0 ]; then
-        print_status "$GREEN" "🎉 All testable examples passed!"
+        if [ $SKIPPED -eq 0 ]; then
+            print_status "$GREEN" "🎉 All examples passed!"
+        else
+            print_status "$GREEN" "🎉 All testable examples passed!"
+        fi
         return 0
     else
         print_status "$RED" "⚠️  Some examples failed. Run with --verbose for details."

@@ -1,10 +1,12 @@
 use rak_agent::LLMAgent;
-use rak_core::{Content, RakConfig};
-use rak_model::GeminiModel;
+use rak_core::Content;
 use rak_runner::Runner;
 use rak_session::{inmemory::InMemorySessionService, SessionService};
 use futures::StreamExt;
 use std::sync::Arc;
+
+#[path = "common.rs"]
+mod common;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -15,18 +17,15 @@ async fn main() -> anyhow::Result<()> {
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
 
-    // println! is fine for user-facing output in examples
-    println!("RAK Quickstart Example");
-    println!("============================\n");
+    common::print_header("RAK Quickstart Example");
 
-    // Load configuration (priority: config.toml > env vars > defaults)
+    // Load configuration (drives authentication method)
     println!("Loading configuration...");
-    let config = RakConfig::load()?;
-    let api_key = config.api_key()?;
+    let config = common::load_config()?;
 
-    // Create LLM
+    // Create authenticated Gemini model (auth method from config!)
     println!("Creating Gemini model...");
-    let model = Arc::new(GeminiModel::new(api_key, config.model.model_name));
+    let model = common::create_gemini_model(&config)?;
 
     // Create agent
     println!("Creating LLM agent...");

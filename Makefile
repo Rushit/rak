@@ -9,7 +9,9 @@
 .PHONY: test check build clippy fmt doc clean help test-verbose release
 .PHONY: example-quickstart example-tool_usage example-workflow_agents
 .PHONY: example-artifact_usage example-database_session example-memory_usage
-.PHONY: example-websocket_usage example-telemetry_usage
+.PHONY: example-websocket_usage example-server_usage example-telemetry_usage
+.PHONY: example-openai_usage example-gemini_gcloud_usage example-web_tools_usage
+.PHONY: example-config_usage
 
 # Default target - runs all workspace tests
 .DEFAULT_GOAL := test
@@ -118,6 +120,22 @@ example-telemetry_usage:
 	@echo "Running telemetry usage example..."
 	@RUST_LOG=debug cargo run --example telemetry_usage
 
+example-openai_usage:
+	@echo "Running OpenAI usage example..."
+	@cargo run --example openai_usage
+
+example-gemini_gcloud_usage:
+	@echo "Running Gemini with gcloud auth example..."
+	@cargo run --example gemini_gcloud_usage
+
+example-web_tools_usage:
+	@echo "Running web tools usage example..."
+	@cargo run --example web_tools_usage
+
+example-config_usage:
+	@echo "Running config usage example..."
+	@cargo run --example config_usage
+
 #------------------------------------------------------------------------------
 # Cleanup
 #------------------------------------------------------------------------------
@@ -146,19 +164,31 @@ help:
 	@echo "  make doc           - Generate and open documentation"
 	@echo ""
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-	@echo "EXAMPLES (requires GEMINI_API_KEY env var)"
+	@echo "EXAMPLES (supports gcloud auth or API keys)"
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 	@echo ""
+	@echo "  Core Examples:"
 	@echo "  make example-quickstart         - Basic agent example"
+	@echo "  make example-config_usage       - Configuration system"
 	@echo "  make example-tool_usage         - Tool calling example"
 	@echo "  make example-workflow_agents    - Workflow orchestration"
+	@echo ""
+	@echo "  Authentication Examples:"
+	@echo "  make example-gemini_gcloud_usage - Gemini with gcloud auth"
+	@echo "  make example-openai_usage       - OpenAI model usage"
+	@echo ""
+	@echo "  Storage & Services:"
 	@echo "  make example-artifact_usage     - Artifact storage"
 	@echo "  make example-database_session   - Database sessions"
 	@echo "  make example-memory_usage       - Memory service"
+	@echo ""
+	@echo "  Advanced:"
 	@echo "  make example-websocket_usage    - WebSocket client"
 	@echo "  make example-telemetry_usage    - Telemetry & tracing"
+	@echo "  make example-web_tools_usage    - Web scraping tools"
 	@echo ""
 	@echo "  Generic: make example-NAME      - Run any example"
+	@echo "  All:     make test-examples     - Test all examples"
 	@echo ""
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 	@echo "ADVANCED COMMANDS"
@@ -172,11 +202,20 @@ help:
 	@echo "QUICK START"
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 	@echo ""
-	@echo "  1. Set API key:     export GEMINI_API_KEY=\"your-key\""
-	@echo "  2. Run tests:       make test"
-	@echo "  3. Run example:     make example-quickstart"
-	@echo "  4. Format code:     make fmt"
-	@echo "  5. Check code:      make clippy"
+	@echo "  Option A - gcloud auth (recommended):"
+	@echo "    1. Setup:         gcloud auth login"
+	@echo "    2. Set project:   gcloud config set project PROJECT_ID"
+	@echo "    3. Run example:   make example-quickstart"
+	@echo ""
+	@echo "  Option B - API key:"
+	@echo "    1. Copy config:   cp config.toml.example config.toml"
+	@echo "    2. Edit config:   # Add your GOOGLE_API_KEY"
+	@echo "    3. Run example:   make example-quickstart"
+	@echo ""
+	@echo "  Development:"
+	@echo "    make test         Run all tests"
+	@echo "    make fmt          Format code"
+	@echo "    make clippy       Check code quality"
 	@echo ""
 	@echo "For more details, see README.md and CONTRIBUTING.md"
 	@echo ""

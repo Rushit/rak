@@ -5,20 +5,59 @@ use async_trait::async_trait;
 use futures::stream::{Stream, StreamExt};
 use reqwest::Client;
 
+/// Authentication method for Gemini API
+#[derive(Clone, Debug)]
+pub enum GeminiAuth {
+    /// API Key authentication (for generativelanguage.googleapis.com)
+    ApiKey(String),
+    /// Bearer token authentication (for Vertex AI via gcloud)
+    BearerToken(String),
+}
+
 pub struct GeminiModel {
     client: Client,
-    api_key: String,
+    auth: GeminiAuth,
     model_name: String,
     base_url: String,
 }
 
 impl GeminiModel {
+    /// Create a new Gemini model with API key authentication.
+    ///
+    /// This uses the public Gemini API endpoint.
     pub fn new(api_key: String, model_name: String) -> Self {
         Self {
             client: Client::new(),
-            api_key,
+            auth: GeminiAuth::ApiKey(api_key),
             model_name,
             base_url: "https://generativelanguage.googleapis.com/v1/models".to_string(),
+        }
+    }
+
+    /// Create a new Gemini model with Bearer token authentication (e.g., from gcloud).
+    ///
+    /// This is typically used with Vertex AI endpoints.
+    ///
+    /// # Arguments
+    ///
+    /// * `access_token` - Bearer access token (e.g., from `gcloud auth print-access-token`)
+    /// * `model_name` - Model name (e.g., "gemini-1.5-flash")
+    /// * `project_id` - GCP project ID
+    /// * `location` - GCP location (e.g., "us-central1")
+    pub fn with_bearer_token(
+        access_token: String,
+        model_name: String,
+        project_id: String,
+        location: String,
+    ) -> Self {
+        Self {
+            client: Client::new(),
+            auth: GeminiAuth::BearerToken(access_token),
+            model_name: model_name.clone(),
+            base_url: format!(
+                "https://{}-aiplatform.googleapis.com/v1/projects/{}/locations/{}/publishers/google/models",
+                location, project_id, location
+            ),
         }
     }
 
@@ -28,11 +67,20 @@ impl GeminiModel {
         } else {
             "generateContent"
         };
-        format!(
-            "{}/{}:{}?key={}",
-            self.base_url, self.model_name, method, self.api_key
-        )
+
+        match &self.auth {
+            GeminiAuth::ApiKey(key) => {
+                format!(
+                    "{}/{}:{}?key={}",
+                    self.base_url, self.model_name, method, key
+                )
+            }
+            GeminiAuth::BearerToken(_) => {
+                format!("{}/{}:{}", self.base_url, self.model_name, method)
+            }
+        }
     }
+
 }
 
 #[async_trait]
@@ -48,6 +96,7 @@ impl LLM for GeminiModel {
     ) -> Box<dyn Stream<Item = Result<LLMResponse>> + Send + Unpin> {
         let url = self.build_url(do_stream);
         let client = self.client.clone();
+        let auth = self.auth.clone();
 
         // Convert LLMRequest to GeminiRequest
         let gemini_req = GeminiRequest {
@@ -64,11 +113,14 @@ impl LLM for GeminiModel {
         if do_stream {
             // Streaming response
             Box::new(Box::pin(stream! {
-                let response = client
-                    .post(&url)
-                    .json(&gemini_req)
-                    .send()
-                    .await;
+                let mut req_builder = client.post(&url).json(&gemini_req);
+                
+                // Add auth header if using bearer token
+                if let GeminiAuth::BearerToken(token) = &auth {
+                    req_builder = req_builder.bearer_auth(token);
+                }
+                
+                let response = req_builder.send().await;
 
                 match response {
                     Ok(resp) => {
@@ -129,11 +181,14 @@ impl LLM for GeminiModel {
         } else {
             // Non-streaming response
             Box::new(Box::pin(stream! {
-                let response = client
-                    .post(&url)
-                    .json(&gemini_req)
-                    .send()
-                    .await;
+                let mut req_builder = client.post(&url).json(&gemini_req);
+                
+                // Add auth header if using bearer token
+                if let GeminiAuth::BearerToken(token) = &auth {
+                    req_builder = req_builder.bearer_auth(token);
+                }
+                
+                let response = req_builder.send().await;
 
                 match response {
                     Ok(resp) => {

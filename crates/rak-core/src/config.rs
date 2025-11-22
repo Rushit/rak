@@ -5,6 +5,7 @@
 //! 2. Environment variables (fallback)
 //! 3. Defaults
 
+use crate::auth::{AuthCredentials, AuthProvider};
 use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
 use std::env;
@@ -14,6 +15,9 @@ use std::path::{Path, PathBuf};
 /// RAK configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RakConfig {
+    /// Authentication configuration (API key or gcloud)
+    pub auth: AuthProvider,
+    
     #[serde(default)]
     pub model: ModelConfig,
     
@@ -174,7 +178,14 @@ impl RakConfig {
 
     /// Resolve ${VAR_NAME} references to environment variables
     fn resolve_env_vars(&mut self) -> Result<()> {
-        // Resolve model.api_key
+        // Resolve auth.api_key.key
+        if let AuthProvider::ApiKey { ref mut config } = self.auth {
+            if let Some(resolved) = Self::resolve_env_var(&config.key) {
+                config.key = resolved;
+            }
+        }
+        
+        // Resolve model.api_key (legacy support)
         if let Some(ref key) = self.model.api_key {
             if let Some(resolved) = Self::resolve_env_var(key) {
                 self.model.api_key = Some(resolved);
@@ -220,23 +231,61 @@ impl RakConfig {
         }
     }
 
-    /// Get API key with clear error message
+    /// Get API key with clear error message (legacy method for backward compatibility)
+    ///
+    /// **Deprecated**: Use `auth` configuration and `get_auth_credentials()` instead.
     pub fn api_key(&self) -> Result<String> {
+        // Try new auth config first
+        if let AuthProvider::ApiKey { ref config } = self.auth {
+            return Ok(config.key.clone());
+        }
+        
+        // Fall back to legacy model.api_key
         self.model.api_key.clone().ok_or_else(|| {
             anyhow!(
-                "API key not found. Set it in config.toml:\n\
-                [model]\n\
-                api_key = \"your-key\"\n\
+                "API key not found. Configure authentication in config.toml:\n\
+                [auth]\n\
+                provider = \"api_key\"\n\
+                [auth.api_key]\n\
+                key = \"your-key\"\n\
                 \n\
                 Or set environment variable:\n\
-                export GEMINI_API_KEY=\"your-key\""
+                export GOOGLE_API_KEY=\"your-key\""
             )
         })
+    }
+    
+    /// Get authentication credentials from configured provider
+    ///
+    /// This method resolves the authentication configuration into concrete credentials.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// let config = RakConfig::load()?;
+    /// let creds = config.get_auth_credentials()?;
+    /// 
+    /// match creds {
+    ///     AuthCredentials::ApiKey { key } => {
+    ///         // Use API key
+    ///     }
+    ///     AuthCredentials::GCloud { token, project, .. } => {
+    ///         // Use gcloud credentials
+    ///     }
+    /// }
+    /// ```
+    pub fn get_auth_credentials(&self) -> crate::Result<AuthCredentials> {
+        self.auth.get_credentials()
     }
 
     /// Create test-friendly defaults (no API key required)
     pub fn test_defaults() -> Self {
         Self {
+            auth: AuthProvider::ApiKey {
+                config: crate::auth::ApiKeyConfig {
+                    key: "test-api-key".to_string(),
+                },
+            },
             model: ModelConfig {
                 provider: "test".to_string(),
                 api_key: Some("test-api-key".to_string()),

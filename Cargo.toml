@@ -53,6 +53,10 @@ tokio-tungstenite = { workspace = true }
 name = "integration_test"
 path = "tests/integration_test.rs"
 
+[[test]]
+name = "openapi_usage_test"
+path = "tests/openapi_usage_test.rs"
+
 [[example]]
 name = "quickstart"
 path = "examples/quickstart.rs"
@@ -72,6 +76,18 @@ path = "examples/web_tools_usage.rs"
 [[example]]
 name = "config_usage"
 path = "examples/config_usage.rs"
+
+[[example]]
+name = "gemini_gcloud_usage"
+path = "examples/gemini_gcloud_usage.rs"
+
+# Exclude common.rs from being treated as an example
+# (it's a shared module included by other examples, not a standalone example)
+# We use a nonexistent feature to effectively disable it
+[[example]]
+name = "common"
+path = "examples/common.rs"
+required-features = ["__nonexistent_feature__"]
 
 [workspace.package]
 version = "0.1.0"

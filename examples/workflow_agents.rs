@@ -1,28 +1,33 @@
 use rak_agent::{LLMAgent, LoopAgent, ParallelAgent, SequentialAgent};
-use rak_core::{Content, RakConfig};
-use rak_model::GeminiModel;
+use rak_core::{Content, LLM};
 use rak_runner::Runner;
 use rak_session::inmemory::InMemorySessionService;
 use rak_tool::builtin::create_echo_tool;
 use futures::StreamExt;
 use std::sync::Arc;
 
+#[path = "common.rs"]
+mod common;
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // Setup logging
     tracing_subscriber::fmt::init();
 
-    // Load configuration
-    let config = RakConfig::load()?;
-    let api_key = config.api_key()?;
+    common::print_header("RAK Workflow Agents Demo");
 
-    println!("=== RAK Workflow Agents Demo ===\n");
+    // Load configuration (drives authentication method)
+    println!("Loading configuration...");
+    let config = common::load_config()?;
+    
+    // Show auth info
+    common::show_auth_info(&config)?;
+    println!();
 
-    // Create model
-    let model = Arc::new(GeminiModel::new(
-        api_key.clone(),
-        config.model.model_name.clone(),
-    ));
+    // Create model factory function using config-driven auth
+    let create_model = || -> anyhow::Result<Arc<dyn LLM>> {
+        common::create_gemini_model(&config)
+    };
 
     // ===================================================================
     // Example 1: Sequential Workflow
@@ -35,10 +40,7 @@ async fn main() -> anyhow::Result<()> {
             LLMAgent::builder()
                 .name("step1")
                 .description("Analyzes the problem")
-                .model(Arc::new(GeminiModel::new(
-                    api_key.clone(),
-                    "gemini-2.0-flash-exp".to_string(),
-                )))
+                .model(create_model()?)
                 .build()?,
         );
 
@@ -46,10 +48,7 @@ async fn main() -> anyhow::Result<()> {
             LLMAgent::builder()
                 .name("step2")
                 .description("Proposes solutions")
-                .model(Arc::new(GeminiModel::new(
-                    api_key.clone(),
-                    "gemini-2.0-flash-exp".to_string(),
-                )))
+                .model(create_model()?)
                 .build()?,
         );
 
@@ -57,10 +56,7 @@ async fn main() -> anyhow::Result<()> {
             LLMAgent::builder()
                 .name("step3")
                 .description("Summarizes results")
-                .model(Arc::new(GeminiModel::new(
-                    api_key.clone(),
-                    "gemini-2.0-flash-exp".to_string(),
-                )))
+                .model(create_model()?)
                 .build()?,
         );
 
@@ -116,10 +112,7 @@ async fn main() -> anyhow::Result<()> {
             LLMAgent::builder()
                 .name("poet")
                 .description("Writes poetry")
-                .model(Arc::new(GeminiModel::new(
-                    api_key.clone(),
-                    "gemini-2.0-flash-exp".to_string(),
-                )))
+                .model(create_model()?)
                 .build()?,
         );
 
@@ -127,10 +120,7 @@ async fn main() -> anyhow::Result<()> {
             LLMAgent::builder()
                 .name("scientist")
                 .description("Provides scientific explanation")
-                .model(Arc::new(GeminiModel::new(
-                    api_key.clone(),
-                    "gemini-2.0-flash-exp".to_string(),
-                )))
+                .model(create_model()?)
                 .build()?,
         );
 
@@ -138,10 +128,7 @@ async fn main() -> anyhow::Result<()> {
             LLMAgent::builder()
                 .name("educator")
                 .description("Explains for children")
-                .model(Arc::new(GeminiModel::new(
-                    api_key.clone(),
-                    "gemini-2.0-flash-exp".to_string(),
-                )))
+                .model(create_model()?)
                 .build()?,
         );
 
@@ -204,7 +191,7 @@ async fn main() -> anyhow::Result<()> {
             LLMAgent::builder()
                 .name("refiner")
                 .description("Iteratively refines content")
-                .model(model.clone())
+                .model(create_model()?)
                 .tool(echo_tool)
                 .build()?,
         );
@@ -265,10 +252,7 @@ async fn main() -> anyhow::Result<()> {
             LLMAgent::builder()
                 .name("analyzer")
                 .description("Initial analysis")
-                .model(Arc::new(GeminiModel::new(
-                    api_key.clone(),
-                    "gemini-2.0-flash-exp".to_string(),
-                )))
+                .model(create_model()?)
                 .build()?,
         );
 
@@ -276,10 +260,7 @@ async fn main() -> anyhow::Result<()> {
             LLMAgent::builder()
                 .name("option1")
                 .description("Explores option 1")
-                .model(Arc::new(GeminiModel::new(
-                    api_key.clone(),
-                    "gemini-2.0-flash-exp".to_string(),
-                )))
+                .model(create_model()?)
                 .build()?,
         );
 
@@ -287,10 +268,7 @@ async fn main() -> anyhow::Result<()> {
             LLMAgent::builder()
                 .name("option2")
                 .description("Explores option 2")
-                .model(Arc::new(GeminiModel::new(
-                    api_key.clone(),
-                    "gemini-2.0-flash-exp".to_string(),
-                )))
+                .model(create_model()?)
                 .build()?,
         );
 
@@ -307,10 +285,7 @@ async fn main() -> anyhow::Result<()> {
             LLMAgent::builder()
                 .name("summarizer")
                 .description("Summarizes all findings")
-                .model(Arc::new(GeminiModel::new(
-                    api_key,
-                    "gemini-2.0-flash-exp".to_string(),
-                )))
+                .model(create_model()?)
                 .build()?,
         );
 

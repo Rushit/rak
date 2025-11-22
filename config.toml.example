@@ -4,10 +4,10 @@
 #
 # Setup Instructions:
 # 1. Copy this file: cp config.toml.example config.toml
-# 2. Edit config.toml with your actual API keys
+# 2. Edit config.toml with your actual API keys or configure gcloud
 # 3. config.toml is in .gitignore and will NOT be committed to git
 #
-# ⚙️  Configuration Priority (NEW):
+# ⚙️  Configuration Priority:
 # 1. config.toml (highest priority)
 # 2. Environment variables (fallback)
 # 3. Defaults (lowest priority)
@@ -17,38 +17,102 @@
 # - config.test.toml  (for tests)
 # - config.prod.toml  (for production)
 
+# =============================================================================
+# Authentication Configuration
+# =============================================================================
+# RAK supports two authentication methods:
+# 1. API Key (Public Gemini API) - Good for quick start and development
+# 2. Google Cloud (gcloud) - Best for production and enterprise use
+#
+# Choose ONE method below:
+
+# ----------------------------------------------------------------------------
+# Option 1: API Key Authentication (Default for Development)
+# ----------------------------------------------------------------------------
+# Use Google's public Gemini API with an API key
+# Get your API key from: https://aistudio.google.com/apikey
+
+[auth]
+provider = "api_key"
+
+[auth.api_key]
+# Recommended: Use environment variable
+key = "${GOOGLE_API_KEY}"
+# Alternative: Direct value (only for local development, never commit!)
+# key = "your-gemini-api-key-here"
+
+# ----------------------------------------------------------------------------
+# Option 2: Google Cloud Authentication (Best for Production)
+# ----------------------------------------------------------------------------
+# Use Google Cloud's Vertex AI with gcloud CLI authentication
+# Setup:
+#   1. Install gcloud CLI: https://cloud.google.com/sdk/docs/install
+#   2. Authenticate: gcloud auth login
+#   3. Set project: gcloud config set project YOUR_PROJECT_ID
+#   4. Enable Vertex AI API in your GCP project
+#
+# Uncomment the following to use gcloud auth:
+
+# [auth]
+# provider = "gcloud"
+# 
+# [auth.gcloud]
+# # Optional: Specify project ID (auto-detected from gcloud if not set)
+# project_id = "my-gcp-project"
+# # Optional: Specify region (defaults to us-central1)
+# location = "us-central1"
+# # Optional: Custom Vertex AI endpoint
+# # endpoint = "https://us-central1-aiplatform.googleapis.com"
+
+# =============================================================================
+# Model Configuration
+# =============================================================================
+
 [model]
 provider = "gemini"
-# Option 1 (Recommended): Use environment variable
-api_key = "${GEMINI_API_KEY}"
-# Option 2: Direct value (only for local development, never commit!)
-# api_key = "your-gemini-api-key-here"
 model_name = "gemini-2.0-flash-exp"
 
-# OpenAI API Key (for OpenAI models)
-# -----------------------------------
+# Legacy: API key can also be set here (deprecated, use [auth] instead)
+# api_key = "${GEMINI_API_KEY}"
+
+# =============================================================================
+# OpenAI Configuration (Optional)
+# =============================================================================
 # Set this if you want to use OpenAI models (gpt-4o, gpt-4o-mini, etc.)
+
 # Option 1: Environment variable (recommended)
 openai_api_key = "${OPENAI_API_KEY}"
 # Option 2: Direct value (only for local development, never commit!)
 # openai_api_key = "sk-your-openai-api-key-here"
 
+# =============================================================================
+# Server Configuration
+# =============================================================================
+
 [server]
 host = "127.0.0.1"
 port = 8080
 
+# =============================================================================
+# Session Storage Configuration
+# =============================================================================
+
 [session]
-# using in-memory
+# Development: Use in-memory storage (sessions lost on restart)
 provider = "in-memory"
 
-# For production, use database
+# Production: Use database storage
 # provider = "postgres"
 # connection_string = "${DATABASE_URL}"
+
+# =============================================================================
+# Additional Tool Configurations (Optional)
+# =============================================================================
 
 # Web Tools Configuration
 # -------------------------
 # Web tools use Gemini's built-in capabilities
-# ✅ NO additional API keys needed! Uses [model] api_key above
+# ✅ NO additional API keys needed! Uses [auth] credentials above
 #
 # Future: If you want to use Google Custom Search API instead:
 # [web_tools]
@@ -62,3 +126,9 @@ provider = "in-memory"
 # weather_api_key = "${WEATHER_API_KEY}"  # Example for weather API
 # stripe_api_key = "${STRIPE_API_KEY}"    # Example for Stripe API
 
+# =============================================================================
+# Observability Configuration (Optional)
+# =============================================================================
+# [observability]
+# otel_endpoint = "http://localhost:4317"
+# service_name = "rak-agent"

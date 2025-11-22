@@ -1,26 +1,27 @@
-//! Example demonstrating OpenAPI tool generation from a spec.
+//! Integration test for OpenAPI tool generation from a spec.
 //!
-//! This example shows how to:
+//! This test demonstrates how to:
 //! 1. Load an OpenAPI specification
 //! 2. Generate tools automatically
 //! 3. Configure authentication
 //! 4. Use the tools in an agent
 //!
 //! Run with:
-//!   cargo run --example openapi_usage
+//!   cargo test openapi_usage_test -- --ignored --nocapture
 
 use rak_openapi::{AuthConfig, OpenApiToolset};
 use tracing::{error, info};
 use tracing_subscriber;
 
-#[tokio::main]
-async fn main() {
+#[tokio::test]
+#[ignore] // Optional test - run with: cargo test -- --ignored
+async fn test_openapi_toolset_generation() {
     // Initialize logging
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::INFO)
         .init();
 
-    info!("RAK OpenAPI Tool Generator Example");
+    info!("RAK OpenAPI Tool Generator Test");
 
     // Example 1: Load from YAML string
     let yaml_spec = r#"
@@ -73,7 +74,7 @@ paths:
     match OpenApiToolset::from_str(yaml_spec) {
         Ok(toolset) => {
             info!("✓ Successfully parsed OpenAPI spec");
-            info!("✓ Generated {} tools", toolset.len());
+            assert_eq!(toolset.len(), 3, "Should generate 3 tools");
 
             info!("\nAvailable tools:");
             for name in toolset.tool_names() {
@@ -95,14 +96,10 @@ paths:
             }
 
             info!("\n✓ Tools are ready to be used in agents!");
-            info!("\nNext steps:");
-            info!("  1. Add tools to an LLMAgent");
-            info!("  2. Agent can call any API operation");
-            info!("  3. Authentication is handled automatically");
         }
         Err(e) => {
             error!("Failed to parse OpenAPI spec: {}", e);
-            std::process::exit(1);
+            panic!("OpenAPI spec parsing failed: {}", e);
         }
     }
 
@@ -114,6 +111,7 @@ paths:
         .unwrap()
         .with_auth(AuthConfig::bearer("my-bearer-token"));
     info!("✓ Configured Bearer token authentication");
+    assert_eq!(toolset_bearer.len(), 3);
 
     // Example 5: Basic auth
     info!("\n---");
@@ -123,8 +121,9 @@ paths:
         .unwrap()
         .with_auth(AuthConfig::basic("username", "password"));
     info!("✓ Configured Basic authentication");
+    assert_eq!(toolset_basic.len(), 3);
 
     info!("\n---");
-    info!("✓ OpenAPI tool generation complete!");
+    info!("✓ OpenAPI tool generation test complete!");
 }
 

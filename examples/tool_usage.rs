@@ -1,26 +1,28 @@
 use rak_agent::LLMAgent;
-use rak_core::{Content, RakConfig};
-use rak_model::GeminiModel;
+use rak_core::Content;
 use rak_runner::Runner;
 use rak_session::inmemory::InMemorySessionService;
 use rak_tool::builtin::{create_calculator_tool, create_echo_tool};
 use futures::StreamExt;
 use std::sync::Arc;
 
+#[path = "common.rs"]
+mod common;
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // Setup logging
     tracing_subscriber::fmt::init();
 
-    // Load configuration
-    let config = RakConfig::load()?;
-    let api_key = config.api_key()?;
+    common::print_header("RAK Tool Usage Example");
 
-    // Create model
-    let model = Arc::new(GeminiModel::new(
-        api_key,
-        config.model.model_name,
-    ));
+    // Load configuration (drives authentication method)
+    println!("Loading configuration...");
+    let config = common::load_config()?;
+
+    // Create authenticated Gemini model (auth method from config!)
+    println!("Creating Gemini model...");
+    let model = common::create_gemini_model(&config)?;
 
     // Create tools
     let calculator = Arc::new(create_calculator_tool()?);
