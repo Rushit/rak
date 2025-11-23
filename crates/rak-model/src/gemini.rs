@@ -98,6 +98,23 @@ impl LLM for GeminiModel {
         let client = self.client.clone();
         let auth = self.auth.clone();
 
+        // Convert tools to Gemini format
+        let tools = if request.tools.is_empty() {
+            vec![]
+        } else {
+            vec![GeminiTool {
+                function_declarations: request
+                    .tools
+                    .iter()
+                    .map(|tool| GeminiFunctionDeclaration {
+                        name: tool.name().to_string(),
+                        description: tool.description().to_string(),
+                        parameters: tool.schema(),
+                    })
+                    .collect(),
+            }]
+        };
+
         // Convert LLMRequest to GeminiRequest
         let gemini_req = GeminiRequest {
             contents: request.contents,
@@ -108,7 +125,14 @@ impl LLM for GeminiModel {
                 top_k: c.top_k,
             }),
             system_instruction: None,
+            tools,
         };
+
+        // Debug logging removed - uncomment if needed
+        // eprintln!(
+        //     "DEBUG: Gemini API request: {}",
+        //     serde_json::to_string_pretty(&gemini_req).unwrap_or_else(|_| "failed to serialize".to_string())
+        // );
 
         if do_stream {
             // Streaming response
@@ -135,6 +159,7 @@ impl LLM for GeminiModel {
 
                                         // Parse JSON objects from buffer
                                         if let Some(json_str) = extract_json(&mut buffer) {
+                                            // eprintln!("DEBUG: Streaming response chunk: {}", json_str);
                                             match serde_json::from_str::<GeminiResponse>(&json_str) {
                                                 Ok(gemini_resp) => {
                                                     if let Some(candidate) = gemini_resp.candidates.first() {
@@ -192,7 +217,11 @@ impl LLM for GeminiModel {
 
                 match response {
                     Ok(resp) => {
-                        match resp.json::<GeminiResponse>().await {
+                        // Get response text for debugging
+                        let response_text = resp.text().await.unwrap_or_else(|_| "failed to read response".to_string());
+                        // eprintln!("DEBUG: Gemini API response: {}", response_text);
+                        
+                        match serde_json::from_str::<GeminiResponse>(&response_text) {
                             Ok(gemini_resp) => {
                                 if let Some(candidate) = gemini_resp.candidates.first() {
                                     yield Ok(LLMResponse {
@@ -222,13 +251,37 @@ impl LLM for GeminiModel {
 
 // Helper function to extract JSON from SSE format
 fn extract_json(buffer: &mut String) -> Option<String> {
-    // Simple JSON extraction - look for complete objects
-    if let Some(start) = buffer.find('{') {
-        if let Some(end) = buffer[start..].find('}') {
-            let json_str = buffer[start..start + end + 1].to_string();
-            buffer.drain(..start + end + 1);
-            return Some(json_str);
+    // Find the start of a JSON object
+    let start = buffer.find('{')?;
+    
+    // Track brace depth to find the matching closing brace
+    let mut depth = 0;
+    let mut in_string = false;
+    let mut escape_next = false;
+    
+    for (i, c) in buffer[start..].char_indices() {
+        if escape_next {
+            escape_next = false;
+            continue;
+        }
+        
+        match c {
+            '\\' if in_string => escape_next = true,
+            '"' => in_string = !in_string,
+            '{' if !in_string => depth += 1,
+            '}' if !in_string => {
+                depth -= 1;
+                if depth == 0 {
+                    // Found complete JSON object
+                    let end = start + i + 1;
+                    let json_str = buffer[start..end].to_string();
+                    buffer.drain(..end);
+                    return Some(json_str);
+                }
+            }
+            _ => {}
         }
     }
+    
     None
 }

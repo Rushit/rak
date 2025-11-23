@@ -5,22 +5,33 @@
 //! - GeminiUrlContextTool - Read web pages using Gemini's built-in capability
 //! - WebScraperTool - Parse HTML content from any URL
 //!
-//! ## 🔑 API Keys Required
+//! ## 🔑 Authentication
 //!
-//! **✅ ZERO additional API keys needed!**
+//! **✅ ZERO additional API keys needed for web tools!**
 //!
-//! - Gemini tools: Use your existing GEMINI_API_KEY
-//! - Web scraper: No API key needed at all
+//! Configure authentication in config.toml:
 //!
-//! ## Setup
+//! **Option 1: Google Cloud (Recommended)**
+//! ```toml
+//! [auth]
+//! provider = "gcloud"
+//! project_id = "your-project-id"  # Optional, auto-detected
+//! ```
 //!
+//! **Option 2: API Key**
+//! ```toml
+//! [auth]
+//! provider = "api_key"
+//! key = "${GOOGLE_API_KEY}"
+//! ```
+//!
+//! Then run:
 //! ```bash
-//! export GEMINI_API_KEY="your-gemini-api-key"
 //! cargo run --example web_tools_usage
 //! ```
 
 use rak_agent::LLMAgent;
-use rak_core::{Content, RakConfig};
+use rak_core::{AuthCredentials, Content, RakConfig};
 use rak_model::GeminiModel;
 use rak_runner::Runner;
 use rak_session::inmemory::InMemorySessionService;
@@ -38,16 +49,32 @@ async fn main() -> anyhow::Result<()> {
 
     // Load configuration
     let config = RakConfig::load()?;
-    let api_key = config.api_key()?;
-
+    
     println!("✅ Configuration loaded from config.toml");
+    
+    // Get authentication credentials from config
+    let creds = config.get_auth_credentials()?;
+    
+    // Create Gemini model based on auth type
+    let model: Arc<GeminiModel> = match creds {
+        AuthCredentials::ApiKey { key } => {
+            println!("🔑 Using API Key authentication");
+            Arc::new(GeminiModel::new(key, config.model.model_name.clone()))
+        }
+        AuthCredentials::GCloud { token, project, location, .. } => {
+            println!("🔑 Using Google Cloud authentication");
+            println!("   Project: {}", project);
+            println!("   Location: {}", location);
+            Arc::new(GeminiModel::with_bearer_token(
+                token,
+                config.model.model_name.clone(),
+                project,
+                location,
+            ))
+        }
+    };
+    
     println!("🔑 Note: NO additional API keys needed for web tools!\n");
-
-    // Create Gemini 2.0 model (required for built-in tools)
-    let model = Arc::new(GeminiModel::new(
-        api_key,
-        config.model.model_name,
-    ));
 
     println!("📦 Creating web tools...");
 

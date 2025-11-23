@@ -5,13 +5,21 @@
 //! - Register custom span processors
 //! - Trace LLM calls and tool executions
 //!
-//! Run with:
+//! ## Authentication
+//!
+//! Configure in config.toml (supports both gcloud and API key):
+//! ```toml
+//! [auth]
+//! provider = "gcloud"  # or "api_key"
 //! ```
-//! RUST_LOG=debug GEMINI_API_KEY=your-key cargo run --example telemetry_usage
+//!
+//! Run with:
+//! ```bash
+//! RUST_LOG=debug cargo run --example telemetry_usage
 //! ```
 
 use rak_agent::LLMAgent;
-use rak_core::{Content, Part, RakConfig};
+use rak_core::{AuthCredentials, Content, Part, RakConfig};
 use rak_model::GeminiModel;
 use rak_runner::Runner;
 use rak_session::inmemory::InMemorySessionService;
@@ -35,10 +43,28 @@ async fn main() -> anyhow::Result<()> {
 
     // Load configuration
     let config = RakConfig::load()?;
-    let api_key = config.api_key()?;
-
-    // Create LLM model
-    let model = Arc::new(GeminiModel::new(api_key, config.model.model_name));
+    
+    // Get authentication credentials from config
+    let creds = config.get_auth_credentials()?;
+    
+    // Create LLM model based on auth type
+    let model: Arc<GeminiModel> = match creds {
+        AuthCredentials::ApiKey { key } => {
+            println!("✓ Using API Key authentication\n");
+            Arc::new(GeminiModel::new(key, config.model.model_name.clone()))
+        }
+        AuthCredentials::GCloud { token, project, location, .. } => {
+            println!("✓ Using Google Cloud authentication");
+            println!("  Project: {}", project);
+            println!("  Location: {}\n", location);
+            Arc::new(GeminiModel::with_bearer_token(
+                token,
+                config.model.model_name.clone(),
+                project,
+                location,
+            ))
+        }
+    };
 
     // Create agent with tools
     let calculator = create_calculator_tool()?;

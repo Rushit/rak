@@ -12,6 +12,22 @@ pub struct GeminiRequest {
     pub generation_config: Option<GenerationConfig>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub system_instruction: Option<SystemInstruction>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub tools: Vec<GeminiTool>,
+}
+
+/// Tool definition for Gemini API
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GeminiTool {
+    pub function_declarations: Vec<GeminiFunctionDeclaration>,
+}
+
+/// Function declaration for Gemini API
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GeminiFunctionDeclaration {
+    pub name: String,
+    pub description: String,
+    pub parameters: serde_json::Value,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

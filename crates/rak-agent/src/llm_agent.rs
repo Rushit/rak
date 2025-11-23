@@ -109,10 +109,14 @@ impl Agent for LLMAgent {
             // Tool execution loop
             let max_iterations = 10; // Prevent infinite loops
             for iteration in 0..max_iterations {
+                // Convert tools HashMap to Vec for LLMRequest
+                let tool_list: Vec<Arc<dyn Tool>> = tools.values().cloned().collect();
+                
                 let request = LLMRequest {
                     model: model.name().to_string(),
                     contents: conversation.clone(),
                     config: None,
+                    tools: tool_list,
                 };
 
                 tracing::debug!(
@@ -242,17 +246,20 @@ impl Agent for LLMAgent {
                 let mut function_responses = Vec::new();
                 for fc in function_calls {
                     if let Some(tool) = tools.get(&fc.name) {
+                        // Generate ID if not provided by API
+                        let call_id = fc.id.clone().unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+                        
                         tracing::debug!(
                             invocation_id = %invocation_id,
                             session_id = %session_id,
                             tool_name = %fc.name,
-                            tool_id = %fc.id,
+                            tool_id = %call_id,
                             "Executing tool"
                         );
 
                         // Create tool context
                         let tool_ctx = Arc::new(rak_tool::DefaultToolContext::new(
-                            fc.id.clone(),
+                            call_id.clone(),
                             invocation_id.clone(),
                         ));
 
@@ -263,7 +270,7 @@ impl Agent for LLMAgent {
                                     function_response: rak_core::FunctionResponse {
                                         name: fc.name.clone(),
                                         response: response.result,
-                                        id: fc.id.clone(),
+                                        id: Some(call_id.clone()),
                                     },
                                 });
 

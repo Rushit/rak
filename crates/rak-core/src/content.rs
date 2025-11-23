@@ -25,12 +25,23 @@ impl Content {
 
 /// Part represents a single part of content
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", untagged)]
+#[serde(untagged)]
 pub enum Part {
-    Text { text: String },
-    InlineData { inline_data: InlineData },
-    FunctionCall { function_call: FunctionCall },
-    FunctionResponse { function_response: FunctionResponse },
+    Text { 
+        text: String 
+    },
+    InlineData { 
+        #[serde(rename = "inlineData")]
+        inline_data: InlineData 
+    },
+    FunctionCall { 
+        #[serde(rename = "functionCall")]
+        function_call: FunctionCall 
+    },
+    FunctionResponse { 
+        #[serde(rename = "functionResponse")]
+        function_response: FunctionResponse 
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -44,12 +55,14 @@ pub struct InlineData {
 pub struct FunctionCall {
     pub name: String,
     pub args: serde_json::Value,
-    pub id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FunctionResponse {
     pub name: String,
     pub response: serde_json::Value,
-    pub id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
 }

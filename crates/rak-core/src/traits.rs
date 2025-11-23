@@ -79,11 +79,23 @@ pub trait Toolset: Send + Sync {
 }
 
 /// Request to an LLM
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct LLMRequest {
     pub model: String,
     pub contents: Vec<Content>,
     pub config: Option<GenerateConfig>,
+    pub tools: Vec<Arc<dyn Tool>>,
+}
+
+impl std::fmt::Debug for LLMRequest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("LLMRequest")
+            .field("model", &self.model)
+            .field("contents", &self.contents)
+            .field("config", &self.config)
+            .field("tools_count", &self.tools.len())
+            .finish()
+    }
 }
 
 /// Response from an LLM

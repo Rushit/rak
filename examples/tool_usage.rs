@@ -77,14 +77,16 @@ async fn main() -> anyhow::Result<()> {
                             rak_core::Part::FunctionCall { function_call } => {
                                 println!(
                                     "  Function Call: {} ({})",
-                                    function_call.name, function_call.id
+                                    function_call.name, 
+                                    function_call.id.as_deref().unwrap_or("no-id")
                                 );
                                 println!("    Args: {}", function_call.args);
                             }
                             rak_core::Part::FunctionResponse { function_response } => {
                                 println!(
                                     "  Function Response: {} ({})",
-                                    function_response.name, function_response.id
+                                    function_response.name, 
+                                    function_response.id.as_deref().unwrap_or("no-id")
                                 );
                                 println!("    Result: {}", function_response.response);
                             }
