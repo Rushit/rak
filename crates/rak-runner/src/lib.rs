@@ -80,6 +80,7 @@ mod tests {
                         model: "mock".to_string(),
                         contents: vec![],
                         config: None,
+                        tools: vec![],
                     },
                     false,
                 ).await;

@@ -32,7 +32,7 @@ impl MockLLM {
                             function_call: FunctionCall {
                                 name: "calculator".to_string(),
                                 args: serde_json::json!({"expression": "2 + 2"}),
-                                id: "call-1".to_string(),
+                                id: Some("call-1".to_string()),
                             },
                         }],
                     }),
