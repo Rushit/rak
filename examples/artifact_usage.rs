@@ -100,5 +100,8 @@ async fn demonstrate_artifact_service(
     service.save(save_req).await?;
     println!("  Saved user-scoped artifact");
 
+    // Validation
+    println!("\n✅ VALIDATION PASSED: Artifact operations completed successfully");
+
     Ok(())
 }

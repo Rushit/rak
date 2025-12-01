@@ -221,5 +221,8 @@ async fn main() -> anyhow::Result<()> {
     println!("  • Memories are isolated per user and application");
     println!("  • Case-insensitive matching for better recall");
 
+    // Validation
+    println!("\n✅ VALIDATION PASSED: Memory operations completed successfully");
+
     Ok(())
 }

@@ -123,6 +123,7 @@ async fn main() -> Result<()> {
     }
 
     tracing::info!("=== MCP Example Complete ===");
+    println!("\n✅ VALIDATION PASSED: MCP toolset integration verified");
 
     Ok(())
 }

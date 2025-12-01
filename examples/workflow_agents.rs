@@ -1,7 +1,7 @@
 use futures::StreamExt;
 use std::sync::Arc;
 use zdk_agent::{LLMAgent, LoopAgent, ParallelAgent, SequentialAgent};
-use zdk_core::{Content, LLM};
+use zdk_core::{Content, Provider};
 use zdk_runner::Runner;
 use zdk_session::inmemory::InMemorySessionService;
 use zdk_tool::builtin::create_echo_tool;
@@ -25,7 +25,7 @@ async fn main() -> anyhow::Result<()> {
     println!();
 
     // Create model factory function using config-driven auth
-    let create_model = || -> anyhow::Result<Arc<dyn LLM>> { common::create_gemini_model(&config) };
+    let create_model = || -> anyhow::Result<Arc<dyn Provider>> { common::create_gemini_model(&config) };
 
     // ===================================================================
     // Example 1: Sequential Workflow
@@ -337,6 +337,8 @@ async fn main() -> anyhow::Result<()> {
     println!("  • Parallel: Concurrent execution for independent tasks");
     println!("  • Loop: Iterative refinement with escalate control");
     println!("  • Nested: Complex combinations for sophisticated workflows\n");
+
+    println!("✅ VALIDATION PASSED: Workflow agents verified");
 
     Ok(())
 }

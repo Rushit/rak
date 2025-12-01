@@ -128,28 +128,12 @@ async fn main() -> anyhow::Result<()> {
         .await?;
 
     print!("Assistant: ");
-    while let Some(event_result) = stream.next().await {
-        match event_result {
-            Ok(event) => {
-                if let Some(content) = &event.content {
-                    for part in &content.parts {
-                        if let zdk_core::Part::Text { text } = part {
-                            print!("{}", text);
-                            std::io::Write::flush(&mut std::io::stdout()).ok();
-                        }
-                    }
-                }
-                if event.is_final_response() {
-                    println!("\n");
-                }
-            }
-            Err(e) => {
-                eprintln!("Error: {}", e);
-                return Err(e.into());
-            }
-        }
-    }
+    let response = common::collect_and_print_response(&mut stream, "gemini query").await?;
 
+    // Validation
+    common::validate_response_not_empty(&response, "agent response");
+
+    common::validation_passed("Gemini gcloud auth verified");
     println!("Done! Gemini with gcloud auth is working correctly.");
     println!("\nNote: Access tokens expire after 1 hour. For production, implement token refresh.");
 

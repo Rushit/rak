@@ -1,8 +1,7 @@
 use futures::StreamExt;
 use std::sync::Arc;
 use zdk_agent::LLMAgent;
-use zdk_core::{Content, ZConfig};
-use zdk_model::OpenAIModel;
+use zdk_core::{Content, ZConfig, ZConfigExt};
 use zdk_runner::Runner;
 use zdk_session::{SessionService, inmemory::InMemorySessionService};
 
@@ -22,18 +21,17 @@ async fn main() -> anyhow::Result<()> {
     println!("Loading configuration...");
     let config = ZConfig::load()?;
 
-    // Create OpenAI model using the simplified factory
-    // The factory will automatically use the provider and credentials from config
-    println!("Creating OpenAI model...");
-    use zdk_model::ZConfigExt;
-    let model = config.create_model()?;
+    // Create OpenAI provider using the unified provider system
+    // The provider will automatically use the credentials from config
+    println!("Creating OpenAI provider...");
+    let provider = config.create_provider()?;
 
     // Create agent
     println!("Creating LLM agent...");
     let agent = LLMAgent::builder()
         .name("openai-assistant")
         .description("An AI assistant powered by OpenAI")
-        .model(model)
+        .model(provider)
         .system_instruction("You are a helpful AI assistant powered by OpenAI.")
         .build()?;
 
@@ -77,27 +75,7 @@ async fn main() -> anyhow::Result<()> {
         .await?;
 
     print!("Assistant: ");
-    while let Some(event_result) = stream.next().await {
-        match event_result {
-            Ok(event) => {
-                if let Some(content) = &event.content {
-                    for part in &content.parts {
-                        if let zdk_core::Part::Text { text } = part {
-                            print!("{}", text);
-                            std::io::Write::flush(&mut std::io::stdout()).ok();
-                        }
-                    }
-                }
-                if event.is_final_response() {
-                    println!("\n");
-                }
-            }
-            Err(e) => {
-                eprintln!("Error: {}", e);
-                return Err(e.into());
-            }
-        }
-    }
+    let response1 = common::collect_and_print_response(&mut stream, "first conversation").await?;
 
     // Example 2: Follow-up question (tests conversation history)
     println!("Example 2: Follow-up Question");
@@ -115,29 +93,16 @@ async fn main() -> anyhow::Result<()> {
         .await?;
 
     print!("Assistant: ");
-    while let Some(event_result) = stream2.next().await {
-        match event_result {
-            Ok(event) => {
-                if let Some(content) = &event.content {
-                    for part in &content.parts {
-                        if let zdk_core::Part::Text { text } = part {
-                            print!("{}", text);
-                            std::io::Write::flush(&mut std::io::stdout()).ok();
-                        }
-                    }
-                }
-                if event.is_final_response() {
-                    println!("\n");
-                }
-            }
-            Err(e) => {
-                eprintln!("Error: {}", e);
-                return Err(e.into());
-            }
-        }
-    }
+    let response2 = common::collect_and_print_response(&mut stream2, "second conversation").await?;
 
+    // Validate both responses
+    common::validate_response_not_empty(&response1, "first response");
+    common::validate_response_not_empty(&response2, "follow-up response");
+
+    common::validation_passed("OpenAI integration verified");
     println!("Done! OpenAI integration is working correctly.");
 
     Ok(())
 }
+
+

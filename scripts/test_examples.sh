@@ -49,10 +49,11 @@ Examples:
 
 Example Categories:
     - Core examples: config_usage, quickstart, tool_usage
+    - Provider examples: provider_discovery, multi_capability_usage, embedding_usage
     - Auth examples: gemini_gcloud_usage, openai_usage
     - Workflow examples: workflow_agents
     - Storage examples: artifact_usage, memory_usage, database_session
-    - Integration examples: telemetry_usage, web_tools_usage
+    - Integration examples: database_tools_usage, mcp_toolset_usage, telemetry_usage, web_tools_usage
     - Server examples: server_usage (starts server), websocket_usage (requires server)
 
 Authentication:
@@ -186,30 +187,36 @@ test_example() {
             echo ""
         fi
         
-        # Analyze output to determine status
-        if echo "$output" | grep -qE "(panic|thread .* panicked)"; then
-            print_status "$RED" "❌ PANIC"
+        # Analyze exit code and output
+        if [ "$exit_code" -eq 124 ] || [ "$exit_code" -eq 143 ]; then
+            # Timeout (124 from timeout command, 143 from SIGTERM)
+            print_status "$YELLOW" "⏭️  SKIP (timeout)"
+            ((SKIPPED++))
+        elif echo "$output" | grep -q "VALIDATION FAILED"; then
+            # Example ran but failed its own validation
+            print_status "$RED" "❌ FAIL (validation)"
             ((FAILED++))
             if [ "$VERBOSE" = false ]; then
-                echo "   Error: $(echo "$output" | grep -i "panicked" | head -1)"
+                echo "   $(echo "$output" | grep "VALIDATION FAILED" | head -1 | sed 's/.*VALIDATION FAILED: //')"
             fi
-        elif echo "$output" | grep -qE "Connection refused|Failed to connect"; then
+        elif echo "$output" | grep -qE "Connection refused|Failed to connect|External.*service"; then
+            # Needs external service
             print_status "$YELLOW" "⏭️  SKIP (needs external service)"
             ((SKIPPED++))
         elif echo "$output" | grep -qE "API key not found|config.toml not found"; then
-            print_status "$YELLOW" "⏭️  SKIP (needs config.toml)"
+            # Missing config
+            print_status "$YELLOW" "⏭️  SKIP (needs config)"
             ((SKIPPED++))
-        elif echo "$output" | grep -qE "(Complete|Done|Success|Example|Demo)" || [ "$exit_code" -eq 0 ]; then
+        elif [ "$exit_code" -eq 0 ]; then
+            # Success - example validated itself and exited cleanly
             print_status "$GREEN" "✅ PASS"
             ((PASSED++))
-        elif echo "$output" | grep -q "TIMEOUT"; then
-            print_status "$YELLOW" "⏭️  SKIP (timeout - likely waiting for API)"
-            ((SKIPPED++))
         else
-            print_status "$RED" "❌ FAIL"
+            # Failed with non-zero exit code
+            print_status "$RED" "❌ FAIL (exit $exit_code)"
             ((FAILED++))
             if [ "$VERBOSE" = false ]; then
-                echo "   Error: $(echo "$output" | grep -iE "error|failed" | head -1)"
+                echo "   $(echo "$output" | grep -iE "error|failed" | head -1)"
             fi
         fi
     else
@@ -225,8 +232,8 @@ get_category() {
         config_usage|quickstart|tool_usage)
             echo "Core"
             ;;
-        gemini_gcloud_usage|openai_usage)
-            echo "Authentication"
+        provider_discovery|multi_capability_usage|embedding_usage|gemini_gcloud_usage|openai_usage)
+            echo "Provider"
             ;;
         workflow_agents)
             echo "Workflow"
@@ -234,7 +241,7 @@ get_category() {
         artifact_usage|memory_usage|database_session)
             echo "Storage"
             ;;
-        telemetry_usage|web_tools_usage)
+        database_tools_usage|mcp_toolset_usage|telemetry_usage|web_tools_usage)
             echo "Integration"
             ;;
         server_usage|websocket_usage)
@@ -256,12 +263,17 @@ test_examples() {
         "config_usage"
         "quickstart"
         "tool_usage"
+        "provider_discovery"
+        "multi_capability_usage"
+        "embedding_usage"
         "gemini_gcloud_usage"
         "openai_usage"
         "workflow_agents"
         "artifact_usage"
         "memory_usage"
         "database_session"
+        "database_tools_usage"
+        "mcp_toolset_usage"
         "telemetry_usage"
         "web_tools_usage"
         "server_usage"

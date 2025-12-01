@@ -11,7 +11,8 @@
 .PHONY: example-artifact_usage example-database_session example-memory_usage
 .PHONY: example-websocket_usage example-server_usage example-telemetry_usage
 .PHONY: example-openai_usage example-gemini_gcloud_usage example-web_tools_usage
-.PHONY: example-config_usage
+.PHONY: example-config_usage example-provider_discovery example-multi_capability_usage
+.PHONY: example-embedding_usage example-database_tools_usage example-mcp_toolset_usage
 
 # Default target - runs all workspace tests
 .DEFAULT_GOAL := test
@@ -141,6 +142,26 @@ example-config_usage:
 	@echo "Running config usage example..."
 	@cargo run --example config_usage
 
+example-provider_discovery:
+	@echo "Running provider discovery example..."
+	@cargo run --example provider_discovery
+
+example-multi_capability_usage:
+	@echo "Running multi capability usage example..."
+	@cargo run --example multi_capability_usage
+
+example-embedding_usage:
+	@echo "Running embedding usage example..."
+	@cargo run --example embedding_usage
+
+example-database_tools_usage:
+	@echo "Running database tools usage example..."
+	@cargo run --example database_tools_usage
+
+example-mcp_toolset_usage:
+	@echo "Running MCP toolset usage example..."
+	@cargo run --example mcp_toolset_usage
+
 #------------------------------------------------------------------------------
 # Cleanup
 #------------------------------------------------------------------------------
@@ -179,19 +200,26 @@ help:
 	@echo "  make example-tool_usage         - Tool calling example"
 	@echo "  make example-workflow_agents    - Workflow orchestration"
 	@echo ""
-	@echo "  Authentication Examples:"
-	@echo "  make example-gemini_gcloud_usage - Gemini with gcloud auth"
-	@echo "  make example-openai_usage       - OpenAI model usage"
+	@echo "  Provider Examples (NEW):"
+	@echo "  make example-provider_discovery       - Discover providers and capabilities"
+	@echo "  make example-multi_capability_usage   - Use multiple capabilities"
+	@echo "  make example-embedding_usage          - Semantic search with embeddings"
+	@echo "  make example-gemini_gcloud_usage      - Gemini with gcloud auth"
+	@echo "  make example-openai_usage             - OpenAI model usage"
 	@echo ""
 	@echo "  Storage & Services:"
 	@echo "  make example-artifact_usage     - Artifact storage"
 	@echo "  make example-database_session   - Database sessions"
 	@echo "  make example-memory_usage       - Memory service"
 	@echo ""
+	@echo "  Tool Integration:"
+	@echo "  make example-database_tools_usage   - Database tools"
+	@echo "  make example-mcp_toolset_usage      - MCP toolset"
+	@echo "  make example-web_tools_usage        - Web scraping tools"
+	@echo ""
 	@echo "  Advanced:"
 	@echo "  make example-websocket_usage    - WebSocket client"
 	@echo "  make example-telemetry_usage    - Telemetry & tracing"
-	@echo "  make example-web_tools_usage    - Web scraping tools"
 	@echo ""
 	@echo "  Generic: make example-NAME      - Run any example"
 	@echo "  All:     make test-examples     - Test all examples"

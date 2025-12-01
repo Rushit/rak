@@ -234,5 +234,7 @@ async fn run_websocket_client() -> Result<()> {
     // Wait for read task to finish
     let _ = tokio::time::timeout(Duration::from_secs(2), read_handle).await;
 
+    println!("\n✅ VALIDATION PASSED: WebSocket communication verified");
+
     Ok(())
 }

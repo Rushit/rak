@@ -72,8 +72,9 @@ use anyhow::{Context, Result};
 use std::env;
 use std::path::PathBuf;
 use std::sync::Arc;
+use tokio::time::{sleep, timeout, Duration};
 use zdk_agent::LLMAgent;
-use zdk_core::{AuthCredentials, LLM, ZConfig};
+use zdk_core::{AuthCredentials, Provider, ZConfig};
 use zdk_runner::Runner;
 use zdk_server::rest::create_router;
 use zdk_session::inmemory::InMemorySessionService;
@@ -132,11 +133,12 @@ async fn main() -> Result<()> {
     // Start server
     let addr = format!("{}:{}", config.server.host, config.server.port);
     let listener = tokio::net::TcpListener::bind(&addr).await?;
+    let server_url = format!("http://{}", addr);
 
     println!("\n╔═══════════════════════════════════════════════════════════╗");
     println!("║                    Server Running                         ║");
     println!("╚═══════════════════════════════════════════════════════════╝\n");
-    println!("🌐 Server listening on: http://{}", addr);
+    println!("🌐 Server listening on: {}", server_url);
     println!("\n📡 Available endpoints:");
     println!("   GET  /health                                    - Health check");
     println!("   GET  /readiness                                 - Readiness check");
@@ -144,15 +146,140 @@ async fn main() -> Result<()> {
     println!("   POST /api/v1/sessions/:id/run                   - Run agent (batch)");
     println!("   POST /api/v1/sessions/:id/run/sse               - Run agent (SSE stream)");
     println!("   GET  /api/v1/sessions/:id/run/ws                - WebSocket connection");
-    println!("\n🧪 Test with:");
-    println!("   curl http://{}/health", addr);
-    println!("   cargo run --example websocket_usage");
-    println!("\n⏹️  Press Ctrl+C to stop\n");
+    
+    println!("\n🧪 Running example workflow...");
+    run_example_workflow(server_url, app, listener).await?;
 
-    axum::serve(listener, app)
-        .await
-        .context("Server failed to start")?;
+    Ok(())
+}
 
+/// Run example workflow: start server, create session, interact with agent, shutdown
+async fn run_example_workflow(
+    server_url: String,
+    app: axum::Router,
+    listener: tokio::net::TcpListener,
+) -> Result<()> {
+    use serde_json::json;
+
+    // Start server in background
+    let server_handle = tokio::spawn(async move {
+        axum::serve(listener, app)
+            .await
+            .context("Server failed to start")
+    });
+
+    // Wait for server to be ready
+    println!("⏳ Waiting for server to start...");
+    sleep(Duration::from_millis(500)).await;
+
+    let client = reqwest::Client::new();
+    
+    // Step 1: Health check
+    println!("\n📋 Step 1: Health Check");
+    let health_url = format!("{}/health", server_url);
+    match timeout(Duration::from_secs(5), client.get(&health_url).send()).await {
+        Ok(Ok(response)) => {
+            if response.status().is_success() {
+                println!("   ✅ Server is healthy ({})", response.status());
+            } else {
+                anyhow::bail!("Health check failed with status: {}", response.status());
+            }
+        }
+        Ok(Err(e)) => {
+            anyhow::bail!("Failed to connect to server: {}", e);
+        }
+        Err(_) => {
+            anyhow::bail!("Health check timed out");
+        }
+    }
+
+    // Step 2: Create session
+    println!("\n📋 Step 2: Create Session");
+    let session_url = format!("{}/api/v1/sessions", server_url);
+    let session_payload = json!({
+        "appName": "example-app",
+        "userId": "demo-user"
+    });
+    
+    let session_response = timeout(
+        Duration::from_secs(5),
+        client.post(&session_url)
+            .json(&session_payload)
+            .send()
+    ).await
+        .context("Session creation timed out")?
+        .context("Failed to create session")?;
+    
+    if !session_response.status().is_success() {
+        anyhow::bail!("Session creation failed: {}", session_response.status());
+    }
+    
+    let session_data: serde_json::Value = session_response.json().await?;
+    let session_id = session_data["sessionId"]
+        .as_str()
+        .context("Session ID not found in response")?;
+    
+    println!("   ✅ Session created: {}", session_id);
+
+    // Step 3: Send message to agent (batch mode for simplicity)
+    println!("\n📋 Step 3: Interact with Agent");
+    let run_url = format!("{}/api/v1/sessions/{}/run", server_url, session_id);
+    let message_payload = json!({
+        "newMessage": {
+            "role": "user",
+            "parts": [{"text": "Hello! Can you tell me what 2+2 equals?"}]
+        },
+        "streaming": false
+    });
+    
+    println!("   💬 Sending: 'Hello! Can you tell me what 2+2 equals?'");
+    
+    let agent_response = timeout(
+        Duration::from_secs(10),
+        client.post(&run_url)
+            .json(&message_payload)
+            .send()
+    ).await
+        .context("Agent interaction timed out")?
+        .context("Failed to run agent")?;
+    
+    if !agent_response.status().is_success() {
+        anyhow::bail!("Agent interaction failed: {}", agent_response.status());
+    }
+    
+    let response_data: serde_json::Value = agent_response.json().await?;
+    println!("   ✅ Agent responded successfully");
+    
+    // Extract and display response text from events
+    if let Some(events) = response_data.get("events").and_then(|e| e.as_array()) {
+        // Look for the final response event
+        for event in events.iter().rev() {
+            if let Some(content) = event.get("content") {
+                if let Some(parts) = content.get("parts").and_then(|p| p.as_array()) {
+                    if let Some(text) = parts.first().and_then(|p| p.get("text")).and_then(|t| t.as_str()) {
+                        // Truncate long responses for display
+                        let display_text = if text.len() > 100 {
+                            format!("{}...", &text[..100])
+                        } else {
+                            text.to_string()
+                        };
+                        println!("   💭 Response: {}", display_text);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    // Step 4: Shutdown
+    println!("\n📋 Step 4: Cleanup");
+    server_handle.abort();
+    println!("   ✅ Server shutdown gracefully");
+    
+    println!("\n╔═══════════════════════════════════════════════════════════╗");
+    println!("║              Example Completed Successfully!             ║");
+    println!("╚═══════════════════════════════════════════════════════════╝\n");
+    
     Ok(())
 }
 
@@ -197,16 +324,16 @@ fn describe_auth(creds: &AuthCredentials) -> String {
 
 /// Create model from configuration using the factory
 ///
-/// This uses the simplified ModelFactory pattern which automatically
+/// This uses the unified provider system which automatically
 /// selects the appropriate provider and authentication method.
-fn create_model_from_auth(_creds: AuthCredentials, config: &ZConfig) -> Result<Arc<dyn LLM>> {
-    use zdk_model::ZConfigExt;
-    config.create_model()
-        .context("Failed to create model from configuration")
+fn create_model_from_auth(_creds: AuthCredentials, config: &ZConfig) -> Result<Arc<dyn Provider>> {
+    use zdk_core::ZConfigExt;
+    config.create_provider()
+        .context("Failed to create provider from configuration")
 }
 
 /// Create an agent with tools
-fn create_agent(model: Arc<dyn LLM>) -> Result<Arc<dyn zdk_core::Agent>> {
+fn create_agent(model: Arc<dyn Provider>) -> Result<Arc<dyn zdk_core::Agent>> {
     // For this example, we'll create a simple agent without tools
     // In a real application, you would register tools here
     let tools: Vec<Arc<dyn Tool>> = vec![];

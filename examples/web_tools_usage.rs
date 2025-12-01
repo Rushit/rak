@@ -32,8 +32,7 @@
 
 use std::sync::Arc;
 use zdk_agent::LLMAgent;
-use zdk_core::{AuthCredentials, Content, ZConfig};
-use zdk_model::GeminiModel;
+use zdk_core::{Content, ZConfig, ZConfigExt};
 use zdk_runner::Runner;
 use zdk_session::SessionService;
 use zdk_session::inmemory::InMemorySessionService;
@@ -52,33 +51,10 @@ async fn main() -> anyhow::Result<()> {
 
     println!("✅ Configuration loaded from config.toml");
 
-    // Get authentication credentials from config
-    let creds = config.get_auth_credentials()?;
-
-    // Create Gemini model based on auth type
-    let model: Arc<GeminiModel> = match creds {
-        AuthCredentials::ApiKey { key } => {
-            println!("🔑 Using API Key authentication");
-            Arc::new(GeminiModel::new(key, config.model.model_name.clone()))
-        }
-        AuthCredentials::GCloud {
-            token,
-            project,
-            location,
-            ..
-        } => {
-            println!("🔑 Using Google Cloud authentication");
-            println!("   Project: {}", project);
-            println!("   Location: {}", location);
-            Arc::new(GeminiModel::with_bearer_token(
-                token,
-                config.model.model_name.clone(),
-                project,
-                location,
-            ))
-        }
-    };
-
+    // Create provider using the unified provider system
+    let provider = config.create_provider()?;
+    
+    println!("🔑 Provider created: {}", config.model.provider);
     println!("🔑 Note: NO additional API keys needed for web tools!\n");
 
     println!("📦 Creating web tools...");
@@ -96,7 +72,7 @@ async fn main() -> anyhow::Result<()> {
     let agent = LLMAgent::builder()
         .name("web_research_agent")
         .description("An AI agent that can search the web and read web pages")
-        .model(model)
+        .model(provider)
         .tool(google_search)
         .tool(url_context)
         .tool(web_scraper)
@@ -145,13 +121,22 @@ async fn main() -> anyhow::Result<()> {
         .await?;
 
     use futures::StreamExt;
+    let mut response1 = String::new();
     while let Some(event) = stream.next().await {
-        let event = event?;
-        if let Some(content) = &event.content {
-            for part in &content.parts {
-                if let zdk_core::Part::Text { text } = part {
-                    print!("{}", text);
+        match event {
+            Ok(event) => {
+                if let Some(content) = &event.content {
+                    for part in &content.parts {
+                        if let zdk_core::Part::Text { text } = part {
+                            print!("{}", text);
+                            response1.push_str(text);
+                        }
+                    }
                 }
+            }
+            Err(e) => {
+                eprintln!("\n❌ VALIDATION FAILED: Error in web search: {}", e);
+                std::process::exit(1);
             }
         }
     }
@@ -178,13 +163,22 @@ async fn main() -> anyhow::Result<()> {
         )
         .await?;
 
+    let mut response2 = String::new();
     while let Some(event) = stream.next().await {
-        let event = event?;
-        if let Some(content) = &event.content {
-            for part in &content.parts {
-                if let zdk_core::Part::Text { text } = part {
-                    print!("{}", text);
+        match event {
+            Ok(event) => {
+                if let Some(content) = &event.content {
+                    for part in &content.parts {
+                        if let zdk_core::Part::Text { text } = part {
+                            print!("{}", text);
+                            response2.push_str(text);
+                        }
+                    }
                 }
+            }
+            Err(e) => {
+                eprintln!("\n❌ VALIDATION FAILED: Error reading URL: {}", e);
+                std::process::exit(1);
             }
         }
     }
@@ -213,13 +207,22 @@ async fn main() -> anyhow::Result<()> {
         )
         .await?;
 
+    let mut response3 = String::new();
     while let Some(event) = stream.next().await {
-        let event = event?;
-        if let Some(content) = &event.content {
-            for part in &content.parts {
-                if let zdk_core::Part::Text { text } = part {
-                    print!("{}", text);
+        match event {
+            Ok(event) => {
+                if let Some(content) = &event.content {
+                    for part in &content.parts {
+                        if let zdk_core::Part::Text { text } = part {
+                            print!("{}", text);
+                            response3.push_str(text);
+                        }
+                    }
                 }
+            }
+            Err(e) => {
+                eprintln!("\n❌ VALIDATION FAILED: Error in web scraping: {}", e);
+                std::process::exit(1);
             }
         }
     }
@@ -234,6 +237,26 @@ async fn main() -> anyhow::Result<()> {
     println!("  • GeminiUrlContextTool: Reads URLs via Gemini API");
     println!("  • WebScraperTool: Parses HTML directly (works with any model)");
     println!("\n🔑 NO additional API keys needed - uses your Gemini API key!");
+
+    // Validate all responses were received
+    println!("\nValidating responses...");
+    
+    if response1.trim().is_empty() {
+        eprintln!("❌ VALIDATION FAILED: No response from web search example");
+        std::process::exit(1);
+    }
+    
+    if response2.trim().is_empty() {
+        eprintln!("❌ VALIDATION FAILED: No response from URL reading example");
+        std::process::exit(1);
+    }
+    
+    if response3.trim().is_empty() {
+        eprintln!("❌ VALIDATION FAILED: No response from web scraping example");
+        std::process::exit(1);
+    }
+
+    println!("✅ VALIDATION PASSED: All web tools verified with responses");
 
     Ok(())
 }

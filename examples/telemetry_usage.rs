@@ -21,8 +21,7 @@
 use futures::StreamExt;
 use std::sync::Arc;
 use zdk_agent::LLMAgent;
-use zdk_core::{AuthCredentials, Content, Part, ZConfig};
-use zdk_model::GeminiModel;
+use zdk_core::{Content, Part, ZConfig, ZConfigExt};
 use zdk_runner::Runner;
 use zdk_session::inmemory::InMemorySessionService;
 use zdk_telemetry::init_telemetry;
@@ -44,32 +43,11 @@ async fn main() -> anyhow::Result<()> {
     // Load configuration
     let config = ZConfig::load()?;
 
-    // Get authentication credentials from config
-    let creds = config.get_auth_credentials()?;
-
-    // Create LLM model based on auth type
-    let model: Arc<GeminiModel> = match creds {
-        AuthCredentials::ApiKey { key } => {
-            println!("✓ Using API Key authentication\n");
-            Arc::new(GeminiModel::new(key, config.model.model_name.clone()))
-        }
-        AuthCredentials::GCloud {
-            token,
-            project,
-            location,
-            ..
-        } => {
-            println!("✓ Using Google Cloud authentication");
-            println!("  Project: {}", project);
-            println!("  Location: {}\n", location);
-            Arc::new(GeminiModel::with_bearer_token(
-                token,
-                config.model.model_name.clone(),
-                project,
-                location,
-            ))
-        }
-    };
+    // Create provider using the new unified provider system
+    let provider = config.create_provider()?;
+    
+    println!("✓ Provider created: {}", config.model.provider);
+    println!("  Model: {}\n", config.model.model_name);
 
     // Create agent with tools
     let calculator = create_calculator_tool()?;
@@ -78,7 +56,7 @@ async fn main() -> anyhow::Result<()> {
     let agent = LLMAgent::builder()
         .name("telemetry_demo")
         .description("Agent demonstrating telemetry integration")
-        .model(model)
+        .model(provider)
         .system_instruction("You are a helpful assistant with access to calculator and echo tools.")
         .tool(Arc::new(calculator))
         .tool(Arc::new(echo))
@@ -111,23 +89,54 @@ async fn main() -> anyhow::Result<()> {
         )
         .await?;
 
-    // Collect response
+    // Collect response and validate
     let mut full_response = String::new();
+    let mut tool_executed = false;
+    
     while let Some(event_result) = stream.next().await {
         let event = event_result?;
 
         if let Some(content) = &event.content {
             for part in &content.parts {
-                if let Part::Text { text } = part {
-                    if !text.is_empty() && !event.partial {
-                        full_response.push_str(text);
+                match part {
+                    Part::Text { text } => {
+                        if !text.is_empty() {
+                            full_response.push_str(text);
+                        }
                     }
+                    Part::FunctionCall { function_call } => {
+                        if function_call.name == "calculator" || function_call.name == "echo" {
+                            tool_executed = true;
+                        }
+                    }
+                    _ => {}
                 }
             }
         }
     }
 
     println!("Assistant: {}", full_response);
+    
+    // Validate results
+    println!("\nValidating example results...");
+    
+    if !tool_executed {
+        eprintln!("❌ VALIDATION FAILED: No tools were executed");
+        std::process::exit(1);
+    }
+    
+    if full_response.is_empty() {
+        eprintln!("❌ VALIDATION FAILED: No response text received from agent");
+        std::process::exit(1);
+    }
+    
+    if !full_response.contains("105") {
+        eprintln!("❌ VALIDATION FAILED: Response doesn't contain expected calculation result (105)");
+        eprintln!("   Got: '{}'", full_response.trim());
+        std::process::exit(1);
+    }
+    
+    println!("✅ VALIDATION PASSED: All checks successful");
     println!("\n✅ Example complete!");
     println!("\nKey telemetry features demonstrated:");
     println!("  • Automatic LLM call tracing");

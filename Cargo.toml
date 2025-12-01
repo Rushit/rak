@@ -2,7 +2,6 @@
 resolver = "2"
 members = [
     "crates/zdk-core",
-    "crates/zdk-model",
     "crates/zdk-session",
     "crates/zdk-agent",
     "crates/zdk-runner",
@@ -25,7 +24,6 @@ edition.workspace = true
 
 [dependencies]
 zdk-core = { path = "crates/zdk-core" }
-zdk-model = { path = "crates/zdk-model" }
 zdk-session = { path = "crates/zdk-session" }
 zdk-agent = { path = "crates/zdk-agent" }
 zdk-runner = { path = "crates/zdk-runner" }
@@ -52,6 +50,8 @@ serde_json = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 tokio-tungstenite = { workspace = true }
+toml = "0.8"
+reqwest = { workspace = true }
 
 [[test]]
 name = "integration_test"

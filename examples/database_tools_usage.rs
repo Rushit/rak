@@ -216,6 +216,7 @@ async fn run_postgres_example(model: Arc<dyn zdk_core::LLM>, connection_url: &st
         .await?;
 
     // Process events
+    let mut received_response = false;
     while let Some(result) = stream.next().await {
         match result {
             Ok(event) => {
@@ -223,15 +224,29 @@ async fn run_postgres_example(model: Arc<dyn zdk_core::LLM>, connection_url: &st
                     for part in &content.parts {
                         if let Part::Text { text } = part {
                             tracing::info!("Agent response: {}", text);
+                            if !text.trim().is_empty() {
+                                received_response = true;
+                            }
                         }
                     }
                 }
             }
             Err(e) => {
                 tracing::error!("Error: {}", e);
+                eprintln!("❌ VALIDATION FAILED: Error during execution: {}", e);
+                std::process::exit(1);
             }
         }
     }
 
+    // Validation
+    if !received_response {
+        eprintln!("❌ VALIDATION FAILED: No response received from agent");
+        std::process::exit(1);
+    }
+
+    println!("\n✅ VALIDATION PASSED: Database tools integration verified");
+
     Ok(())
 }
+

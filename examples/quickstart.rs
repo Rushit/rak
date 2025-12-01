@@ -73,30 +73,15 @@ async fn main() -> anyhow::Result<()> {
         )
         .await?;
 
-    // Print responses
+    // Print responses and validate
     print!("Agent: ");
-    while let Some(event_result) = stream.next().await {
-        match event_result {
-            Ok(event) => {
-                if let Some(content) = &event.content {
-                    for part in &content.parts {
-                        if let zdk_core::Part::Text { text } = part {
-                            print!("{}", text);
-                            std::io::Write::flush(&mut std::io::stdout()).ok();
-                        }
-                    }
-                }
-                if event.is_final_response() {
-                    println!("\n");
-                }
-            }
-            Err(e) => {
-                eprintln!("Error: {}", e);
-                return Err(e.into());
-            }
-        }
-    }
+    let response = common::collect_and_print_response(&mut stream, "agent query").await?;
 
+    // Validate response quality
+    common::validate_response_not_empty(&response, "agent response");
+    common::validate_response_min_length(&response, 20, "explanation");
+
+    common::validation_passed("Agent responded successfully");
     println!("Done!");
 
     Ok(())

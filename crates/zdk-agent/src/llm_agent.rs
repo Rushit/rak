@@ -208,7 +208,7 @@ impl Agent for LLMAgent {
                 }
 
                 // If no function calls, we're done
-                if function_calls.is_empty() || turn_is_complete {
+                if function_calls.is_empty() {
                     tracing::info!(
                         invocation_id = %invocation_id,
                         session_id = %session_id,
@@ -252,7 +252,7 @@ impl Agent for LLMAgent {
                                     function_response: zdk_core::FunctionResponse {
                                         name: fc.name.clone(),
                                         response: response.result,
-                                        id: Some(call_id.clone()),
+                                        id: None, // Don't include ID for Gemini compatibility
                                     },
                                 });
 
