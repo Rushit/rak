@@ -2,20 +2,20 @@
 
 **Date**: 2025-11-23 13:00  
 **Status**: 🎯 Design Phase  
-**Type**: New Binary (`rak-ingest`)
+**Type**: New Binary (`zdk-ingest`)
 
 ---
 
 ## 🎯 Objectives
 
 Build a **standalone telemetry ingestion service** that:
-- Receives traces, metrics, and profiles from RAK agents
+- Receives traces, metrics, and profiles from ZDK agents
 - Batches data for efficient storage
 - Stores all telemetry in ClickHouse (columnar database)
 - Provides query APIs for visualization
 - Scales horizontally for high throughput
 
-**Key Principle**: This is the **server-side** complement to the client-side `rak-telemetry` crate.
+**Key Principle**: This is the **server-side** complement to the client-side `zdk-telemetry` crate.
 
 ---
 
@@ -23,7 +23,7 @@ Build a **standalone telemetry ingestion service** that:
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│                    RAK Agents (Clients)                       │
+│                    ZDK Agents (Clients)                       │
 │                                                               │
 │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐        │
 │  │ Agent 1 │  │ Agent 2 │  │ Agent 3 │  │ Agent N │        │
@@ -40,7 +40,7 @@ Build a **standalone telemetry ingestion service** that:
         └────────────┬────────────┘
                      │
         ┌────────────▼────────────────────────────────┐
-        │     rak-ingest Service Cluster              │
+        │     zdk-ingest Service Cluster              │
         │                                              │
         │  ┌──────────┐  ┌──────────┐  ┌──────────┐ │
         │  │ Instance │  │ Instance │  │ Instance │ │
@@ -79,14 +79,14 @@ Build a **standalone telemetry ingestion service** that:
 
 ---
 
-## 📦 New Binary: `rak-ingest`
+## 📦 New Binary: `zdk-ingest`
 
 ### Project Structure
 
 ```
 rak/
 ├── crates/
-│   ├── rak-ingest/              # NEW: Ingestion service
+│   ├── zdk-ingest/              # NEW: Ingestion service
 │   │   ├── Cargo.toml
 │   │   ├── src/
 │   │   │   ├── main.rs          # Binary entry point
@@ -139,7 +139,7 @@ CREATE TABLE spans_local ON CLUSTER '{cluster}' (
     duration_ns UInt64,                 -- Duration in nanoseconds
     
     -- Metadata
-    service_name LowCardinality(String), -- Service name (e.g., "rak-rust-app")
+    service_name LowCardinality(String), -- Service name (e.g., "zdk-rust-app")
     span_name LowCardinality(String),    -- Span name (e.g., "agent.run")
     span_kind Enum8(                     -- Span kind
         'INTERNAL' = 1,
@@ -158,8 +158,8 @@ CREATE TABLE spans_local ON CLUSTER '{cluster}' (
     status_message String,               -- Error message if any
     
     -- Attributes (indexed for fast queries)
-    invocation_id String,                -- RAK invocation ID
-    session_id String,                   -- RAK session ID
+    invocation_id String,                -- ZDK invocation ID
+    session_id String,                   -- ZDK session ID
     user_id String,                      -- User ID
     agent_name LowCardinality(String),   -- Agent name
     agent_type LowCardinality(String),   -- Agent type (llm, workflow, etc.)
@@ -432,11 +432,11 @@ GROUP BY hour, service_name, tool_name;
 
 ---
 
-## 🔧 Implementation: `rak-ingest` Service
+## 🔧 Implementation: `zdk-ingest` Service
 
 ### 1. Main Entry Point
 
-**File**: `crates/rak-ingest/src/main.rs`
+**File**: `crates/zdk-ingest/src/main.rs`
 
 ```rust
 use anyhow::Result;
@@ -455,7 +455,7 @@ async fn main() -> Result<()> {
     let config = IngestConfig::from_file("config.toml")
         .or_else(|_| IngestConfig::from_env())?;
     
-    info!("Starting rak-ingest service");
+    info!("Starting zdk-ingest service");
     info!("ClickHouse: {}", config.clickhouse.url);
     info!("OTLP gRPC: 0.0.0.0:{}", config.otlp_grpc_port);
     info!("OTLP HTTP: 0.0.0.0:{}", config.otlp_http_port);
@@ -492,7 +492,7 @@ async fn main() -> Result<()> {
 
 ### 2. Server Implementation
 
-**File**: `crates/rak-ingest/src/server.rs`
+**File**: `crates/zdk-ingest/src/server.rs`
 
 ```rust
 use crate::{
@@ -657,7 +657,7 @@ impl IngestServer {
 
 ### 3. Batch Buffer Implementation
 
-**File**: `crates/rak-ingest/src/batch/buffer.rs`
+**File**: `crates/zdk-ingest/src/batch/buffer.rs`
 
 ```rust
 use std::sync::Arc;
@@ -828,7 +828,7 @@ impl BatchBuffer {
 
 ### 4. ClickHouse Storage Implementation
 
-**File**: `crates/rak-ingest/src/storage/clickhouse.rs`
+**File**: `crates/zdk-ingest/src/storage/clickhouse.rs`
 
 ```rust
 use clickhouse::{Client, Row};
@@ -966,7 +966,7 @@ impl From<&Span> for SpanRow {
 
 ## ⚙️ Configuration
 
-**File**: `config.toml` for `rak-ingest`
+**File**: `config.toml` for `zdk-ingest`
 
 ```toml
 [server]
@@ -1104,7 +1104,7 @@ services:
       - clickhouse_data:/var/lib/clickhouse
       - ./init-schema.sql:/docker-entrypoint-initdb.d/init.sql
   
-  rak-ingest:
+  zdk-ingest:
     build: .
     ports:
       - "4317:4317"   # OTLP gRPC
@@ -1132,30 +1132,30 @@ WORKDIR /app
 
 # Copy manifests
 COPY Cargo.toml Cargo.lock ./
-COPY crates/rak-ingest/Cargo.toml ./crates/rak-ingest/
+COPY crates/zdk-ingest/Cargo.toml ./crates/zdk-ingest/
 
 # Build dependencies (cached layer)
-RUN mkdir crates/rak-ingest/src && \
-    echo "fn main() {}" > crates/rak-ingest/src/main.rs && \
-    cargo build --release --package rak-ingest
+RUN mkdir crates/zdk-ingest/src && \
+    echo "fn main() {}" > crates/zdk-ingest/src/main.rs && \
+    cargo build --release --package zdk-ingest
 
 # Copy source
-COPY crates/rak-ingest/src ./crates/rak-ingest/src
+COPY crates/zdk-ingest/src ./crates/zdk-ingest/src
 
 # Build application
-RUN touch crates/rak-ingest/src/main.rs && \
-    cargo build --release --package rak-ingest
+RUN touch crates/zdk-ingest/src/main.rs && \
+    cargo build --release --package zdk-ingest
 
 # Runtime stage
 FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /app/target/release/rak-ingest /usr/local/bin/
+COPY --from=builder /app/target/release/zdk-ingest /usr/local/bin/
 
 EXPOSE 4317 4318 4319 8080
 
-CMD ["rak-ingest"]
+CMD ["zdk-ingest"]
 ```
 
 ---
@@ -1217,7 +1217,7 @@ With ClickHouse compression (~10x):
 ### Key Metrics to Track
 
 ```rust
-// Expose Prometheus metrics from rak-ingest
+// Expose Prometheus metrics from zdk-ingest
 use prometheus::{Counter, Histogram, Gauge};
 
 lazy_static! {
@@ -1248,7 +1248,7 @@ lazy_static! {
 ## ✅ Implementation Checklist
 
 ### Phase 1: Core Infrastructure (Week 1)
-- [ ] Create `rak-ingest` binary crate
+- [ ] Create `zdk-ingest` binary crate
 - [ ] Implement configuration loading
 - [ ] Set up ClickHouse client
 - [ ] Define table schemas
@@ -1310,7 +1310,7 @@ lazy_static! {
 
 | Component | Spec | Cost (AWS) |
 |-----------|------|------------|
-| **rak-ingest** (2 instances) | t3.medium | ~$60/month |
+| **zdk-ingest** (2 instances) | t3.medium | ~$60/month |
 | **ClickHouse** (3-node cluster) | r6i.xlarge | ~$450/month |
 | **Load Balancer** | ALB | ~$20/month |
 | **Storage** (compressed) | 170 GB/month | ~$17/month |

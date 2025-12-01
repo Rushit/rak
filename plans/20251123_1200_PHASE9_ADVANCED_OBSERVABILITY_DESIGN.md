@@ -22,7 +22,7 @@ Build a comprehensive observability system that tracks **every step** of agent e
 
 ### What Exists (Phase 7 - Basic Observability)
 
-**Crate**: `rak-telemetry`  
+**Crate**: `zdk-telemetry`  
 **Capabilities**:
 - ✅ LLM call tracing (`trace_llm_call`)
 - ✅ Tool execution tracing (`trace_tool_call`)
@@ -59,7 +59,7 @@ Build a comprehensive observability system that tracks **every step** of agent e
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     RAK Application                          │
+│                     ZDK Application                          │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
 │  │  Agent   │  │  Runner  │  │ Session  │  │   LLM    │   │
 │  │ Tracing  │  │ Tracing  │  │ Tracing  │  │ Tracing  │   │
@@ -69,7 +69,7 @@ Build a comprehensive observability system that tracks **every step** of agent e
 │                          │                                   │
 │              ┌───────────▼───────────┐                      │
 │              │  Telemetry Collector  │                      │
-│              │  (rak-telemetry)      │                      │
+│              │  (zdk-telemetry)      │                      │
 │              └───────────┬───────────┘                      │
 │                          │                                   │
 └──────────────────────────┼───────────────────────────────────┘
@@ -112,7 +112,7 @@ runner.run                          [ROOT SPAN]
 
 ### 1. Enhanced Span Management
 
-**File**: `crates/rak-telemetry/src/spans.rs`
+**File**: `crates/zdk-telemetry/src/spans.rs`
 
 #### New Span Types
 
@@ -166,7 +166,7 @@ impl AgentSpan {
 
 ### 2. OTLP Exporter Configuration
 
-**File**: `crates/rak-telemetry/src/exporters.rs` (NEW)
+**File**: `crates/zdk-telemetry/src/exporters.rs` (NEW)
 
 ```rust
 pub struct OtlpExporterConfig {
@@ -223,7 +223,7 @@ pub fn create_otlp_exporter(
 
 ### 3. Trace Sampling Configuration
 
-**File**: `crates/rak-telemetry/src/sampling.rs` (NEW)
+**File**: `crates/zdk-telemetry/src/sampling.rs` (NEW)
 
 ```rust
 pub enum SamplingStrategy {
@@ -258,7 +258,7 @@ pub struct SamplingConfig {
 
 ### 4. Configuration Integration
 
-**Update**: `crates/rak-core/src/config.rs`
+**Update**: `crates/zdk-core/src/config.rs`
 
 ```rust
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -342,7 +342,7 @@ always_sample_slow_seconds = 5.0
 
 #### Runner Instrumentation
 
-**Update**: `crates/rak-runner/src/runner.rs`
+**Update**: `crates/zdk-runner/src/runner.rs`
 
 ```rust
 use rak_telemetry::{trace_runner_start, RunnerSpanAttributes};
@@ -379,7 +379,7 @@ impl Runner {
 
 #### Agent Instrumentation
 
-**Update**: `crates/rak-agent/src/llm_agent.rs`
+**Update**: `crates/zdk-agent/src/llm_agent.rs`
 
 ```rust
 use rak_telemetry::{trace_agent_start, AgentSpanAttributes};
@@ -413,7 +413,7 @@ impl Agent for LLMAgent {
 
 #### Workflow Agent Instrumentation
 
-**Update**: `crates/rak-agent/src/workflow.rs`
+**Update**: `crates/zdk-agent/src/workflow.rs`
 
 ```rust
 #[tracing::instrument(
@@ -443,7 +443,7 @@ async fn run(&self, ctx: Arc<dyn InvocationContext>) -> ... {
 
 ### 6. Context Propagation
 
-**File**: `crates/rak-telemetry/src/context.rs` (NEW)
+**File**: `crates/zdk-telemetry/src/context.rs` (NEW)
 
 ```rust
 use opentelemetry::Context as OtelContext;
@@ -481,7 +481,7 @@ impl TraceContext {
 
 ### 7. Metrics Collection (Optional but Recommended)
 
-**File**: `crates/rak-telemetry/src/metrics.rs` (NEW)
+**File**: `crates/zdk-telemetry/src/metrics.rs` (NEW)
 
 ```rust
 use opentelemetry::metrics::{Counter, Histogram};
@@ -532,8 +532,8 @@ impl TelemetryMetrics {
 5. Write unit tests for span creation and management
 
 **Files**:
-- `crates/rak-telemetry/src/spans.rs` (enhance existing)
-- `crates/rak-telemetry/src/lib.rs` (update exports)
+- `crates/zdk-telemetry/src/spans.rs` (enhance existing)
+- `crates/zdk-telemetry/src/lib.rs` (update exports)
 
 **Tests**:
 - Span creation with all attributes
@@ -553,8 +553,8 @@ impl TelemetryMetrics {
 5. Integrate with telemetry initialization
 
 **Files**:
-- `crates/rak-telemetry/src/exporters.rs` (new)
-- `crates/rak-telemetry/src/tracer.rs` (update)
+- `crates/zdk-telemetry/src/exporters.rs` (new)
+- `crates/zdk-telemetry/src/tracer.rs` (update)
 
 **Dependencies**:
 ```toml
@@ -580,8 +580,8 @@ tonic = "0.11"
 5. Integrate with tracer provider
 
 **Files**:
-- `crates/rak-telemetry/src/sampling.rs` (new)
-- `crates/rak-telemetry/src/tracer.rs` (update)
+- `crates/zdk-telemetry/src/sampling.rs` (new)
+- `crates/zdk-telemetry/src/tracer.rs` (update)
 
 **Tests**:
 - Always-on sampling
@@ -601,7 +601,7 @@ tonic = "0.11"
 5. Update config documentation
 
 **Files**:
-- `crates/rak-core/src/config.rs` (update)
+- `crates/zdk-core/src/config.rs` (update)
 - `config.toml.example` (update)
 
 **Config Example**:
@@ -634,11 +634,11 @@ always_sample_errors = true
 5. Add context propagation
 
 **Files**:
-- `crates/rak-runner/src/runner.rs` (update)
-- `crates/rak-agent/src/llm_agent.rs` (update)
-- `crates/rak-agent/src/workflow.rs` (update)
-- `crates/rak-session/src/inmemory.rs` (update)
-- `crates/rak-session/src/database.rs` (update)
+- `crates/zdk-runner/src/runner.rs` (update)
+- `crates/zdk-agent/src/llm_agent.rs` (update)
+- `crates/zdk-agent/src/workflow.rs` (update)
+- `crates/zdk-session/src/inmemory.rs` (update)
+- `crates/zdk-session/src/database.rs` (update)
 
 **Instrumentation Points**:
 - Runner start/complete
@@ -660,9 +660,9 @@ always_sample_errors = true
 5. Test context propagation across async boundaries
 
 **Files**:
-- `crates/rak-telemetry/src/context.rs` (new)
-- `crates/rak-runner/src/runner.rs` (update stream handling)
-- `crates/rak-agent/src/workflow.rs` (update sub-agent calls)
+- `crates/zdk-telemetry/src/context.rs` (new)
+- `crates/zdk-runner/src/runner.rs` (update stream handling)
+- `crates/zdk-agent/src/workflow.rs` (update sub-agent calls)
 
 ---
 
@@ -676,8 +676,8 @@ always_sample_errors = true
 5. Add metrics configuration
 
 **Files**:
-- `crates/rak-telemetry/src/metrics.rs` (new)
-- `crates/rak-telemetry/src/exporters.rs` (update)
+- `crates/zdk-telemetry/src/metrics.rs` (new)
+- `crates/zdk-telemetry/src/exporters.rs` (update)
 
 **Metrics**:
 - `agent.invocations` (counter)
@@ -737,7 +737,7 @@ always_sample_errors = true
 # Start Jaeger all-in-one
 docker run -d -p 6831:6831/udp -p 16686:16686 jaegertracing/all-in-one:latest
 
-# Configure RAK
+# Configure ZDK
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 
 # Run application
@@ -767,7 +767,7 @@ always_sample_errors = true
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: rak-config
+  name: zdk-config
 data:
   config.toml: |
     [telemetry.tracing.otlp]
@@ -786,12 +786,12 @@ data:
 
 1. **Find slow agent executions**:
    ```
-   duration > 5s AND service.name="rak-rust-app"
+   duration > 5s AND service.name="zdk-rust-app"
    ```
 
 2. **Find all traces with errors**:
    ```
-   error=true AND service.name="rak-rust-app"
+   error=true AND service.name="zdk-rust-app"
    ```
 
 3. **Find traces for specific session**:
@@ -816,9 +816,9 @@ data:
 
 ---
 
-## 🔄 Comparison with Python RAK
+## 🔄 Comparison with Python ZDK
 
-| Feature | Python RAK | Rust RAK (Phase 9) |
+| Feature | Python ZDK | Rust ZDK (Phase 9) |
 |---------|-----------|-------------------|
 | OpenTelemetry Tracing | ✅ | ✅ |
 | LLM Call Tracing | ✅ | ✅ (exists) |
@@ -926,5 +926,5 @@ Phase 9 is complete when:
 
 ---
 
-**Ready to implement?** Let's build world-class observability for RAK! 🚀
+**Ready to implement?** Let's build world-class observability for ZDK! 🚀
 

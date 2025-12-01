@@ -6,11 +6,11 @@
 
 ## Overview
 
-Phase 4 adds persistent storage capabilities to RAK through artifact services and database-backed session storage.
+Phase 4 adds persistent storage capabilities to ZDK through artifact services and database-backed session storage.
 
 ## Components Implemented
 
-### 1. Artifact Service (`rak-artifact`)
+### 1. Artifact Service (`zdk-artifact`)
 
 A comprehensive artifact storage system with multiple backend implementations:
 
@@ -32,7 +32,7 @@ A comprehensive artifact storage system with multiple backend implementations:
 - Full CRUD operations
 - Thread-safe implementations
 
-### 2. Database Session Services (`rak-session`)
+### 2. Database Session Services (`zdk-session`)
 
 Database-backed session storage with PostgreSQL and SQLite support:
 
@@ -112,17 +112,17 @@ async fn main() {
 
 ## Feature Flags
 
-### rak-artifact
+### zdk-artifact
 - Default: None
 - All features always available
 
-### rak-session
+### zdk-session
 - `sqlite` - SQLite backend support
 - `postgres` - PostgreSQL backend support
 
 Example:
 ```toml
-rak-session = { version = "0.1", features = ["sqlite"] }
+zdk-session = { version = "0.1", features = ["sqlite"] }
 ```
 
 ## Testing
@@ -150,12 +150,12 @@ Basic compilation and structure verified. Integration tests can be added for:
 - `base64 = "0.22"` - Base64 encoding for binary artifacts
 - `sqlx` (already present) - Used with chrono feature
 
-### rak-artifact
+### zdk-artifact
 - `tokio` with fs and io-util features
 - `base64`
 - `tempfile` (dev)
 
-### rak-session
+### zdk-session
 - `sqlx` with runtime-tokio-rustls and chrono
 - `chrono`
 
@@ -200,19 +200,19 @@ Potential additions (not in current scope):
 
 ## Files Created
 
-### rak-artifact Crate
-- `crates/rak-artifact/Cargo.toml`
-- `crates/rak-artifact/src/lib.rs`
-- `crates/rak-artifact/src/service.rs`
-- `crates/rak-artifact/src/memory.rs`
-- `crates/rak-artifact/src/filesystem.rs`
+### zdk-artifact Crate
+- `crates/zdk-artifact/Cargo.toml`
+- `crates/zdk-artifact/src/lib.rs`
+- `crates/zdk-artifact/src/service.rs`
+- `crates/zdk-artifact/src/memory.rs`
+- `crates/zdk-artifact/src/filesystem.rs`
 
-### rak-session Database Support
-- `crates/rak-session/src/database/mod.rs`
-- `crates/rak-session/src/database/migrations.rs`
-- `crates/rak-session/src/database/models.rs`
-- `crates/rak-session/src/database/postgres.rs`
-- `crates/rak-session/src/database/sqlite.rs`
+### zdk-session Database Support
+- `crates/zdk-session/src/database/mod.rs`
+- `crates/zdk-session/src/database/migrations.rs`
+- `crates/zdk-session/src/database/models.rs`
+- `crates/zdk-session/src/database/postgres.rs`
+- `crates/zdk-session/src/database/sqlite.rs`
 
 ### Examples
 - `examples/artifact_usage.rs`

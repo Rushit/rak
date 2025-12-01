@@ -1,17 +1,17 @@
-# Python RAK OpenAPI Implementation Analysis
+# Python ZDK OpenAPI Implementation Analysis
 
 **Date**: 2025-11-19 20:10  
-**Purpose**: Analyze Python RAK's OpenAPI implementation to guide RAK (Rust) implementation
+**Purpose**: Analyze Python ZDK's OpenAPI implementation to guide ZDK (Rust) implementation
 
 ## Summary
 
-The Python RAK has a **complete, production-ready OpenAPI tool system** that automatically converts OpenAPI specs into executable tools. This is a **core feature** that enables agents to interact with ANY API that has an OpenAPI specification.
+The Python ZDK has a **complete, production-ready OpenAPI tool system** that automatically converts OpenAPI specs into executable tools. This is a **core feature** that enables agents to interact with ANY API that has an OpenAPI specification.
 
 ## Architecture Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                   Python RAK OpenAPI System                      │
+│                   Python ZDK OpenAPI System                      │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                   │
 │  OpenAPIToolset ───┐                                             │
@@ -379,11 +379,11 @@ agent = LlmAgent(
 # - cancel_booking(booking_id)
 ```
 
-## Key Implementation Insights for RAK
+## Key Implementation Insights for ZDK
 
 ### 1. **Runtime Generation Approach**
 
-Python RAK uses **runtime generation**:
+Python ZDK uses **runtime generation**:
 - Parse OpenAPI spec at runtime
 - Dynamically create tool instances
 - No code generation or macros needed
@@ -397,17 +397,17 @@ Python RAK uses **runtime generation**:
 - No compile-time type checking
 - Spec parsing happens at startup
 
-**For RAK**: Start with runtime generation, add compile-time macros later.
+**For ZDK**: Start with runtime generation, add compile-time macros later.
 
 ### 2. **Tool Interface Design**
 
-Python RAK's `RestApiTool`:
+Python ZDK's `RestApiTool`:
 - Implements `BaseTool` interface
 - Returns function declaration (name, description, schema)
 - Executes with arbitrary JSON args
 - Returns JSON response
 
-**RAK Equivalent**:
+**ZDK Equivalent**:
 ```rust
 pub struct RestApiTool {
     name: String,
@@ -436,7 +436,7 @@ impl Tool for RestApiTool {
 
 ### 3. **HTTP Request Building**
 
-Python RAK separates parameter handling by location:
+Python ZDK separates parameter handling by location:
 - Path parameters: `{id}` in URL
 - Query parameters: `?key=value`
 - Header parameters: `Authorization: Bearer token`
@@ -467,20 +467,20 @@ requests.request(
 )
 ```
 
-**For RAK**: Use `reqwest::RequestBuilder` with similar pattern.
+**For ZDK**: Use `reqwest::RequestBuilder` with similar pattern.
 
 ### 4. **Schema Conversion**
 
-Python RAK converts OpenAPI schemas to Gemini function declarations:
+Python ZDK converts OpenAPI schemas to Gemini function declarations:
 - OpenAPI Schema → JSON Schema → Gemini Schema
 - Uses `_to_gemini_schema()` utility
 - Handles nested objects, arrays, enums, etc.
 
-**For RAK**: We already have `schemars` and JSON schema support, so this should be straightforward.
+**For ZDK**: We already have `schemars` and JSON schema support, so this should be straightforward.
 
 ### 5. **Authentication Integration**
 
-Python RAK has sophisticated auth handling:
+Python ZDK has sophisticated auth handling:
 - Separate `AuthScheme` (how to auth) and `AuthCredential` (what to auth with)
 - `ToolAuthHandler` manages auth state
 - `AutoAuthCredentialExchanger` handles OAuth2 flows
@@ -505,11 +505,11 @@ async def call(self, args, tool_context):
         # Add to headers, query params, etc.
 ```
 
-**For RAK**: Start simple (API key, Bearer), add OAuth2 later.
+**For ZDK**: Start simple (API key, Bearer), add OAuth2 later.
 
 ### 6. **Error Handling**
 
-Python RAK returns errors as tool results:
+Python ZDK returns errors as tool results:
 ```python
 try:
     response.raise_for_status()
@@ -524,11 +524,11 @@ except HTTPError:
 
 **Why**: LLM can see the error and retry with corrections.
 
-**For RAK**: Similar approach - return errors as `ToolResponse` with error field.
+**For ZDK**: Similar approach - return errors as `ToolResponse` with error field.
 
 ### 7. **Reference Resolution**
 
-Python RAK resolves `$ref` recursively with circular reference handling:
+Python ZDK resolves `$ref` recursively with circular reference handling:
 ```python
 def _resolve_references(openapi_spec):
     resolved_cache = {}
@@ -547,11 +547,11 @@ def _resolve_references(openapi_spec):
         # ... handle dicts and lists recursively
 ```
 
-**For RAK**: Use `openapiv3` crate which may already handle this, or implement similar logic.
+**For ZDK**: Use `openapiv3` crate which may already handle this, or implement similar logic.
 
-## Comparison: Python RAK vs RAK Design
+## Comparison: Python ZDK vs ZDK Design
 
-| Aspect | Python RAK | RAK (Proposed) |
+| Aspect | Python ZDK | ZDK (Proposed) |
 |--------|-----------|----------------|
 | **Generation** | Runtime | Runtime (Phase 1), Macro (Phase 2) |
 | **Spec Parsing** | Custom parser | `openapiv3` crate |
@@ -563,7 +563,7 @@ def _resolve_references(openapi_spec):
 | **Schema** | Python types + Gemini | `schemars` + `serde_json` |
 | **Testing** | Mock HTTP, unit tests | Similar approach |
 
-## Recommended Implementation Plan for RAK
+## Recommended Implementation Plan for ZDK
 
 ### Phase 8.1.1: Core Parser (Week 1)
 - Use `openapiv3` crate for parsing
@@ -592,7 +592,7 @@ def _resolve_references(openapi_spec):
 - Implement `Tool` trait
 - Execute HTTP requests
 - Error handling
-- Integration with RAK tool system
+- Integration with ZDK tool system
 
 ### Phase 8.1.6: OpenApiToolset (Week 3-4)
 - Container for all tools
@@ -627,14 +627,14 @@ tokio = { version = "1.0", features = ["full"] }
 async-trait = "0.1"
 ```
 
-## Success Criteria (Matching Python RAK)
+## Success Criteria (Matching Python ZDK)
 
 1. ✅ Parse any valid OpenAPI v3.0+ spec
 2. ✅ Generate tools for all operations
 3. ✅ Support all HTTP methods (GET, POST, PUT, DELETE, etc.)
 4. ✅ Handle parameters in all locations (path, query, header, cookie, body)
 5. ✅ Support common content types (JSON, form data, multipart)
-6. ✅ Integrate with RAK's `Tool` trait
+6. ✅ Integrate with ZDK's `Tool` trait
 7. ✅ Support API Key and Bearer token auth
 8. ✅ Return errors as tool responses (for LLM retry)
 9. ✅ Work with real public APIs (httpbin.org, OpenWeatherMap, etc.)
@@ -642,7 +642,7 @@ async-trait = "0.1"
 
 ## Conclusion
 
-Python RAK's OpenAPI implementation is **comprehensive and production-ready**. It demonstrates that:
+Python ZDK's OpenAPI implementation is **comprehensive and production-ready**. It demonstrates that:
 
 1. **OpenAPI tool generation is critical** - It's not a "nice-to-have" but a core feature
 2. **Runtime generation works well** - No need for complex macros initially
@@ -650,12 +650,12 @@ Python RAK's OpenAPI implementation is **comprehensive and production-ready**. I
 4. **Error handling matters** - Errors should be tool responses, not exceptions
 5. **Real APIs have edge cases** - Need robust parsing and handling
 
-For RAK, we should:
+For ZDK, we should:
 - **Start with runtime generation** (simpler, matches Python)
 - **Use existing crates** (`openapiv3`, `reqwest`)
 - **Focus on common cases first** (GET/POST, API Key auth)
 - **Match Python's API design** (OpenAPIToolset, RestApiTool)
 - **Add Rust-specific improvements** later (compile-time generation, type safety)
 
-This will give RAK feature parity with Python RAK for OpenAPI support, enabling instant integration with 1000s of APIs.
+This will give ZDK feature parity with Python ZDK for OpenAPI support, enabling instant integration with 1000s of APIs.
 

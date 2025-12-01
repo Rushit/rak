@@ -1,7 +1,7 @@
-use rak_agent::LLMAgent;
-use rak_core::{Content, LLM, LLMRequest, LLMResponse, Part, Result};
-use rak_runner::Runner;
-use rak_session::inmemory::InMemorySessionService;
+use zdk_agent::LLMAgent;
+use zdk_core::{Content, LLM, LLMRequest, LLMResponse, Part, Result};
+use zdk_runner::Runner;
+use zdk_session::inmemory::InMemorySessionService;
 use async_trait::async_trait;
 use futures::stream::{Stream, StreamExt};
 use std::sync::Arc;
@@ -99,7 +99,7 @@ async fn test_basic_agent_flow() -> anyhow::Result<()> {
         .build()?;
     
     // Create session
-    let session = session_service.create(&rak_session::CreateRequest {
+    let session = session_service.create(&zdk_session::CreateRequest {
         app_name: "test-app".into(),
         user_id: "test-user".into(),
         session_id: Some("test-session".into()),
@@ -136,7 +136,7 @@ async fn test_basic_agent_flow() -> anyhow::Result<()> {
     }
     
     // Verify session history
-    let updated_session = session_service.get(&rak_session::GetRequest {
+    let updated_session = session_service.get(&zdk_session::GetRequest {
         app_name: "test-app".into(),
         user_id: "test-user".into(),
         session_id: session.id().into(),
@@ -153,7 +153,7 @@ async fn test_session_persistence() -> anyhow::Result<()> {
     let session_service = Arc::new(InMemorySessionService::new());
     
     // Create session
-    let session = session_service.create(&rak_session::CreateRequest {
+    let session = session_service.create(&zdk_session::CreateRequest {
         app_name: "test-app".into(),
         user_id: "user1".into(),
         session_id: Some("session1".into()),
@@ -164,7 +164,7 @@ async fn test_session_persistence() -> anyhow::Result<()> {
     assert_eq!(session.user_id(), "user1");
     
     // Retrieve session
-    let retrieved = session_service.get(&rak_session::GetRequest {
+    let retrieved = session_service.get(&zdk_session::GetRequest {
         app_name: "test-app".into(),
         user_id: "user1".into(),
         session_id: "session1".into(),

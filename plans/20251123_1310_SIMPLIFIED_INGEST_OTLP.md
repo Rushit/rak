@@ -22,13 +22,13 @@
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│              RAK Agents (OTLP Clients)                  │
+│              ZDK Agents (OTLP Clients)                  │
 └────────────────┬────────────────────────────────────────┘
                  │
                  │ OTLP/gRPC (Port 4317)
                  │
 ┌────────────────▼────────────────────────────────────────┐
-│         rak-ingest (OTLP gRPC Server)                   │
+│         zdk-ingest (OTLP gRPC Server)                   │
 │                                                          │
 │  ┌──────────────────────────────────────────────────┐  │
 │  │  Auto-generated from OpenTelemetry Proto         │  │
@@ -61,7 +61,7 @@
 ## 📦 Simplified Project Structure
 
 ```
-crates/rak-ingest/
+crates/zdk-ingest/
 ├── Cargo.toml
 ├── build.rs                    # Proto compilation
 ├── proto/
@@ -102,7 +102,7 @@ crates/rak-ingest/
 
 ```toml
 [package]
-name = "rak-ingest"
+name = "zdk-ingest"
 version = "0.1.0"
 edition = "2021"
 
@@ -158,7 +158,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### 3. OTLP Trace Service Implementation
 
-**File**: `crates/rak-ingest/src/otlp/trace_service.rs`
+**File**: `crates/zdk-ingest/src/otlp/trace_service.rs`
 
 ```rust
 use opentelemetry_proto::tonic::collector::trace::v1::{
@@ -218,7 +218,7 @@ impl TraceService for OtlpTraceService {
 
 ### 4. OTLP Metrics Service Implementation
 
-**File**: `crates/rak-ingest/src/otlp/metrics_service.rs`
+**File**: `crates/zdk-ingest/src/otlp/metrics_service.rs`
 
 ```rust
 use opentelemetry_proto::tonic::collector::metrics::v1::{
@@ -278,7 +278,7 @@ impl MetricsService for OtlpMetricsService {
 
 ### 5. OTLP Converter (Proto -> Internal Format)
 
-**File**: `crates/rak-ingest/src/otlp/converter.rs`
+**File**: `crates/zdk-ingest/src/otlp/converter.rs`
 
 ```rust
 use opentelemetry_proto::tonic::trace::v1::{ResourceSpans, Span as OtlpSpan};
@@ -495,7 +495,7 @@ pub fn convert_resource_metrics(resource_metrics: ResourceMetrics) -> Result<Vec
 
 ### 6. Main Server Setup
 
-**File**: `crates/rak-ingest/src/main.rs`
+**File**: `crates/zdk-ingest/src/main.rs`
 
 ```rust
 use anyhow::Result;
@@ -522,7 +522,7 @@ async fn main() -> Result<()> {
     // Load configuration
     let config = IngestConfig::from_file("config.toml")?;
     
-    info!("Starting rak-ingest OTLP server");
+    info!("Starting zdk-ingest OTLP server");
     info!("ClickHouse: {}", config.clickhouse.url);
     info!("Listening on: 0.0.0.0:{}", config.otlp_port);
     
@@ -583,9 +583,9 @@ max_connections = 10
 
 ---
 
-### 8. Client Configuration (rak-telemetry)
+### 8. Client Configuration (zdk-telemetry)
 
-**File**: `crates/rak-telemetry/src/exporters.rs` (updated)
+**File**: `crates/zdk-telemetry/src/exporters.rs` (updated)
 
 ```rust
 use opentelemetry_otlp::WithExportConfig;
@@ -608,7 +608,7 @@ pub fn create_otlp_exporter(endpoint: &str) -> Result<TracerProvider> {
 **Client config.toml**:
 ```toml
 [telemetry.tracing.otlp]
-endpoint = "http://localhost:4317"  # Points to rak-ingest
+endpoint = "http://localhost:4317"  # Points to zdk-ingest
 ```
 
 ---
@@ -669,14 +669,14 @@ impl TraceService for OtlpTraceService {
 
 ### 5. **Interoperability**
 ```
-RAK Agents (Rust)
-    └─> rak-ingest
+ZDK Agents (Rust)
+    └─> zdk-ingest
     
 Other Apps (Go/Python/etc.)
-    └─> rak-ingest  ✅ Works!
+    └─> zdk-ingest  ✅ Works!
     
 OpenTelemetry Collector
-    └─> rak-ingest  ✅ Works!
+    └─> zdk-ingest  ✅ Works!
 ```
 
 ---
@@ -685,14 +685,14 @@ OpenTelemetry Collector
 
 ```
 ┌─────────────────────────────────────────────────┐
-│  1. RAK Agent generates spans                   │
-│     (using rak-telemetry crate)                 │
+│  1. ZDK Agent generates spans                   │
+│     (using zdk-telemetry crate)                 │
 └────────────────┬────────────────────────────────┘
                  │
                  │ OTLP/gRPC (Protobuf)
                  │
 ┌────────────────▼────────────────────────────────┐
-│  2. rak-ingest receives ExportTraceServiceRequest│
+│  2. zdk-ingest receives ExportTraceServiceRequest│
 │     (auto-generated protobuf message)           │
 └────────────────┬────────────────────────────────┘
                  │
@@ -759,14 +759,14 @@ docker run -d \
 clickhouse-client < schema.sql
 ```
 
-### 3. Build & Run rak-ingest
+### 3. Build & Run zdk-ingest
 ```bash
-cd crates/rak-ingest
+cd crates/zdk-ingest
 cargo build --release
-./target/release/rak-ingest
+./target/release/zdk-ingest
 ```
 
-### 4. Configure RAK Agent
+### 4. Configure ZDK Agent
 ```toml
 [telemetry.tracing.otlp]
 endpoint = "http://localhost:4317"
@@ -781,7 +781,7 @@ All telemetry automatically flows to ClickHouse.
 
 ### Test with opentelemetry-collector
 
-You can test `rak-ingest` using the official OpenTelemetry Collector:
+You can test `zdk-ingest` using the official OpenTelemetry Collector:
 
 ```yaml
 # collector-config.yaml
@@ -793,7 +793,7 @@ receivers:
 
 exporters:
   otlp:
-    endpoint: localhost:4317  # rak-ingest
+    endpoint: localhost:4317  # zdk-ingest
     tls:
       insecure: true
 
@@ -808,7 +808,7 @@ service:
 otelcol --config collector-config.yaml
 ```
 
-Now send traces to collector (port 4316), they'll be forwarded to rak-ingest (port 4317).
+Now send traces to collector (port 4316), they'll be forwarded to zdk-ingest (port 4317).
 
 ---
 

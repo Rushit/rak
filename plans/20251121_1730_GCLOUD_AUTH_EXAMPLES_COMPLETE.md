@@ -45,7 +45,7 @@ Converted `openapi_usage.rs` example to an optional test and added gcloud authen
 
 ### 2. Files Modified
 
-#### `crates/rak-model/src/gemini.rs`
+#### `crates/zdk-model/src/gemini.rs`
 - Added `GeminiAuth` enum with two variants:
   - `ApiKey(String)` - Original API key auth
   - `BearerToken(String)` - New Bearer token auth for Vertex AI
@@ -54,7 +54,7 @@ Converted `openapi_usage.rs` example to an optional test and added gcloud authen
 - Properly handles Authorization header for Bearer tokens
 - **Backward compatible** - existing API key usage unchanged
 
-#### `crates/rak-model/src/lib.rs`
+#### `crates/zdk-model/src/lib.rs`
 - Exported `GeminiAuth` enum publicly
 
 #### `Cargo.toml`
@@ -162,8 +162,8 @@ Complete documentation provided in:
 - `README_TESTING.md`
 
 **Modified (4 files):**
-- `crates/rak-model/src/gemini.rs`
-- `crates/rak-model/src/lib.rs`
+- `crates/zdk-model/src/gemini.rs`
+- `crates/zdk-model/src/lib.rs`
 - `Cargo.toml`
 - `CHANGES_SUMMARY.md` (this file)
 

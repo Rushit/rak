@@ -1,10 +1,10 @@
 // Integration tests for RAK
 // These tests verify the full stack E2E functionality
 
-use rak_agent::LLMAgent;
-use rak_core::{Content, Event, LLMRequest, LLMResponse, Part, Result, LLM};
-use rak_runner::{RunConfig, Runner};
-use rak_session::{inmemory::InMemorySessionService, SessionService};
+use zdk_agent::LLMAgent;
+use zdk_core::{Content, Event, LLMRequest, LLMResponse, Part, Result, LLM};
+use zdk_runner::{RunConfig, Runner};
+use zdk_session::{inmemory::InMemorySessionService, SessionService};
 use async_stream::stream;
 use async_trait::async_trait;
 use axum::{
@@ -103,7 +103,7 @@ async fn test_e2e_session_and_agent_execution() {
 
     // Create session
     let session = session_service
-        .create(&rak_session::CreateRequest {
+        .create(&zdk_session::CreateRequest {
             app_name: "test-app".to_string(),
             user_id: "test-user".to_string(),
             session_id: Some("test-session".to_string()),
@@ -148,7 +148,7 @@ async fn test_e2e_session_and_agent_execution() {
 
     // Verify session persistence
     let updated_session = session_service
-        .get(&rak_session::GetRequest {
+        .get(&zdk_session::GetRequest {
             app_name: "test-app".to_string(),
             user_id: "test-user".to_string(),
             session_id: "test-session".to_string(),
@@ -264,7 +264,7 @@ async fn test_e2e_multiple_turns_in_session() {
 
     // Verify session has all messages
     let session = session_service
-        .get(&rak_session::GetRequest {
+        .get(&zdk_session::GetRequest {
             app_name: "multi-turn-app".to_string(),
             user_id: "user1".to_string(),
             session_id: session_id.to_string(),

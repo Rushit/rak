@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Test script for RAK examples
+# Test script for ZDK examples
 # 
 # Usage:
 #   ./scripts/test_examples.sh           # Test all examples
@@ -31,7 +31,7 @@ cd "$PROJECT_ROOT"
 # Help message
 show_help() {
     cat << EOF
-RAK Examples Test Script
+ZDK Examples Test Script
 
 Usage:
     $0 [OPTIONS] [EXAMPLE_NAME]
@@ -119,7 +119,7 @@ print_status() {
 print_header() {
     echo ""
     print_status "$BLUE" "╔════════════════════════════════════════════════════════════════╗"
-    print_status "$BLUE" "║          RAK Examples Test Suite                              ║"
+    print_status "$BLUE" "║          ZDK Examples Test Suite                              ║"
     print_status "$BLUE" "╚════════════════════════════════════════════════════════════════╝"
     echo ""
 }

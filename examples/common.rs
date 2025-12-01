@@ -10,8 +10,8 @@
 #![allow(dead_code)] // Functions are used by examples that include this module
 
 use anyhow::{Context, Result};
-use rak_core::{AuthCredentials, RakConfig, LLM};
-use rak_model::GeminiModel;
+use zdk_core::{AuthCredentials, RakConfig, LLM};
+use zdk_model::GeminiModel;
 use std::sync::Arc;
 
 /// Create an authenticated Gemini model from configuration

@@ -1,43 +1,43 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/rak-core",
-    "crates/rak-model",
-    "crates/rak-session",
-    "crates/rak-agent",
-    "crates/rak-runner",
-    "crates/rak-server",
-    "crates/rak-tool",
-    "crates/rak-macros",
-    "crates/rak-artifact",
-    "crates/rak-memory",
-    "crates/rak-telemetry",
-    "crates/rak-openapi",
-    "crates/rak-web-tools",
-    "crates/rak-database-tools",
-    "crates/rak-mcp",
+    "crates/zdk-core",
+    "crates/zdk-model",
+    "crates/zdk-session",
+    "crates/zdk-agent",
+    "crates/zdk-runner",
+    "crates/zdk-server",
+    "crates/zdk-tool",
+    "crates/zdk-macros",
+    "crates/zdk-artifact",
+    "crates/zdk-memory",
+    "crates/zdk-telemetry",
+    "crates/zdk-openapi",
+    "crates/zdk-web-tools",
+    "crates/zdk-database-tools",
+    "crates/zdk-mcp",
 ]
 
 [package]
-name = "rak-workspace"
+name = "zdk-workspace"
 version.workspace = true
 edition.workspace = true
 
 [dependencies]
-rak-core = { path = "crates/rak-core" }
-rak-model = { path = "crates/rak-model" }
-rak-session = { path = "crates/rak-session" }
-rak-agent = { path = "crates/rak-agent" }
-rak-runner = { path = "crates/rak-runner" }
-rak-server = { path = "crates/rak-server" }
-rak-tool = { path = "crates/rak-tool" }
-rak-artifact = { path = "crates/rak-artifact" }
-rak-memory = { path = "crates/rak-memory" }
-rak-telemetry = { path = "crates/rak-telemetry" }
-rak-openapi = { path = "crates/rak-openapi" }
-rak-web-tools = { path = "crates/rak-web-tools" }
-rak-database-tools = { path = "crates/rak-database-tools" }
-rak-mcp = { path = "crates/rak-mcp" }
+zdk-core = { path = "crates/zdk-core" }
+zdk-model = { path = "crates/zdk-model" }
+zdk-session = { path = "crates/zdk-session" }
+zdk-agent = { path = "crates/zdk-agent" }
+zdk-runner = { path = "crates/zdk-runner" }
+zdk-server = { path = "crates/zdk-server" }
+zdk-tool = { path = "crates/zdk-tool" }
+zdk-artifact = { path = "crates/zdk-artifact" }
+zdk-memory = { path = "crates/zdk-memory" }
+zdk-telemetry = { path = "crates/zdk-telemetry" }
+zdk-openapi = { path = "crates/zdk-openapi" }
+zdk-web-tools = { path = "crates/zdk-web-tools" }
+zdk-database-tools = { path = "crates/zdk-database-tools" }
+zdk-mcp = { path = "crates/zdk-mcp" }
 
 [dev-dependencies]
 tokio = { workspace = true }
@@ -96,7 +96,7 @@ required-features = ["__nonexistent_feature__"]
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
-authors = ["RAK Team"]
+authors = ["ZDK Team"]
 license = "Apache-2.0"
 
 [workspace.dependencies]

@@ -1,0 +1,42 @@
+[package]
+name = "zdk-tool"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+zdk-core = { path = "../zdk-core" }
+zdk-telemetry = { path = "../zdk-telemetry" }
+
+# Async
+tokio = { workspace = true }
+async-trait = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Schema generation
+schemars = { workspace = true }
+
+# Math evaluation
+meval = { workspace = true }
+
+# Error handling
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+
+# Logging
+tracing = { workspace = true }
+
+# HTTP for remote tools
+reqwest = { workspace = true, optional = true }
+
+[features]
+default = []
+http = ["reqwest"]
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full"] }
+

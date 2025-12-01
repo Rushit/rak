@@ -1,6 +1,6 @@
 # Quick Start with Google Cloud Authentication
 
-Get started with RAK using Google Cloud authentication in under 2 minutes!
+Get started with ZDK using Google Cloud authentication in under 2 minutes!
 
 ## Prerequisites
 
@@ -158,5 +158,5 @@ gcloud auth application-default login
 - **Build errors?** Run `cargo clean && cargo build`
 - **Still stuck?** Open an issue on GitHub
 
-Enjoy building with RAK! 🚀
+Enjoy building with ZDK! 🚀
 

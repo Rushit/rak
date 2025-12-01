@@ -24,7 +24,7 @@ This document describes a **complete observability system** for AI agent applica
 
 ```
 ┌───────────────────────────────────────────────────────────────────┐
-│                      RAK Application Layer                         │
+│                      ZDK Application Layer                         │
 │                                                                    │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐         │
 │  │  Runner  │  │  Agents  │  │ Session  │  │   LLM    │         │
@@ -38,7 +38,7 @@ This document describes a **complete observability system** for AI agent applica
         └─────────────┴──────────────┴─────────────┘
                       │
         ┌─────────────▼──────────────┐
-        │   rak-telemetry (Enhanced) │
+        │   zdk-telemetry (Enhanced) │
         │                            │
         │  ┌─────────────────────┐  │
         │  │  Trace Collection   │  │
@@ -100,11 +100,11 @@ This document describes a **complete observability system** for AI agent applica
 
 ## 📦 Component Breakdown
 
-### 1. Telemetry Collection (`rak-telemetry`)
+### 1. Telemetry Collection (`zdk-telemetry`)
 
 #### Module Structure
 ```
-crates/rak-telemetry/
+crates/zdk-telemetry/
 ├── src/
 │   ├── lib.rs                    # Public API
 │   ├── tracer.rs                 # OpenTelemetry setup
@@ -328,11 +328,11 @@ type = "pyroscope"                # "pyroscope", "gcp", "file"
 
 # Pyroscope
 pyroscope_endpoint = "http://localhost:4040"
-application_name = "rak-rust-app"
+application_name = "zdk-rust-app"
 
 # GCP Cloud Profiler
 # gcp_project_id = "my-project"
-# gcp_service_name = "rak-service"
+# gcp_service_name = "zdk-service"
 
 # File output (development)
 # file_output_dir = "./profiles"
@@ -517,7 +517,7 @@ enabled = true
 [telemetry.profiling.exporter]
 type = "gcp"
 gcp_project_id = "${GCP_PROJECT}"
-gcp_service_name = "rak-production"
+gcp_service_name = "zdk-production"
 ```
 
 **Access**:
@@ -533,7 +533,7 @@ gcp_service_name = "rak-production"
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: rak-config
+  name: zdk-config
 data:
   config.toml: |
     [telemetry.tracing.otlp]
@@ -549,7 +549,7 @@ data:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: rak-metrics
+  name: zdk-metrics
 spec:
   selector:
     matchLabels:
@@ -566,7 +566,7 @@ spec:
 ### 1. Find Slow Requests
 
 **In Jaeger**:
-1. Search by service: `rak-rust-app`
+1. Search by service: `zdk-rust-app`
 2. Filter: `min duration: 5s`
 3. Select trace → see full hierarchy
 

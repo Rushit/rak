@@ -1,8 +1,8 @@
-use rak_agent::{LLMAgent, LoopAgent, ParallelAgent, SequentialAgent};
-use rak_core::{Content, LLM};
-use rak_runner::Runner;
-use rak_session::inmemory::InMemorySessionService;
-use rak_tool::builtin::create_echo_tool;
+use zdk_agent::{LLMAgent, LoopAgent, ParallelAgent, SequentialAgent};
+use zdk_core::{Content, LLM};
+use zdk_runner::Runner;
+use zdk_session::inmemory::InMemorySessionService;
+use zdk_tool::builtin::create_echo_tool;
 use futures::StreamExt;
 use std::sync::Arc;
 

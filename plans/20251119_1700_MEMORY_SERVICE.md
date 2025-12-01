@@ -1,4 +1,4 @@
-# RAK Memory Service
+# ZDK Memory Service
 
 **Date**: November 19, 2025, 17:00  
 **Type**: Implementation Documentation  
@@ -6,7 +6,7 @@
 
 ## Overview
 
-The RAK Memory Service provides long-term memory storage for AI agents, enabling knowledge retention and retrieval across multiple sessions. This allows agents to remember past conversations and use that context in future interactions.
+The ZDK Memory Service provides long-term memory storage for AI agents, enabling knowledge retention and retrieval across multiple sessions. This allows agents to remember past conversations and use that context in future interactions.
 
 ## Key Concepts
 
@@ -212,11 +212,11 @@ The implementation includes comprehensive tests covering:
 - ✅ No matches scenario
 - ✅ Thread safety (via RwLock)
 
-All tests match the behavior of the Go RAK implementation.
+All tests match the behavior of the Go ZDK implementation.
 
-## Comparison with Go RAK
+## Comparison with Go ZDK
 
-The Rust implementation closely follows the Go RAK's memory service:
+The Rust implementation closely follows the Go ZDK's memory service:
 
 ### Similarities
 
@@ -311,17 +311,17 @@ In future phases, agents could automatically:
 - **No Ranking**: Results are unordered (relevance scoring in future)
 - **Linear Search**: O(n) time complexity (indexing in future)
 
-These limitations are intentional to keep the initial implementation simple and aligned with the Go RAK. Future enhancements will address them.
+These limitations are intentional to keep the initial implementation simple and aligned with the Go ZDK. Future enhancements will address them.
 
 ## Conclusion
 
-The Memory Service provides essential long-term memory capabilities for RAK agents. The keyword-based implementation is simple, efficient, and matches the Go RAK behavior. It provides a solid foundation for future enhancements while maintaining compatibility and simplicity.
+The Memory Service provides essential long-term memory capabilities for ZDK agents. The keyword-based implementation is simple, efficient, and matches the Go ZDK behavior. It provides a solid foundation for future enhancements while maintaining compatibility and simplicity.
 
 **Key Takeaways**:
 - ✅ Long-term memory across sessions
 - ✅ User and application isolation
 - ✅ Keyword-based search
 - ✅ Thread-safe and async
-- ✅ Compatible with Go RAK
+- ✅ Compatible with Go ZDK
 - ✅ Foundation for future enhancements
 

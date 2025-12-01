@@ -1,19 +1,19 @@
 # Phase 8.3: Web & Search Tools - Design Discussion
 
 **Date**: 2025-11-19 21:00  
-**Purpose**: Analyze Python RAK's web tools and discuss implementation options for Rust
+**Purpose**: Analyze Python ZDK's web tools and discuss implementation options for Rust
 
 ## Overview
 
-We need to implement Phase 8.3: Web & Search Tools. This document analyzes how Python RAK implements these features and proposes implementation options for Rust RAK.
+We need to implement Phase 8.3: Web & Search Tools. This document analyzes how Python ZDK implements these features and proposes implementation options for Rust ZDK.
 
 ---
 
-## Python RAK's Approach
+## Python ZDK's Approach
 
 ### 1. Google Search Tool
 
-Python RAK has **THREE** different implementations:
+Python ZDK has **THREE** different implementations:
 
 #### Option A: `google_search_tool.py` - Gemini Built-in Tool ⭐
 ```python
@@ -74,10 +74,10 @@ class DiscoveryEngineSearchTool(FunctionTool):
 - **Pros**: Search your own data
 - **Cons**: Requires GCP setup, costs money
 
-#### Option D: Custom Search API (NOT in Python RAK!)
+#### Option D: Custom Search API (NOT in Python ZDK!)
 This is what most people expect - Google Custom Search JSON API:
 ```python
-# Not in Python RAK, but common approach
+# Not in Python ZDK, but common approach
 response = requests.get(
     "https://www.googleapis.com/customsearch/v1",
     params={
@@ -144,7 +144,7 @@ def load_web_page(url: str) -> str:
 
 ---
 
-## Implementation Options for Rust RAK
+## Implementation Options for Rust ZDK
 
 ### Option 1: Gemini Built-in Tools (Easiest) ⭐
 
@@ -185,7 +185,7 @@ impl Tool for GoogleSearchTool {
 - ✅ Extremely simple (50-100 lines each)
 - ✅ No API keys needed
 - ✅ No HTTP client code
-- ✅ Matches Python RAK exactly
+- ✅ Matches Python ZDK exactly
 - ✅ Works perfectly with Gemini 2.0+
 
 **Cons**:
@@ -306,9 +306,9 @@ let scraper = WebScraperTool::new()?;
 
 ---
 
-## Python RAK's Web Tool Ecosystem
+## Python ZDK's Web Tool Ecosystem
 
-Python RAK has **many** web/search-related tools:
+Python ZDK has **many** web/search-related tools:
 
 ### Search Tools
 1. `google_search_tool.py` - Gemini built-in
@@ -326,7 +326,7 @@ Python RAK has **many** web/search-related tools:
 9. `load_web_page.py` - Simple web scraper
 10. `url_context_tool.py` - Gemini URL context
 
-**Observation**: Python RAK heavily leverages **Gemini built-in tools** for simplicity.
+**Observation**: Python ZDK heavily leverages **Gemini built-in tools** for simplicity.
 
 ---
 
@@ -344,17 +344,17 @@ Python RAK has **many** web/search-related tools:
 
 ### 2. HTTP Client
 
-We already use `reqwest` in `rak-openapi`. Continue using it:
+We already use `reqwest` in `zdk-openapi`. Continue using it:
 ```rust
 let client = reqwest::Client::builder()
-    .user_agent("RAK-Web-Tools/0.1.0")
+    .user_agent("ZDK-Web-Tools/0.1.0")
     .timeout(Duration::from_secs(30))
     .build()?;
 ```
 
 ### 3. Rate Limiting
 
-Python RAK doesn't implement rate limiting. We could add:
+Python ZDK doesn't implement rate limiting. We could add:
 ```rust
 use std::time::{Duration, Instant};
 
@@ -376,7 +376,7 @@ struct RateLimiter {
 - `WebScraperTool` (simple, like Python)
 
 **Rationale**:
-- ✅ Matches Python RAK's primary approach
+- ✅ Matches Python ZDK's primary approach
 - ✅ Very quick to implement (3-4 hours)
 - ✅ Zero configuration for users
 - ✅ Works great with Gemini (our primary model)
@@ -415,7 +415,7 @@ struct RateLimiter {
 
 ### Structure
 ```
-rak-web-tools/
+zdk-web-tools/
 ├── Cargo.toml
 ├── src/
 │   ├── lib.rs                          # Public API
@@ -439,7 +439,7 @@ rak-web-tools/
 ### Dependencies
 ```toml
 [dependencies]
-rak-core = { path = "../rak-core" }
+zdk-core = { path = "../zdk-core" }
 reqwest = { workspace = true }
 scraper = "0.20"          # HTML parsing
 url = { workspace = true }
@@ -499,7 +499,7 @@ anyhow = { workspace = true }
 - Advanced scraping (CSS selectors, link extraction)
 - Rate limiting
 
-This matches Python RAK's philosophy: **Leverage model capabilities first, add custom implementations when needed.**
+This matches Python ZDK's philosophy: **Leverage model capabilities first, add custom implementations when needed.**
 
 ---
 

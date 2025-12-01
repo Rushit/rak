@@ -1,4 +1,4 @@
-# RAK Documentation Index
+# ZDK Documentation Index
 
 **Created:** 2025-11-19 14:35  
 **Last Updated:** 2025-11-22 01:00  
@@ -26,10 +26,10 @@ This document serves as a quick reference guide to all project documentation, he
 
 ### 2. **20251119_1410_PROJECT_SCOPE.md** - Complete Scope
 **Location**: `/rak/docs/20251119_1410_PROJECT_SCOPE.md`
-**Purpose**: Full project scope from Go RAK analysis to future roadmap
+**Purpose**: Full project scope from Go ZDK analysis to future roadmap
 
 **Key Topics**:
-- Go RAK architecture analysis
+- Go ZDK architecture analysis
 - Complete phase breakdown (1-7)
 - Implementation details
 - API compatibility matrix
@@ -144,12 +144,12 @@ rak/
 │   └── 20251119_1435_DOCUMENTATION_INDEX.md
 │
 ├── crates/                  # 📚 Core implementation
-│   ├── rak-core/           # Traits & types
-│   ├── rak-model/          # LLM implementations  
-│   ├── rak-session/        # Session management
-│   ├── rak-agent/          # Agent implementations
-│   ├── rak-runner/         # Execution engine
-│   └── rak-server/         # REST API
+│   ├── zdk-core/           # Traits & types
+│   ├── zdk-model/          # LLM implementations  
+│   ├── zdk-session/        # Session management
+│   ├── zdk-agent/          # Agent implementations
+│   ├── zdk-runner/         # Execution engine
+│   └── zdk-server/         # REST API
 │
 ├── examples/               # 💡 Usage examples
 │   └── quickstart.rs       # Basic example
@@ -184,7 +184,7 @@ rak/
 - **Mock Infrastructure**: 20251119_1425_TESTING_GUIDE.md → Mock LLM for Testing
 
 ### API & Compatibility
-- **Event Format**: 20251119_1410_PROJECT_SCOPE.md → Go RAK Event Format
+- **Event Format**: 20251119_1410_PROJECT_SCOPE.md → Go ZDK Event Format
 - **REST Endpoints**: 20251119_1400_IMPLEMENTATION_SUMMARY.md → Server Crate
 - **API Matrix**: 20251119_1410_PROJECT_SCOPE.md → API Compatibility Matrix
 
@@ -252,7 +252,7 @@ rak/
 - [Workspace Config](../Cargo.toml)
 - [Quickstart Example](../examples/quickstart.rs)
 - [Integration Tests](../tests/integration_test.rs)
-- [Core Traits](../crates/rak-core/src/traits.rs)
+- [Core Traits](../crates/zdk-core/src/traits.rs)
 
 ### External
 - [Rust Documentation](https://www.rust-lang.org/)
@@ -286,7 +286,7 @@ rak/
 **Q: What's next?**
 → docs/20251119_1410_PROJECT_SCOPE.md → Phase 2
 
-**Q: Is it compatible with Go RAK?**
+**Q: Is it compatible with Go ZDK?**
 → docs/20251119_1410_PROJECT_SCOPE.md → API Compatibility Matrix
 
 ---

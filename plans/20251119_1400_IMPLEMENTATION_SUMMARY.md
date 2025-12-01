@@ -1,4 +1,4 @@
-# RAK Implementation Summary
+# ZDK Implementation Summary
 
 **Created:** 2025-11-19 14:00  
 **Last Updated:** 2025-11-19 14:00  
@@ -14,12 +14,12 @@ All planned MVP components have been successfully implemented and the workspace 
 rak/
 ├── Cargo.toml (workspace configuration)
 ├── crates/
-│   ├── rak-core/        ✅ Core traits and types
-│   ├── rak-model/       ✅ Gemini LLM integration
-│   ├── rak-session/     ✅ In-memory session management
-│   ├── rak-agent/       ✅ LLMAgent with builder
-│   ├── rak-runner/      ✅ Execution orchestration
-│   └── rak-server/      ✅ Axum REST + SSE
+│   ├── zdk-core/        ✅ Core traits and types
+│   ├── zdk-model/       ✅ Gemini LLM integration
+│   ├── zdk-session/     ✅ In-memory session management
+│   ├── zdk-agent/       ✅ LLMAgent with builder
+│   ├── zdk-runner/      ✅ Execution orchestration
+│   └── zdk-server/      ✅ Axum REST + SSE
 ├── examples/
 │   └── quickstart.rs    ✅ Working example
 ├── tests/
@@ -30,19 +30,19 @@ rak/
 
 ### Implemented Features
 
-#### 1. Core Abstractions (`rak-core`) ✅
+#### 1. Core Abstractions (`zdk-core`) ✅
 - **Traits**:
   - `Agent` - Core agent interface with async run method
   - `LLM` - Language model abstraction
   - `Tool` - Tool execution interface
   - `InvocationContext` / `ReadonlyContext` - Execution contexts
 - **Types**:
-  - `Event` - JSON-serializable events matching Go RAK format
+  - `Event` - JSON-serializable events matching Go ZDK format
   - `Content` / `Part` - Multi-modal content representation
   - `EventActions` - State and artifact deltas
 - **Error Handling**: Comprehensive error types with `thiserror`
 
-#### 2. Model Layer (`rak-model`) ✅
+#### 2. Model Layer (`zdk-model`) ✅
 - **GeminiModel**: Full Gemini API integration
   - HTTP client with `reqwest`
   - Streaming support via async-stream
@@ -50,7 +50,7 @@ rak/
   - Request/response type mapping
 - Extensible for additional providers (OpenAI, etc.)
 
-#### 3. Session Management (`rak-session`) ✅
+#### 3. Session Management (`zdk-session`) ✅
 - **SessionService** trait
 - **InMemorySessionService**: Thread-safe in-memory storage
   - Uses `Arc<RwLock<HashMap>>` for concurrent access
@@ -58,7 +58,7 @@ rak/
   - Event history tracking
 - Prepared for PostgreSQL/SQLite implementations
 
-#### 4. Agent System (`rak-agent`) ✅
+#### 4. Agent System (`zdk-agent`) ✅
 - **LLMAgent**: Full-featured LLM-powered agent
   - Builder pattern for configuration
   - System instruction support
@@ -67,7 +67,7 @@ rak/
 - Integration with model layer
 - Context-aware execution
 
-#### 5. Runner (`rak-runner`) ✅
+#### 5. Runner (`zdk-runner`) ✅
 - **Runner**: Orchestration engine
   - Session lifecycle management
   - Context creation and injection
@@ -76,7 +76,7 @@ rak/
 - **DefaultInvocationContext**: Context implementation
 - Builder pattern for configuration
 
-#### 6. Server (`rak-server`) ✅
+#### 6. Server (`zdk-server`) ✅
 - **Axum-based REST API**:
   - `POST /api/v1/sessions` - Create session
   - `POST /api/v1/sessions/:id/run` - Batch execution
@@ -84,7 +84,7 @@ rak/
 - **SSE Implementation**: Real-time event streaming
 - CORS support
 - Error handling with proper HTTP status codes
-- Matches Go RAK API specification
+- Matches Go ZDK API specification
 
 #### 7. Examples ✅
 - **quickstart.rs**: Complete working example
@@ -149,7 +149,7 @@ async fn main() -> Result<()> {
 
 ## API Compatibility
 
-The implementation matches Go RAK's REST API:
+The implementation matches Go ZDK's REST API:
 
 | Endpoint | Method | Status |
 |----------|--------|--------|
@@ -227,10 +227,10 @@ Core dependencies:
 
 1. ✅ Session lifecycle works (create, get, append events)
 2. ✅ LLM integration streams responses from Gemini
-3. ✅ SSE endpoint streams events in Go RAK format
+3. ✅ SSE endpoint streams events in Go ZDK format
 4. ✅ Quickstart example ready to run
 5. ✅ E2E tests implemented
-6. ✅ API matches Go RAK REST specification
+6. ✅ API matches Go ZDK REST specification
 
 ## Getting Started
 

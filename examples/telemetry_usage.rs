@@ -18,13 +18,13 @@
 //! RUST_LOG=debug cargo run --example telemetry_usage
 //! ```
 
-use rak_agent::LLMAgent;
-use rak_core::{AuthCredentials, Content, Part, RakConfig};
-use rak_model::GeminiModel;
-use rak_runner::Runner;
-use rak_session::inmemory::InMemorySessionService;
-use rak_telemetry::init_telemetry;
-use rak_tool::builtin::{create_calculator_tool, create_echo_tool};
+use zdk_agent::LLMAgent;
+use zdk_core::{AuthCredentials, Content, Part, RakConfig};
+use zdk_model::GeminiModel;
+use zdk_runner::Runner;
+use zdk_session::inmemory::InMemorySessionService;
+use zdk_telemetry::init_telemetry;
+use zdk_tool::builtin::{create_calculator_tool, create_echo_tool};
 use futures::StreamExt;
 use std::sync::Arc;
 

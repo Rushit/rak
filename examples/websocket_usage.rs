@@ -23,11 +23,11 @@
 
 use anyhow::{Context, Result};
 use futures::{SinkExt, StreamExt};
-use rak_agent::LLMAgent;
-use rak_core::Content;
-use rak_runner::Runner;
-use rak_server::{rest::create_router, WsClientMessage, WsServerMessage};
-use rak_session::inmemory::InMemorySessionService;
+use zdk_agent::LLMAgent;
+use zdk_core::Content;
+use zdk_runner::Runner;
+use zdk_server::{rest::create_router, WsClientMessage, WsServerMessage};
+use zdk_session::inmemory::InMemorySessionService;
 use serde_json;
 use std::sync::Arc;
 use std::time::Duration;
@@ -166,7 +166,7 @@ async fn run_websocket_client() -> Result<()> {
                             } => {
                                 if let Some(content) = &data.content {
                                     for part in &content.parts {
-                                        if let rak_core::Part::Text { text } = part {
+                                        if let zdk_core::Part::Text { text } = part {
                                             print!("   📨 {}: {}", data.author, text);
                                             std::io::Write::flush(&mut std::io::stdout()).ok();
                                         }

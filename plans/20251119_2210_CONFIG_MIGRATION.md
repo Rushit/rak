@@ -44,7 +44,7 @@ config.staging.toml # Staging environment
 ## 📦 New Configuration Module
 
 ### Location
-`rak-core/src/config.rs` - Centralized configuration management
+`zdk-core/src/config.rs` - Centralized configuration management
 
 ### Key Features
 
@@ -207,7 +207,7 @@ let config = RakConfig::load_test()?;  // Uses config.test.toml
 ```bash
 # Deploy with config file
 cp config.prod.toml config.toml
-./rak-server
+./zdk-server
 ```
 
 **config.prod.toml**:
@@ -226,7 +226,7 @@ port = 8080
 If `config.toml` doesn't exist, fallback to env vars:
 ```bash
 export GEMINI_API_KEY="prod-key"
-./rak-server  # Falls back to env vars
+./zdk-server  # Falls back to env vars
 ```
 
 ---
@@ -356,7 +356,7 @@ export GEMINI_API_KEY="your-key"
 
 ### ✅ Completed
 
-- [x] Create `rak-core/src/config.rs` module
+- [x] Create `zdk-core/src/config.rs` module
 - [x] Add config loading with priority
 - [x] Support `${VAR}` environment variable references
 - [x] Create `config.test.toml` for tests
@@ -471,7 +471,7 @@ cargo run --example quickstart  # Still works! (fallback)
 
 ```bash
 # 1. Build with new config module
-cargo build --package rak-core
+cargo build --package zdk-core
 
 # 2. Run tests (uses config.test.toml or test defaults)
 cargo test --workspace

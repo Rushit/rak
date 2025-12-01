@@ -3,22 +3,22 @@
 **Created:** 2025-11-21 18:00  
 **Last Updated:** 2025-11-21 18:00  
 **Status:** Complete  
-**Author(s):** RAK Team  
+**Author(s):** ZDK Team  
 **Type:** SUMMARY
 
 ## Purpose
 
-This document summarizes the complete implementation of Google Cloud authentication support across the RAK project, including tests, examples, and build tooling integration.
+This document summarizes the complete implementation of Google Cloud authentication support across the ZDK project, including tests, examples, and build tooling integration.
 
 ## Overview
 
-Successfully implemented gcloud authentication support throughout RAK, enabling developers to use their Google Cloud credentials directly instead of managing API keys. All major examples now automatically detect and use gcloud authentication when available, with graceful fallback to API key configuration.
+Successfully implemented gcloud authentication support throughout ZDK, enabling developers to use their Google Cloud credentials directly instead of managing API keys. All major examples now automatically detect and use gcloud authentication when available, with graceful fallback to API key configuration.
 
 ## Key Achievements
 
 ### 1. Core Authentication Support
 
-**Enhanced Gemini Model** (`crates/rak-model/src/gemini.rs`)
+**Enhanced Gemini Model** (`crates/zdk-model/src/gemini.rs`)
 - Added `GeminiAuth` enum with `ApiKey` and `BearerToken` variants
 - New `with_bearer_token()` constructor for Vertex AI endpoints
 - Automatic Vertex AI URL construction
@@ -212,8 +212,8 @@ Default location: `us-central1` (override with `GCP_LOCATION` env var)
 - `plans/20251121_1800_GCLOUD_AUTH_IMPLEMENTATION_SUMMARY.md`
 
 ### Modified Files (9)
-- `crates/rak-model/src/gemini.rs` - Bearer token support
-- `crates/rak-model/src/lib.rs` - Export GeminiAuth
+- `crates/zdk-model/src/gemini.rs` - Bearer token support
+- `crates/zdk-model/src/lib.rs` - Export GeminiAuth
 - `examples/quickstart.rs` - Added gcloud auth
 - `examples/tool_usage.rs` - Added gcloud auth
 - `examples/workflow_agents.rs` - Added gcloud auth
@@ -293,7 +293,7 @@ Default location: `us-central1` (override with `GCP_LOCATION` env var)
 
 ## Conclusion
 
-Successfully implemented comprehensive gcloud authentication support across RAK. All major examples now support automatic authentication detection with graceful fallback. The implementation is backward compatible, well-documented, and follows project guidelines.
+Successfully implemented comprehensive gcloud authentication support across ZDK. All major examples now support automatic authentication detection with graceful fallback. The implementation is backward compatible, well-documented, and follows project guidelines.
 
 Developers can now use `make example-quickstart` immediately after `gcloud auth login` without any additional configuration. This significantly improves the developer experience and aligns with Google Cloud best practices.
 

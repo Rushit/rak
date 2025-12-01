@@ -1,8 +1,8 @@
-# RAK Testing Guide
+# ZDK Testing Guide
 
 ## Test Types
 
-RAK uses multiple types of tests to ensure code quality:
+ZDK uses multiple types of tests to ensure code quality:
 
 ### 1. Unit Tests
 Fast, isolated tests using mocks. Run by default with `cargo test`.

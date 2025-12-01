@@ -42,10 +42,10 @@
 //! - Consistent auth pattern across all examples
 //! - Production-ready
 
-use rak_agent::LLMAgent;
-use rak_core::Content;
-use rak_runner::Runner;
-use rak_session::{inmemory::InMemorySessionService, SessionService};
+use zdk_agent::LLMAgent;
+use zdk_core::Content;
+use zdk_runner::Runner;
+use zdk_session::{inmemory::InMemorySessionService, SessionService};
 use futures::StreamExt;
 use std::sync::Arc;
 
@@ -103,7 +103,7 @@ async fn main() -> anyhow::Result<()> {
     // Create session
     println!("Creating session...\n");
     let session = session_service
-        .create(&rak_session::CreateRequest {
+        .create(&zdk_session::CreateRequest {
             app_name: "gemini_gcloud_example".into(),
             user_id: "user123".into(),
             session_id: None,
@@ -133,7 +133,7 @@ async fn main() -> anyhow::Result<()> {
             Ok(event) => {
                 if let Some(content) = &event.content {
                     for part in &content.parts {
-                        if let rak_core::Part::Text { text } = part {
+                        if let zdk_core::Part::Text { text } = part {
                             print!("{}", text);
                             std::io::Write::flush(&mut std::io::stdout()).ok();
                         }

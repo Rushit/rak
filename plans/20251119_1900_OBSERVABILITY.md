@@ -1,22 +1,22 @@
-# RAK Observability Guide
+# ZDK Observability Guide
 
 **Created:** 2025-11-19 19:00  
 **Status:** Complete
 
 ## Overview
 
-RAK provides comprehensive observability through OpenTelemetry integration and structured logging. This matches the Go RAK's telemetry approach while leveraging Rust's powerful `tracing` ecosystem.
+ZDK provides comprehensive observability through OpenTelemetry integration and structured logging. This matches the Go ZDK's telemetry approach while leveraging Rust's powerful `tracing` ecosystem.
 
 ## Features
 
 ### 1. OpenTelemetry Integration
 
-RAK integrates with OpenTelemetry to provide distributed tracing:
+ZDK integrates with OpenTelemetry to provide distributed tracing:
 
 - **LLM Call Tracing**: Automatic tracing of all LLM requests and responses
 - **Tool Execution Tracing**: Detailed traces of tool calls with arguments and results
 - **Custom Span Processors**: Support for custom span processors (e.g., stdout, Jaeger, cloud exporters)
-- **Standardized Attributes**: Uses the same span attributes as Go RAK for compatibility
+- **Standardized Attributes**: Uses the same span attributes as Go ZDK for compatibility
 
 ### 2. Structured Logging
 
@@ -94,7 +94,7 @@ init_telemetry();
 
 ### LLM Call Spans
 
-RAK traces LLM calls with these attributes (matching Go RAK):
+ZDK traces LLM calls with these attributes (matching Go ZDK):
 
 ```
 gen_ai.system = "gcp.vertex.agent"
@@ -203,7 +203,7 @@ RUST_LOG=debug cargo run --example quickstart
 RUST_LOG=debug cargo run --example telemetry_usage
 
 # Server with info logging (production-like)
-RUST_LOG=info cargo run --bin rak-server
+RUST_LOG=info cargo run --bin zdk-server
 ```
 
 ## HTTP Request Logging
@@ -245,7 +245,7 @@ Used by:
 
 ### Prometheus Metrics (Future)
 
-While not yet implemented, RAK is designed to integrate with Prometheus for metrics:
+While not yet implemented, ZDK is designed to integrate with Prometheus for metrics:
 
 - Request rates and latency
 - LLM call counts and durations
@@ -261,7 +261,7 @@ OpenTelemetry spans can be exported to distributed tracing platforms:
 use opentelemetry_jaeger::JaegerPipeline;
 
 let tracer = JaegerPipeline::new()
-    .with_service_name("rak-rust-app")
+    .with_service_name("zdk-rust-app")
     .install_simple()?;
 ```
 
@@ -276,9 +276,9 @@ tracing_subscriber::fmt()
     .init();
 ```
 
-## Comparison with Go RAK
+## Comparison with Go ZDK
 
-| Feature | Go RAK | RAK | Status |
+| Feature | Go ZDK | ZDK | Status |
 |---------|--------|----------|--------|
 | OpenTelemetry Tracing | ✅ | ✅ | Complete |
 | Structured Logging | ✅ | ✅ | Complete |
@@ -378,11 +378,11 @@ See these examples for practical usage:
 
 - [Tracing Documentation](https://docs.rs/tracing/)
 - [OpenTelemetry Rust](https://github.com/open-telemetry/opentelemetry-rust)
-- [Go RAK Telemetry](https://github.com/google/rak-go/blob/main/internal/telemetry/telemetry.go)
+- [Go ZDK Telemetry](https://github.com/google/zdk-go/blob/main/internal/telemetry/telemetry.go)
 
 ## Summary
 
-RAK provides production-ready observability matching the Go RAK implementation:
+ZDK provides production-ready observability matching the Go ZDK implementation:
 
 ✅ OpenTelemetry tracing for LLM and tool calls  
 ✅ Structured logging with contextual fields  

@@ -1,5 +1,5 @@
-use rak_agent::{LoopAgent, ParallelAgent, SequentialAgent};
-use rak_core::{Agent, Content, Event, InvocationContext, Part, ReadonlyContext, Result};
+use zdk_agent::{LoopAgent, ParallelAgent, SequentialAgent};
+use zdk_core::{Agent, Content, Event, InvocationContext, Part, ReadonlyContext, Result};
 use async_stream::stream;
 use async_trait::async_trait;
 use futures::stream::{Stream, StreamExt};

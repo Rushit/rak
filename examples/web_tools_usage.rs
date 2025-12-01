@@ -30,13 +30,13 @@
 //! cargo run --example web_tools_usage
 //! ```
 
-use rak_agent::LLMAgent;
-use rak_core::{AuthCredentials, Content, RakConfig};
-use rak_model::GeminiModel;
-use rak_runner::Runner;
-use rak_session::inmemory::InMemorySessionService;
-use rak_session::SessionService;
-use rak_web_tools::{GeminiGoogleSearchTool, GeminiUrlContextTool, WebScraperTool};
+use zdk_agent::LLMAgent;
+use zdk_core::{AuthCredentials, Content, RakConfig};
+use zdk_model::GeminiModel;
+use zdk_runner::Runner;
+use zdk_session::inmemory::InMemorySessionService;
+use zdk_session::SessionService;
+use zdk_web_tools::{GeminiGoogleSearchTool, GeminiUrlContextTool, WebScraperTool};
 use std::sync::Arc;
 
 #[tokio::main]
@@ -109,7 +109,7 @@ async fn main() -> anyhow::Result<()> {
 
     // Create a session
     let session = session_service
-        .create(&rak_session::CreateRequest {
+        .create(&zdk_session::CreateRequest {
             app_name: "web-tools-example".to_string(),
             user_id: "demo-user".to_string(),
             session_id: None,
@@ -144,7 +144,7 @@ async fn main() -> anyhow::Result<()> {
         let event = event?;
         if let Some(content) = &event.content {
             for part in &content.parts {
-                if let rak_core::Part::Text { text } = part {
+                if let zdk_core::Part::Text { text } = part {
                     print!("{}", text);
                 }
             }
@@ -177,7 +177,7 @@ async fn main() -> anyhow::Result<()> {
         let event = event?;
         if let Some(content) = &event.content {
             for part in &content.parts {
-                if let rak_core::Part::Text { text } = part {
+                if let zdk_core::Part::Text { text } = part {
                     print!("{}", text);
                 }
             }
@@ -210,7 +210,7 @@ async fn main() -> anyhow::Result<()> {
         let event = event?;
         if let Some(content) = &event.content {
             for part in &content.parts {
-                if let rak_core::Part::Text { text } = part {
+                if let zdk_core::Part::Text { text } = part {
                     print!("{}", text);
                 }
             }

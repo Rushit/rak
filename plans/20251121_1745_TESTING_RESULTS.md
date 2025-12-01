@@ -7,7 +7,7 @@
 
 ## Summary
 
-Successfully updated all RAK usage examples to support Google Cloud authentication via `gcloud` CLI. Examples now automatically detect and use gcloud credentials when available, falling back to API keys from configuration.
+Successfully updated all ZDK usage examples to support Google Cloud authentication via `gcloud` CLI. Examples now automatically detect and use gcloud credentials when available, falling back to API keys from configuration.
 
 ## Updated Examples
 
@@ -99,7 +99,7 @@ All examples compile successfully:
 
 ```bash
 $ cargo build --examples
-   Compiling rak-workspace v0.1.0
+   Compiling zdk-workspace v0.1.0
     Finished `dev` profile [unoptimized + debuginfo] target(s)
 ```
 
@@ -115,7 +115,7 @@ cargo run --example quickstart
 
 Output shows:
 ```
-RAK Quickstart Example
+ZDK Quickstart Example
 ============================
 
 Creating Gemini model...
@@ -133,7 +133,7 @@ cargo run --example quickstart
 
 Output shows:
 ```
-RAK Quickstart Example
+ZDK Quickstart Example
 ============================
 
 Creating Gemini model...
@@ -150,8 +150,8 @@ Creating Gemini model...
 - `examples/quickstart.rs` - Added gcloud auth support
 - `examples/tool_usage.rs` - Added gcloud auth support
 - `examples/workflow_agents.rs` - Added gcloud auth support for all agents
-- `crates/rak-model/src/gemini.rs` - Added `GeminiAuth` enum and `with_bearer_token()` method
-- `crates/rak-model/src/lib.rs` - Exported `GeminiAuth` enum
+- `crates/zdk-model/src/gemini.rs` - Added `GeminiAuth` enum and `with_bearer_token()` method
+- `crates/zdk-model/src/lib.rs` - Exported `GeminiAuth` enum
 - `Cargo.toml` - Added test/example entries
 - `tests/common.rs` - Test helper for gcloud auth
 

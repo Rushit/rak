@@ -1,8 +1,8 @@
-use rak_agent::LLMAgent;
-use rak_core::Content;
-use rak_runner::Runner;
-use rak_session::inmemory::InMemorySessionService;
-use rak_tool::builtin::{create_calculator_tool, create_echo_tool};
+use zdk_agent::LLMAgent;
+use zdk_core::Content;
+use zdk_runner::Runner;
+use zdk_session::inmemory::InMemorySessionService;
+use zdk_tool::builtin::{create_calculator_tool, create_echo_tool};
 use futures::StreamExt;
 use std::sync::Arc;
 
@@ -71,10 +71,10 @@ async fn main() -> anyhow::Result<()> {
                     println!("Event from {}: role={}", event.author, content.role);
                     for part in &content.parts {
                         match part {
-                            rak_core::Part::Text { text } => {
+                            zdk_core::Part::Text { text } => {
                                 println!("  Text: {}", text);
                             }
-                            rak_core::Part::FunctionCall { function_call } => {
+                            zdk_core::Part::FunctionCall { function_call } => {
                                 println!(
                                     "  Function Call: {} ({})",
                                     function_call.name, 
@@ -82,7 +82,7 @@ async fn main() -> anyhow::Result<()> {
                                 );
                                 println!("    Args: {}", function_call.args);
                             }
-                            rak_core::Part::FunctionResponse { function_response } => {
+                            zdk_core::Part::FunctionResponse { function_response } => {
                                 println!(
                                     "  Function Response: {} ({})",
                                     function_response.name, 

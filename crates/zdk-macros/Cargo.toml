@@ -1,0 +1,26 @@
+[package]
+name = "zdk-macros"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+# Proc macro dependencies
+syn = { version = "2.0", features = ["full", "extra-traits"] }
+quote = "1.0"
+proc-macro2 = "1.0"
+
+# Schema generation
+schemars = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+zdk-core = { path = "../zdk-core" }
+zdk-tool = { path = "../zdk-tool" }
+tokio = { workspace = true }
+

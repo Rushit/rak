@@ -13,11 +13,11 @@
 mod common;
 
 use anyhow::Result;
-use rak_agent::LLMAgent;
-use rak_core::{Agent, Content, Part};
-use rak_mcp::{McpToolset, StdioConnectionParams};
-use rak_runner::{RunConfig, Runner};
-use rak_session::inmemory::InMemorySessionService;
+use zdk_agent::LLMAgent;
+use zdk_core::{Agent, Content, Part};
+use zdk_mcp::{McpToolset, StdioConnectionParams};
+use zdk_runner::{RunConfig, Runner};
+use zdk_session::inmemory::InMemorySessionService;
 use futures::StreamExt;
 use std::sync::Arc;
 

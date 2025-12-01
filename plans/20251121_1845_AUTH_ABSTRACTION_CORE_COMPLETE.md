@@ -3,16 +3,16 @@
 **Created:** 2025-11-21 18:45  
 **Last Updated:** 2025-11-21 18:45  
 **Status:** Complete  
-**Author(s):** RAK Team  
+**Author(s):** ZDK Team  
 **Type:** IMPLEMENTATION
 
 ## Overview
 
-Successfully implemented the core authentication abstraction for RAK, enabling users to choose between API Key and Google Cloud authentication via `config.toml`. This provides a flexible, production-ready authentication system.
+Successfully implemented the core authentication abstraction for ZDK, enabling users to choose between API Key and Google Cloud authentication via `config.toml`. This provides a flexible, production-ready authentication system.
 
 ## What Was Implemented
 
-### 1. Core Authentication Module (`rak-core/src/auth.rs`)
+### 1. Core Authentication Module (`zdk-core/src/auth.rs`)
 
 Created a comprehensive authentication abstraction with:
 
@@ -33,7 +33,7 @@ Represents resolved authentication credentials:
 - Environment variable resolution
 - Comprehensive unit tests
 
-### 2. Configuration Updates (`rak-core/src/config.rs`)
+### 2. Configuration Updates (`zdk-core/src/config.rs`)
 
 Enhanced `RakConfig` with:
 - New `auth: AuthProvider` field
@@ -41,13 +41,13 @@ Enhanced `RakConfig` with:
 - Backward compatibility with legacy `api_key` field
 - Environment variable resolution for `auth.api_key.key`
 
-### 3. Error Handling (`rak-core/src/error.rs`)
+### 3. Error Handling (`zdk-core/src/error.rs`)
 
 Added new error variants:
 - `Error::Auth(String)` - Authentication errors
 - `Error::Config(String)` - Configuration errors
 
-### 4. Public API (`rak-core/src/lib.rs`)
+### 4. Public API (`zdk-core/src/lib.rs`)
 
 Exported new types:
 ```rust
@@ -137,12 +137,12 @@ The implementation maintains backward compatibility:
 ## Files Modified
 
 ### New Files
-- ✅ `rak/crates/rak-core/src/auth.rs` (397 lines) - Core auth module
+- ✅ `rak/crates/zdk-core/src/auth.rs` (397 lines) - Core auth module
 
 ### Modified Files
-- ✅ `rak/crates/rak-core/src/config.rs` - Added `auth` field and methods
-- ✅ `rak/crates/rak-core/src/error.rs` - Added Auth and Config error variants
-- ✅ `rak/crates/rak-core/src/lib.rs` - Exported auth types
+- ✅ `rak/crates/zdk-core/src/config.rs` - Added `auth` field and methods
+- ✅ `rak/crates/zdk-core/src/error.rs` - Added Auth and Config error variants
+- ✅ `rak/crates/zdk-core/src/lib.rs` - Exported auth types
 - ✅ `rak/config.toml.example` - Complete rewrite with auth sections
 - ✅ `rak/config.test.toml` - Updated for new auth format
 
@@ -151,13 +151,13 @@ The implementation maintains backward compatibility:
 ### Compilation
 ```bash
 ✅ cargo build --workspace
-✅ cargo build --package rak-core
+✅ cargo build --package zdk-core
 ```
 
 ### Linting
 ```bash
 ✅ Fixed clippy warnings in auth.rs
-⚠️  Pre-existing warnings in rak-macros and rak-telemetry (not related)
+⚠️  Pre-existing warnings in zdk-macros and zdk-telemetry (not related)
 ```
 
 ### Unit Tests

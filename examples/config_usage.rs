@@ -18,7 +18,7 @@
 //! ```
 
 use anyhow::Result;
-use rak_core::RakConfig;
+use zdk_core::RakConfig;
 use std::env;
 use std::path::Path;
 

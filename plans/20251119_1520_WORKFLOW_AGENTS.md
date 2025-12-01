@@ -1,4 +1,4 @@
-# RAK Workflow Agents Documentation
+# ZDK Workflow Agents Documentation
 
 **Created:** 2025-11-19 15:20  
 **Last Updated:** 2025-11-19 15:20  
@@ -6,7 +6,7 @@
 
 ## Purpose
 
-This document provides comprehensive documentation for RAK workflow agents: LoopAgent, SequentialAgent, and ParallelAgent. These agents enable sophisticated multi-agent orchestration patterns.
+This document provides comprehensive documentation for ZDK workflow agents: LoopAgent, SequentialAgent, and ParallelAgent. These agents enable sophisticated multi-agent orchestration patterns.
 
 ---
 

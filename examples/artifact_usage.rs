@@ -1,6 +1,6 @@
 //! Example demonstrating artifact storage usage
 
-use rak_artifact::{
+use zdk_artifact::{
     ArtifactPart, ArtifactService, FileSystemArtifactService, InMemoryArtifactService, ListRequest,
     LoadRequest, SaveRequest,
 };

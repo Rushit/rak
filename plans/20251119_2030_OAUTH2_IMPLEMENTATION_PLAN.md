@@ -1,7 +1,7 @@
 # OAuth2 Implementation Plan (Phase 8.7)
 
 **Date**: 2025-11-19 20:30  
-**Purpose**: Detailed analysis of what it takes to implement full OAuth2 support in RAK
+**Purpose**: Detailed analysis of what it takes to implement full OAuth2 support in ZDK
 
 ## Executive Summary
 
@@ -826,8 +826,8 @@ chrono = "0.4"              # Already have this
 
 ## Alternatives to Consider
 
-### Option A: Use Python RAK's Approach (Recommended)
-Match Python RAK's implementation:
+### Option A: Use Python ZDK's Approach (Recommended)
+Match Python ZDK's implementation:
 - Use `oauth2` crate (mature, well-tested)
 - Use `openidconnect` for auto-config
 - Similar API surface

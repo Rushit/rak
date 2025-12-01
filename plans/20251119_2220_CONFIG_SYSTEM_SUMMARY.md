@@ -26,7 +26,7 @@ This enables:
 
 ### 1. Core Configuration Module
 
-**File**: `rak-core/src/config.rs`
+**File**: `zdk-core/src/config.rs`
 
 **Key Features**:
 - `RakConfig::load()` - Auto-discover config.toml
@@ -241,7 +241,7 @@ rak/
 ├── config.toml                # Your config (.gitignore)
 ├── .gitignore                 # Ignores config.toml
 ├── crates/
-│   └── rak-core/
+│   └── zdk-core/
 │       └── src/
 │           └── config.rs      # NEW: Config module
 ├── examples/
@@ -303,7 +303,7 @@ cargo run
 
 All tests passing:
 ```bash
-cargo test --package rak-core --lib config
+cargo test --package zdk-core --lib config
 
 running 3 tests
 test config::tests::test_default_config ... ok
@@ -400,9 +400,9 @@ For Developers:
 ### Changes Required
 
 **In Code**:
-- ✅ Added `rak-core/src/config.rs` (~300 lines)
-- ✅ Updated `rak-core/src/lib.rs` (exports)
-- ✅ Updated `rak-core/Cargo.toml` (dependencies)
+- ✅ Added `zdk-core/src/config.rs` (~300 lines)
+- ✅ Updated `zdk-core/src/lib.rs` (exports)
+- ✅ Updated `zdk-core/Cargo.toml` (dependencies)
 - ✅ Added `examples/config_usage.rs` (~150 lines)
 - ✅ Updated `README.md` (configuration section)
 
@@ -428,6 +428,6 @@ For Developers:
 
 ---
 
-**Summary**: RAK now has a robust, flexible configuration system that prioritizes config files over environment variables, making it easier to manage multiple environments while maintaining backward compatibility.
+**Summary**: ZDK now has a robust, flexible configuration system that prioritizes config files over environment variables, making it easier to manage multiple environments while maintaining backward compatibility.
 
 

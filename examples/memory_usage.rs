@@ -7,9 +7,9 @@
 //!
 //! Run with: cargo run --example memory_usage
 
-use rak_core::{Content, Event};
-use rak_memory::{InMemoryMemoryService, MemoryService, SearchRequest};
-use rak_session::Session;
+use zdk_core::{Content, Event};
+use zdk_memory::{InMemoryMemoryService, MemoryService, SearchRequest};
+use zdk_session::Session;
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -116,7 +116,7 @@ async fn main() -> anyhow::Result<()> {
     for (i, memory) in results.memories.iter().enumerate() {
         if let Some(content) = &memory.content {
             for part in &content.parts {
-                if let rak_core::Part::Text { text } = part {
+                if let zdk_core::Part::Text { text } = part {
                     println!("    {}. [{}] {}", i + 1, memory.author, text);
                 }
             }
@@ -138,7 +138,7 @@ async fn main() -> anyhow::Result<()> {
     for (i, memory) in results.memories.iter().enumerate() {
         if let Some(content) = &memory.content {
             for part in &content.parts {
-                if let rak_core::Part::Text { text } = part {
+                if let zdk_core::Part::Text { text } = part {
                     println!("    {}. [{}] {}", i + 1, memory.author, text);
                 }
             }
@@ -160,7 +160,7 @@ async fn main() -> anyhow::Result<()> {
     for (i, memory) in results.memories.iter().enumerate() {
         if let Some(content) = &memory.content {
             for part in &content.parts {
-                if let rak_core::Part::Text { text } = part {
+                if let zdk_core::Part::Text { text } = part {
                     println!("    {}. [{}] {}", i + 1, memory.author, text);
                 }
             }

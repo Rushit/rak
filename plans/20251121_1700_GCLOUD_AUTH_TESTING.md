@@ -6,7 +6,7 @@
 
 ## Overview
 
-Updated RAK testing infrastructure to support gcloud authentication for local testing with Google Cloud APIs (Gemini/Vertex AI) instead of requiring hardcoded API keys.
+Updated ZDK testing infrastructure to support gcloud authentication for local testing with Google Cloud APIs (Gemini/Vertex AI) instead of requiring hardcoded API keys.
 
 ## Changes Made
 
@@ -37,7 +37,7 @@ These functions:
 
 ### 3. Enhanced Gemini Model for Bearer Token Auth
 
-**File:** `crates/rak-model/src/gemini.rs`
+**File:** `crates/zdk-model/src/gemini.rs`
 
 Added `GeminiAuth` enum to support two authentication modes:
 
@@ -74,7 +74,7 @@ Key improvements:
 Complete working example showing:
 - How to get gcloud credentials programmatically
 - How to create GeminiModel with Bearer token
-- How to use it with RAK agent system
+- How to use it with ZDK agent system
 - Error handling and configuration
 
 Run with:
@@ -89,7 +89,7 @@ cargo run --example gemini_gcloud_usage
 - Added `[[test]]` entry for `openapi_usage_test`
 - Added `[[example]]` entry for `gemini_gcloud_usage`
 
-**File:** `crates/rak-model/src/lib.rs`
+**File:** `crates/zdk-model/src/lib.rs`
 
 - Exported `GeminiAuth` enum publicly
 
@@ -284,8 +284,8 @@ async fn test_real_gemini_api() {
 - `plans/20251121_1700_GCLOUD_AUTH_TESTING.md` - This document
 
 ### Modified Files
-- `crates/rak-model/src/gemini.rs` - Added Bearer token auth support
-- `crates/rak-model/src/lib.rs` - Exported GeminiAuth enum
+- `crates/zdk-model/src/gemini.rs` - Added Bearer token auth support
+- `crates/zdk-model/src/lib.rs` - Exported GeminiAuth enum
 - `Cargo.toml` - Added test and example entries
 
 ### Removed Files
@@ -293,7 +293,7 @@ async fn test_real_gemini_api() {
 
 ## Summary
 
-Successfully implemented gcloud authentication support for RAK testing infrastructure:
+Successfully implemented gcloud authentication support for ZDK testing infrastructure:
 
 ✅ OpenAPI example converted to optional test  
 ✅ GCloud auth helper module created  

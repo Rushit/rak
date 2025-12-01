@@ -1,7 +1,7 @@
 # API Key Security Best Practices
 
 **Date**: 2025-11-19 21:50  
-**Purpose**: Guide for securely managing API keys in RAK
+**Purpose**: Guide for securely managing API keys in ZDK
 
 ---
 
@@ -56,7 +56,7 @@ cargo run --example quickstart
 
 ## ✅ What's Protected
 
-RAK's `.gitignore` protects these files from being committed:
+ZDK's `.gitignore` protects these files from being committed:
 
 ```gitignore
 # Configuration files with API keys
@@ -71,7 +71,7 @@ Only these example files are in git:
 
 ---
 
-## 🔑 API Keys in RAK
+## 🔑 API Keys in ZDK
 
 ### Current Keys (Phase 8.3)
 
@@ -187,7 +187,7 @@ Only these example files are in git:
 
 ## 🎯 Configuration Priority
 
-RAK loads configuration in this order (highest priority first):
+ZDK loads configuration in this order (highest priority first):
 
 1. **Environment variables** (highest priority)
    ```bash
@@ -263,13 +263,13 @@ RUN cargo build --release
 
 FROM debian:bookworm-slim
 # Don't copy config.toml - use env vars or secrets!
-COPY --from=builder /app/target/release/rak-agent /usr/local/bin/
-CMD ["rak-agent"]
+COPY --from=builder /app/target/release/zdk-agent /usr/local/bin/
+CMD ["zdk-agent"]
 ```
 
 ```bash
 # Pass key at runtime
-docker run -e GEMINI_API_KEY="your-key" rak-agent
+docker run -e GEMINI_API_KEY="your-key" zdk-agent
 ```
 
 ### Using docker-compose
@@ -278,7 +278,7 @@ docker run -e GEMINI_API_KEY="your-key" rak-agent
 # docker-compose.yml
 version: '3.8'
 services:
-  rak-agent:
+  zdk-agent:
     build: .
     env_file:
       - .env  # NOT committed to git

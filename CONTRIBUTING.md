@@ -1,6 +1,6 @@
-# Contributing to RAK (Rust Agent Kit)
+# Contributing to ZDK (ZAgent Development Kit)
 
-Thank you for your interest in contributing to RAK! This document provides guidelines and instructions for contributing to the project.
+Thank you for your interest in contributing to ZDK! This document provides guidelines and instructions for contributing to the project.
 
 ## Table of Contents
 
@@ -82,17 +82,17 @@ export RUST_LOG=info
 ```
 rak/
 ├── crates/              # All workspace crates
-│   ├── rak-core/       # Core traits and types
-│   ├── rak-model/      # LLM implementations
-│   ├── rak-session/    # Session management
-│   ├── rak-agent/      # Agent implementations
-│   ├── rak-runner/     # Execution engine
-│   ├── rak-server/     # REST/WebSocket API
-│   ├── rak-tool/       # Tool system
-│   ├── rak-macros/     # Procedural macros
-│   ├── rak-artifact/   # Artifact storage
-│   ├── rak-memory/     # Memory service
-│   └── rak-telemetry/  # Observability
+│   ├── zdk-core/       # Core traits and types
+│   ├── zdk-model/      # LLM implementations
+│   ├── zdk-session/    # Session management
+│   ├── zdk-agent/      # Agent implementations
+│   ├── zdk-runner/     # Execution engine
+│   ├── zdk-server/     # REST/WebSocket API
+│   ├── zdk-tool/       # Tool system
+│   ├── zdk-macros/     # Procedural macros
+│   ├── zdk-artifact/   # Artifact storage
+│   ├── zdk-memory/     # Memory service
+│   └── zdk-telemetry/  # Observability
 ├── docs/               # Documentation
 ├── examples/           # Usage examples
 ├── tests/             # Integration tests
@@ -101,7 +101,7 @@ rak/
 
 ### Key Directories
 
-- **`crates/`**: Individual crates that make up RAK
+- **`crates/`**: Individual crates that make up ZDK
 - **`docs/`**: Architecture docs, phase summaries, guides
 - **`examples/`**: Runnable examples demonstrating features
 - **`tests/`**: Integration and E2E tests
@@ -110,7 +110,7 @@ rak/
 
 ### Primary: Using Make Commands
 
-RAK uses `make` for all common development tasks. Run `make help` to see all available commands.
+ZDK uses `make` for all common development tasks. Run `make help` to see all available commands.
 
 ```bash
 # Run all tests (default and recommended)
@@ -152,16 +152,16 @@ For advanced use cases, you can use cargo commands directly:
 
 ```bash
 # Build specific crate only
-cargo build --package rak-core
+cargo build --package zdk-core
 
 # Test specific crate only
-cargo test --package rak-agent
+cargo test --package zdk-agent
 
 # Run with custom logging
 RUST_LOG=debug cargo run --example quickstart
 
 # Check single crate
-cargo check --package rak-session
+cargo check --package zdk-session
 
 # Use shorter aliases (configured in .cargo/config.toml)
 cargo t    # Test all workspace
@@ -174,7 +174,7 @@ cargo cl   # Clippy all workspace
 
 ## Code Style Guidelines
 
-RAK follows Rust best practices and conventions defined in `.cursorrules`.
+ZDK follows Rust best practices and conventions defined in `.cursorrules`.
 
 ### Formatting
 
@@ -546,7 +546,7 @@ How was this tested?
 
 ### Version Bumping
 
-RAK follows [Semantic Versioning](https://semver.org/):
+ZDK follows [Semantic Versioning](https://semver.org/):
 - `MAJOR`: Breaking changes
 - `MINOR`: New features (backward compatible)
 - `PATCH`: Bug fixes
@@ -641,9 +641,9 @@ cargo cl   # cargo clippy --workspace
 
 ## License
 
-By contributing to RAK, you agree that your contributions will be licensed under the Apache 2.0 License.
+By contributing to ZDK, you agree that your contributions will be licensed under the Apache 2.0 License.
 
 ---
 
-Thank you for contributing to RAK! 🦀🚀
+Thank you for contributing to ZDK! 🦀🚀
 

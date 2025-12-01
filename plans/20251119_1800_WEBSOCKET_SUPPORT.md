@@ -6,13 +6,13 @@
 
 ## Overview
 
-RAK now supports WebSocket communication alongside the existing SSE (Server-Sent Events) streaming. WebSocket provides bidirectional communication, enabling interactive features like cancellation, status queries, and real-time control.
+ZDK now supports WebSocket communication alongside the existing SSE (Server-Sent Events) streaming. WebSocket provides bidirectional communication, enabling interactive features like cancellation, status queries, and real-time control.
 
 ## Architecture
 
 ### Shared Agent Model
 
-Following the Go RAK design pattern:
+Following the Go ZDK design pattern:
 - **One agent instance** serves all users
 - **Stateless agents**: Behavior is shared, state is per-session
 - **Per-invocation tracking**: Each execution gets unique ID and cancellation token
@@ -452,12 +452,12 @@ See `examples/websocket_usage.rs` for functional test example.
 
 ## Conclusion
 
-WebSocket support adds interactive capabilities to RAK while maintaining:
+WebSocket support adds interactive capabilities to ZDK while maintaining:
 - ✅ Backward compatibility with SSE
 - ✅ Shared agent architecture
 - ✅ Scalability (1000+ concurrent users)
 - ✅ Thread-safe cancellation
-- ✅ Go RAK parity
+- ✅ Go ZDK parity
 
 **Key benefits**:
 - Cancellation for long-running agents

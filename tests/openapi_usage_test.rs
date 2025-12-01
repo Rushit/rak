@@ -9,7 +9,7 @@
 //! Run with:
 //!   cargo test openapi_usage_test -- --ignored --nocapture
 
-use rak_openapi::{AuthConfig, OpenApiToolset};
+use zdk_openapi::{AuthConfig, OpenApiToolset};
 use tracing::{error, info};
 use tracing_subscriber;
 

@@ -7,7 +7,7 @@
 
 ## 🔑 Quick Answer: Tests Don't Need config.toml!
 
-**RAK's automated tests use MOCKS, not real APIs.**
+**ZDK's automated tests use MOCKS, not real APIs.**
 
 | Scenario | Needs config.toml? | Needs API Key? | Why? |
 |----------|-------------------|----------------|------|
@@ -37,7 +37,7 @@ cargo test --workspace
 cargo test --test integration_test
 
 # Run unit tests for a crate
-cargo test --package rak-web-tools
+cargo test --package zdk-web-tools
 
 # Run doc tests
 cargo test --doc
@@ -130,7 +130,7 @@ cargo run --example quickstart
 
 ## 📂 Configuration Priority
 
-RAK loads configuration in this order (highest to lowest priority):
+ZDK loads configuration in this order (highest to lowest priority):
 
 ```
 1. Environment Variables (GEMINI_API_KEY)
@@ -185,7 +185,7 @@ let api_key = env::var("GEMINI_API_KEY")
 
 2. **Running the Server**
    ```bash
-   cargo run --bin rak-server  # Needs API key
+   cargo run --bin zdk-server  # Needs API key
    ```
 
 3. **Production Deployment**
@@ -420,7 +420,7 @@ cargo run --example quickstart
 ```bash
 # Testing (no config needed)
 cargo test --workspace              # Run all tests
-cargo test --package rak-web-tools  # Test specific crate
+cargo test --package zdk-web-tools  # Test specific crate
 
 # Examples (needs API key)
 export GEMINI_API_KEY="your-key"   # Set key first

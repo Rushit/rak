@@ -3,7 +3,7 @@
 **Created:** 2025-11-21 18:30  
 **Last Updated:** 2025-11-21 18:30  
 **Status:** Planning  
-**Author(s):** RAK Team  
+**Author(s):** ZDK Team  
 **Type:** DESIGN
 
 ## Purpose
@@ -53,7 +53,7 @@ No way to configure gcloud preferences!
                          │
                          ▼
 ┌─────────────────────────────────────────────────────┐
-│              rak-core/src/auth.rs                   │
+│              zdk-core/src/auth.rs                   │
 │                                                      │
 │  pub enum AuthProvider {                            │
 │      ApiKey { key: String },                        │
@@ -143,10 +143,10 @@ model_name = "gemini-1.5-flash"
 
 ### 2. Core Auth Module
 
-**File**: `crates/rak-core/src/auth.rs` (NEW)
+**File**: `crates/zdk-core/src/auth.rs` (NEW)
 
 ```rust
-//! Authentication abstraction for RAK
+//! Authentication abstraction for ZDK
 //!
 //! Provides a unified interface for different authentication methods.
 
@@ -292,7 +292,7 @@ fn get_gcloud_project() -> Result<String> {
 
 ### 3. Enhanced RakConfig
 
-**File**: `crates/rak-core/src/config.rs`
+**File**: `crates/zdk-core/src/config.rs`
 
 **Add**:
 ```rust
@@ -377,7 +377,7 @@ let model = config.create_gemini_model()?;
 
 ### New Files (1)
 
-1. **`crates/rak-core/src/auth.rs`**
+1. **`crates/zdk-core/src/auth.rs`**
    - ~200 lines
    - AuthProvider enum
    - AuthCredentials enum
@@ -386,11 +386,11 @@ let model = config.create_gemini_model()?;
 
 ### Modified Files (15)
 
-1. **`crates/rak-core/src/lib.rs`**
+1. **`crates/zdk-core/src/lib.rs`**
    - Add `pub mod auth;`
    - Export auth types
 
-2. **`crates/rak-core/src/config.rs`**
+2. **`crates/zdk-core/src/config.rs`**
    - Add `auth: AuthProvider` field
    - Add `create_gemini_model()` method
    - Add `auth_credentials()` method
@@ -418,7 +418,7 @@ let model = config.create_gemini_model()?;
    - `examples/artifact_usage.rs` (if it uses models)
 
 6. **`examples/_gcloud_helper.rs`**
-   - DELETE (functionality moved to rak-core/auth.rs)
+   - DELETE (functionality moved to zdk-core/auth.rs)
 
 7. **`tests/common.rs`**
    - Can reuse `rak_core::auth` functions
@@ -503,8 +503,8 @@ let model = config.create_gemini_model()?;
 ## Implementation Phases
 
 ### Phase 1: Core Infrastructure ✅
-1. Create `rak-core/src/auth.rs`
-2. Update `rak-core/src/config.rs`
+1. Create `zdk-core/src/auth.rs`
+2. Update `zdk-core/src/config.rs`
 3. Update `config.toml.example`
 4. Write tests for auth module
 

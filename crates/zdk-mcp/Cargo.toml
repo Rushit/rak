@@ -1,0 +1,18 @@
+[package]
+name = "zdk-mcp"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+zdk-core = { path = "../zdk-core" }
+rmcp = { version = "0.9", features = ["client", "transport-child-process"] }
+tokio = { version = "1.0", features = ["full", "process"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+async-trait = "0.1"
+tracing = "0.1"
+
+[dev-dependencies]
+tokio-test = "0.4"
+

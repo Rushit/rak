@@ -1,6 +1,6 @@
-# RAK (rak-rs)
+# ZDK (zdk-rs)
 
-RAK - Rust Agent Kit for Rust - A code-first framework for building AI agents with Rust.
+ZDK - ZAgent Development Kit for Rust - A code-first framework for building AI agents with Rust.
 
 
 ## Features
@@ -30,7 +30,7 @@ RAK - Rust Agent Kit for Rust - A code-first framework for building AI agents wi
 
 ### Configuration Setup
 
-RAK now uses a **config-first** approach with the following priority:
+ZDK now uses a **config-first** approach with the following priority:
 
 ```
 Priority: config.toml > Environment Variables > Defaults
@@ -68,19 +68,19 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-rak-core = { path = "path/to/rak-rs/crates/rak-core" }
-rak-agent = { path = "path/to/rak-rs/crates/rak-agent" }
-rak-model = { path = "path/to/rak-rs/crates/rak-model" }
-rak-runner = { path = "path/to/rak-rs/crates/rak-runner" }
-rak-session = { path = "path/to/rak-rs/crates/rak-session", features = ["sqlite"] }  # Optional: postgres
-rak-tool = { path = "path/to/rak-rs/crates/rak-tool" }
-rak-artifact = { path = "path/to/rak-rs/crates/rak-artifact" }
-rak-memory = { path = "path/to/rak-rs/crates/rak-memory" }
-rak-telemetry = { path = "path/to/rak-rs/crates/rak-telemetry" }  # Optional: for OpenTelemetry
-rak-openapi = { path = "path/to/rak-rs/crates/rak-openapi" }  # Optional: for OpenAPI tool generation
-rak-web-tools = { path = "path/to/rak-rs/crates/rak-web-tools" }  # Optional: for web search & scraping
-rak-database-tools = { path = "path/to/rak-rs/crates/rak-database-tools" }  # Optional: for database access
-rak-mcp = { path = "path/to/rak-rs/crates/rak-mcp" }  # Optional: for MCP protocol support
+zdk-core = { path = "path/to/zdk-rs/crates/zdk-core" }
+zdk-agent = { path = "path/to/zdk-rs/crates/zdk-agent" }
+zdk-model = { path = "path/to/zdk-rs/crates/zdk-model" }
+zdk-runner = { path = "path/to/zdk-rs/crates/zdk-runner" }
+zdk-session = { path = "path/to/zdk-rs/crates/zdk-session", features = ["sqlite"] }  # Optional: postgres
+zdk-tool = { path = "path/to/zdk-rs/crates/zdk-tool" }
+zdk-artifact = { path = "path/to/zdk-rs/crates/zdk-artifact" }
+zdk-memory = { path = "path/to/zdk-rs/crates/zdk-memory" }
+zdk-telemetry = { path = "path/to/zdk-rs/crates/zdk-telemetry" }  # Optional: for OpenTelemetry
+zdk-openapi = { path = "path/to/zdk-rs/crates/zdk-openapi" }  # Optional: for OpenAPI tool generation
+zdk-web-tools = { path = "path/to/zdk-rs/crates/zdk-web-tools" }  # Optional: for web search & scraping
+zdk-database-tools = { path = "path/to/zdk-rs/crates/zdk-database-tools" }  # Optional: for database access
+zdk-mcp = { path = "path/to/zdk-rs/crates/zdk-mcp" }  # Optional: for MCP protocol support
 ```
 
 ### Example
@@ -141,7 +141,7 @@ async fn main() -> anyhow::Result<()> {
 
 ## Using Tools
 
-RAK supports function calling with built-in and custom tools:
+ZDK supports function calling with built-in and custom tools:
 
 ```rust
 use rak_tool::builtin::create_calculator_tool;
@@ -160,7 +160,7 @@ See [examples/tool_usage.rs](examples/tool_usage.rs) for a complete example.
 
 ## Using Workflow Agents
 
-RAK supports multi-agent orchestration with workflow patterns:
+ZDK supports multi-agent orchestration with workflow patterns:
 
 ```rust
 use rak_agent::{SequentialAgent, ParallelAgent, LoopAgent};
@@ -192,7 +192,7 @@ See [examples/workflow_agents.rs](examples/workflow_agents.rs) for a complete ex
 
 ## Using Memory Service
 
-RAK provides long-term memory for agents to remember past conversations:
+ZDK provides long-term memory for agents to remember past conversations:
 
 ```rust
 use rak_memory::{InMemoryMemoryService, MemoryService, SearchRequest};
@@ -220,7 +220,7 @@ See [examples/memory_usage.rs](examples/memory_usage.rs) for a complete example.
 
 ## Using Web Tools
 
-RAK provides web tools for searching and scraping content - **ZERO additional API keys needed!**
+ZDK provides web tools for searching and scraping content - **ZERO additional API keys needed!**
 
 ```rust
 use rak_web_tools::{GeminiGoogleSearchTool, GeminiUrlContextTool, WebScraperTool};
@@ -251,7 +251,7 @@ See [examples/web_tools_usage.rs](examples/web_tools_usage.rs) for a complete ex
 
 ## Using WebSocket Support
 
-RAK provides WebSocket support for bidirectional communication:
+ZDK provides WebSocket support for bidirectional communication:
 
 ```rust
 // Connect to WebSocket endpoint
@@ -288,7 +288,7 @@ See [examples/websocket_usage.rs](examples/websocket_usage.rs) for a complete ex
 
 ## Using Database Tools
 
-RAK provides native database tools with **security-first design** - read-only by default!
+ZDK provides native database tools with **security-first design** - read-only by default!
 
 ```rust
 use rak_database_tools::{create_postgres_tools, create_sqlite_tools, DatabaseToolConfig};
@@ -337,7 +337,7 @@ See [examples/database_tools_usage.rs](examples/database_tools_usage.rs) for a c
 
 ## Using MCP (Model Context Protocol)
 
-RAK supports MCP for **dynamic tool loading** from external servers!
+ZDK supports MCP for **dynamic tool loading** from external servers!
 
 ```rust
 use rak_mcp::{McpToolset, StdioConnectionParams};
@@ -384,7 +384,7 @@ let agent = LLMAgent::builder()
 1. Agent starts and calls `toolset.get_tools()`
 2. MCP client spawns server subprocess
 3. Client discovers available tools via MCP protocol
-4. Tools are wrapped as native RAK tools
+4. Tools are wrapped as native ZDK tools
 5. Agent can call MCP tools like any other tool
 
 **Prerequisites**:
@@ -402,7 +402,7 @@ See [examples/mcp_toolset_usage.rs](examples/mcp_toolset_usage.rs) for a complet
 
 ## Observability & Monitoring
 
-RAK provides comprehensive observability through OpenTelemetry and structured logging:
+ZDK provides comprehensive observability through OpenTelemetry and structured logging:
 
 ### Telemetry Setup
 
@@ -456,7 +456,7 @@ curl http://localhost:8080/readiness
 
 ## Development Commands
 
-RAK uses `make` for all common development tasks. Run `make help` to see all available commands.
+ZDK uses `make` for all common development tasks. Run `make help` to see all available commands.
 
 ### Building and Testing
 
@@ -578,24 +578,24 @@ For advanced testing options and cargo commands, see [CONTRIBUTING.md](CONTRIBUT
 
 ## Architecture
 
-RAK follows a modular architecture:
+ZDK follows a modular architecture:
 
-- **rak-core**: Core traits and types (Agent, LLM, Tool)
-- **rak-model**: LLM provider implementations (Gemini, etc.)
-- **rak-session**: Session management (in-memory, database)
-- **rak-agent**: Agent implementations (LLMAgent, workflow agents)
-- **rak-runner**: Execution orchestration
-- **rak-server**: REST API with SSE and WebSocket streaming
-- **rak-tool**: Tool system with function calling support
-- **rak-macros**: Procedural macros for ergonomic tool creation
-- **rak-artifact**: Artifact storage (files, documents)
-- **rak-memory**: Long-term memory with keyword search
-- **rak-openapi**: OpenAPI tool generator (automatic API integration)
-- **rak-telemetry**: OpenTelemetry tracing and observability
+- **zdk-core**: Core traits and types (Agent, LLM, Tool)
+- **zdk-model**: LLM provider implementations (Gemini, etc.)
+- **zdk-session**: Session management (in-memory, database)
+- **zdk-agent**: Agent implementations (LLMAgent, workflow agents)
+- **zdk-runner**: Execution orchestration
+- **zdk-server**: REST API with SSE and WebSocket streaming
+- **zdk-tool**: Tool system with function calling support
+- **zdk-macros**: Procedural macros for ergonomic tool creation
+- **zdk-artifact**: Artifact storage (files, documents)
+- **zdk-memory**: Long-term memory with keyword search
+- **zdk-openapi**: OpenAPI tool generator (automatic API integration)
+- **zdk-telemetry**: OpenTelemetry tracing and observability
 
 ## REST API
 
-Start a server with the `rak-server` crate:
+Start a server with the `zdk-server` crate:
 
 ```rust
 use rak_server::create_router;

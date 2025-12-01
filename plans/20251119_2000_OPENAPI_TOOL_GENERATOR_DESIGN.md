@@ -6,13 +6,13 @@
 
 ## Purpose
 
-This document details the design and requirements for RAK's OpenAPI Tool Generator - a system that automatically generates RAK tools from OpenAPI specifications.
+This document details the design and requirements for ZDK's OpenAPI Tool Generator - a system that automatically generates ZDK tools from OpenAPI specifications.
 
 ## Problem Statement
 
 **Current State**: 
-- RAK has only 2 built-in tools (Calculator, Echo)
-- Python RAK has 100+ tools
+- ZDK has only 2 built-in tools (Calculator, Echo)
+- Python ZDK has 100+ tools
 - Writing each tool manually is time-consuming and error-prone
 
 **Goal**: 
@@ -147,7 +147,7 @@ The LLM will see each endpoint as a tool:
 ### Crate Structure
 
 ```
-rak-openapi/
+zdk-openapi/
 ├── src/
 │   ├── lib.rs              # Public API
 │   ├── parser.rs           # OpenAPI spec parser
@@ -303,7 +303,7 @@ impl OpenApiToolset {
 
 ### Phase 8.1.5: Tool Integration
 
-Generate tools that implement RAK's `Tool` trait:
+Generate tools that implement ZDK's `Tool` trait:
 
 ```rust
 // Generated tool
@@ -460,7 +460,7 @@ let agent = LLMAgent::builder()
 This phase implements the essential OpenAPI tool system with API Key and Bearer Token authentication. OAuth2 and advanced auth features are deferred to Phase 8.7.
 
 #### Phase 8.1.1: Parser (Week 1)
-- [ ] Create `rak-openapi` crate
+- [ ] Create `zdk-openapi` crate
 - [ ] Use `openapiv3` crate for parsing
 - [ ] Load specs from URL and file
 - [ ] Support JSON and YAML formats
@@ -504,7 +504,7 @@ This phase implements the essential OpenAPI tool system with API Key and Bearer 
 - [ ] Execute HTTP requests
 - [ ] Map responses to `ToolResponse`
 - [ ] Error handling and retry hints
-- [ ] Integration with RAK tool system
+- [ ] Integration with ZDK tool system
 
 #### Phase 8.1.6: OpenApiToolset (Week 3-4)
 - [ ] Container for all tools
@@ -520,7 +520,7 @@ This phase implements the essential OpenAPI tool system with API Key and Bearer 
 This phase will be implemented after Phase 8.1 is complete and stable. Documentation is provided here for planning purposes.
 
 #### Phase 8.7.1: OAuth2 Foundation
-**Goal**: Add OAuth2 authentication support matching Python RAK's capabilities.
+**Goal**: Add OAuth2 authentication support matching Python ZDK's capabilities.
 
 **Components**:
 - [ ] `OAuth2Config` struct
@@ -561,7 +561,7 @@ let toolset = OpenApiToolset::from_file("api.yaml")?
 - [ ] `ToolAuthHandler` for context-aware auth
   - Check if auth is required
   - Return "pending" state if user auth needed
-  - Integrate with RAK's context system
+  - Integrate with ZDK's context system
 
 **Example Usage** (Phase 8.7):
 ```rust
@@ -578,7 +578,7 @@ let toolset = OpenApiToolset::from_file("api.yaml")?
 ```
 
 #### Phase 8.7.3: Advanced Auth Features
-**Goal**: Match Python RAK's full authentication capabilities.
+**Goal**: Match Python ZDK's full authentication capabilities.
 
 **Components**:
 - [ ] OpenID Connect discovery
@@ -647,7 +647,7 @@ openidconnect = "3.0"       # OpenID Connect support
 ## Success Criteria
 
 1. **Can generate tools from any valid OpenAPI v3.0 spec**
-2. **Generated tools work in RAK agents without modification**
+2. **Generated tools work in ZDK agents without modification**
 3. **Support for common authentication methods**
 4. **Clear error messages for invalid specs**
 5. **Complete documentation and examples**
@@ -665,7 +665,7 @@ openidconnect = "3.0"       # OpenID Connect support
 - Community can contribute API integrations easily
 
 ### Ecosystem
-- Matches Python RAK's API tool ecosystem
+- Matches Python ZDK's API tool ecosystem
 - Enables enterprise adoption (internal APIs)
 - Future-proof as more APIs adopt OpenAPI
 
@@ -680,7 +680,7 @@ openidconnect = "3.0"       # OpenID Connect support
 
 ## Related Work
 
-- **Python RAK**: Has OpenAPI tool support
+- **Python ZDK**: Has OpenAPI tool support
 - **LangChain**: Has OpenAPI agent toolkit
 - **OpenAPI Generator**: Generates clients (not tools)
 

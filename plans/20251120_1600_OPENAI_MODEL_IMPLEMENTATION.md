@@ -6,20 +6,20 @@
 
 ## Overview
 
-Successfully implemented OpenAI model support in the `rak-model` crate, following the same architecture pattern as the existing Gemini implementation. This provides RAK with native OpenAI compatibility.
+Successfully implemented OpenAI model support in the `zdk-model` crate, following the same architecture pattern as the existing Gemini implementation. This provides ZDK with native OpenAI compatibility.
 
 ## Implementation Details
 
 ### Files Created/Modified
 
-1. **`crates/rak-model/src/openai.rs`** (NEW)
+1. **`crates/zdk-model/src/openai.rs`** (NEW)
    - `OpenAIModel` struct with API client configuration
-   - Implements the `LLM` trait from `rak-core`
+   - Implements the `LLM` trait from `zdk-core`
    - Supports both streaming and non-streaming responses
-   - Handles message format conversion between RAK and OpenAI formats
+   - Handles message format conversion between ZDK and OpenAI formats
    - Proper SSE (Server-Sent Events) parsing for streaming
 
-2. **`crates/rak-model/src/types.rs`** (UPDATED)
+2. **`crates/zdk-model/src/types.rs`** (UPDATED)
    - Added OpenAI-specific types:
      - `OpenAIRequest` - Request structure
      - `OpenAIMessage` - Message format
@@ -29,11 +29,11 @@ Successfully implemented OpenAI model support in the `rak-model` crate, followin
      - `OpenAIDelta` - Streaming delta
      - `OpenAIUsage` - Token usage statistics
 
-3. **`crates/rak-model/src/lib.rs`** (UPDATED)
+3. **`crates/zdk-model/src/lib.rs`** (UPDATED)
    - Exported `OpenAIModel` module
    - Made OpenAI model publicly available
 
-4. **`crates/rak-core/src/config.rs`** (UPDATED)
+4. **`crates/zdk-core/src/config.rs`** (UPDATED)
    - Added `openai_api_key` field to `RakConfig`
    - Added environment variable resolution for `OPENAI_API_KEY`
    - Supports both config.toml and environment variable configuration
@@ -54,14 +54,14 @@ Successfully implemented OpenAI model support in the `rak-model` crate, followin
 - [x] Token usage tracking
 
 ### ✅ Integration
-- [x] Implements RAK's `LLM` trait
+- [x] Implements ZDK's `LLM` trait
 - [x] Works with existing `LLMAgent`
 - [x] Compatible with `Runner`
 - [x] Session management support
 - [x] Configuration file integration
 
 ### 🔄 Message Format Conversion
-- Converts between RAK `Content` format and OpenAI `messages` format
+- Converts between ZDK `Content` format and OpenAI `messages` format
 - Maps roles: `user` ↔ `user`, `model` ↔ `assistant`, `system` ↔ `system`
 - Handles text parts properly
 
@@ -86,7 +86,7 @@ async fn main() -> anyhow::Result<()> {
         "gpt-4o-mini".to_string(),
     ));
 
-    // Use with existing RAK architecture
+    // Use with existing ZDK architecture
     let agent = LLMAgent::builder()
         .name("openai-assistant")
         .model(model)
@@ -161,7 +161,7 @@ The `graniet/llm` library is an impressive multi-backend LLM client with many fe
 **Reasons:**
 
 1. **Architecture Control**
-   - RAK has a specific trait-based architecture (`LLM` trait)
+   - ZDK has a specific trait-based architecture (`LLM` trait)
    - We have our own `Content`/`Part` format optimized for our use case
    - Tight integration with sessions, tools, agents, and runners
    - No adapter layer needed
@@ -175,19 +175,19 @@ The `graniet/llm` library is an impressive multi-backend LLM client with many fe
 3. **Customization**
    - Easy to extend for our specific needs
    - Direct control over error handling
-   - Can optimize for RAK's streaming model
+   - Can optimize for ZDK's streaming model
    - No breaking changes from upstream
 
 4. **Learning & Ownership**
    - Team understands the implementation fully
    - Can fix bugs immediately
-   - Can add features specific to RAK's needs
+   - Can add features specific to ZDK's needs
    - Better debugging experience
 
 5. **Simplicity**
    - ~250 lines of clean, focused code
    - No unnecessary features
-   - Exactly what RAK needs, nothing more
+   - Exactly what ZDK needs, nothing more
 
 ### When External Libraries Make Sense
 
@@ -199,13 +199,13 @@ External libraries like `graniet/llm` are excellent for:
 
 ### Our Approach
 
-We're building RAK as a **cohesive framework** where all components work together seamlessly:
-- `rak-core` defines the traits
-- `rak-model` implements the providers
-- `rak-agent` uses the models
-- `rak-runner` orchestrates execution
-- `rak-session` manages state
-- `rak-tool` provides capabilities
+We're building ZDK as a **cohesive framework** where all components work together seamlessly:
+- `zdk-core` defines the traits
+- `zdk-model` implements the providers
+- `zdk-agent` uses the models
+- `zdk-runner` orchestrates execution
+- `zdk-session` manages state
+- `zdk-tool` provides capabilities
 
 This tight integration provides better developer experience and performance.
 
@@ -237,17 +237,17 @@ This tight integration provides better developer experience and performance.
 
 ## Related Documents
 
-- [20251119_1400_IMPLEMENTATION_SUMMARY.md](./20251119_1400_IMPLEMENTATION_SUMMARY.md) - Overall RAK implementation
+- [20251119_1400_IMPLEMENTATION_SUMMARY.md](./20251119_1400_IMPLEMENTATION_SUMMARY.md) - Overall ZDK implementation
 - [20251119_2100_WEB_TOOLS_DESIGN.md](./20251119_2100_WEB_TOOLS_DESIGN.md) - Web tools implementation
 - [20251119_2220_CONFIG_SYSTEM_SUMMARY.md](./20251119_2220_CONFIG_SYSTEM_SUMMARY.md) - Configuration system
 
 ## Summary
 
 ✅ **OpenAI model implementation is complete and working**
-- Native integration with RAK architecture
+- Native integration with ZDK architecture
 - Clean, maintainable code
 - Full feature parity with Gemini implementation
 - Ready for production use
 
-The decision to build in-house rather than using external libraries like `graniet/llm` was based on RAK's need for architectural control, minimal dependencies, and tight integration across all components.
+The decision to build in-house rather than using external libraries like `graniet/llm` was based on ZDK's need for architectural control, minimal dependencies, and tight integration across all components.
 

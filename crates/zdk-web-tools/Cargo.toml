@@ -1,0 +1,25 @@
+[package]
+name = "zdk-web-tools"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+zdk-core = { path = "../zdk-core" }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+
+# HTML parsing for web scraper
+scraper = "0.20"
+url = { workspace = true }
+
+[dev-dependencies]
+mockito = "1.5"
+tokio = { workspace = true, features = ["test-util", "macros"] }
+

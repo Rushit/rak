@@ -5,7 +5,7 @@
 //!
 //! Run with: cargo run --example database_session
 
-use rak_session::{CreateRequest, SessionService};
+use zdk_session::{CreateRequest, SessionService};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -15,7 +15,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // If you get a compilation error, ensure rak-session is built with sqlite feature
     #[cfg(feature = "sqlite")]
     {
-        use rak_session::SqliteSessionService;
+        use zdk_session::SqliteSessionService;
 
         // Create an in-memory SQLite database
         let service = SqliteSessionService::new("sqlite::memory:")
@@ -35,12 +35,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("  User: {}", session.user_id());
 
         // Add an event to the session
-        let event = rak_core::Event::new("inv1".to_string(), "user".to_string());
+        let event = zdk_core::Event::new("inv1".to_string(), "user".to_string());
         service.append_event("session456", event).await?;
         println!("\nAdded event to session");
 
         // Retrieve the session
-        let get_req = rak_session::GetRequest {
+        let get_req = zdk_session::GetRequest {
             app_name: "my_app".to_string(),
             user_id: "user123".to_string(),
             session_id: "session456".to_string(),

@@ -1,9 +1,9 @@
-use rak_agent::LLMAgent;
-use rak_core::{
+use zdk_agent::LLMAgent;
+use zdk_core::{
     Agent, Content, FunctionCall, InvocationContext, LLMRequest, LLMResponse, Part, Tool, LLM,
 };
-use rak_tool::builtin::{create_calculator_tool, create_echo_tool};
-use rak_tool::DefaultToolContext;
+use zdk_tool::builtin::{create_calculator_tool, create_echo_tool};
+use zdk_tool::DefaultToolContext;
 use async_stream::stream;
 use async_trait::async_trait;
 use futures::stream::{Stream, StreamExt};
@@ -75,7 +75,7 @@ impl LLM for MockLLM {
         &self,
         _request: LLMRequest,
         _stream: bool,
-    ) -> Box<dyn Stream<Item = rak_core::Result<LLMResponse>> + Send + Unpin> {
+    ) -> Box<dyn Stream<Item = zdk_core::Result<LLMResponse>> + Send + Unpin> {
         let mut count = self.call_count.lock().unwrap();
         let call_num = *count;
         *count += 1;
@@ -116,7 +116,7 @@ impl InvocationContext for MockContext {
     }
 }
 
-impl rak_core::ReadonlyContext for MockContext {
+impl zdk_core::ReadonlyContext for MockContext {
     fn app_name(&self) -> &str {
         "test-app"
     }

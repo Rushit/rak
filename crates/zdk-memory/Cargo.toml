@@ -1,0 +1,20 @@
+[package]
+name = "zdk-memory"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+zdk-core = { path = "../zdk-core" }
+zdk-session = { path = "../zdk-session" }
+async-trait = { workspace = true }
+tokio = { workspace = true }
+chrono = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+

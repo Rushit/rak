@@ -7,11 +7,11 @@
 mod common;
 
 use anyhow::Result;
-use rak_agent::LLMAgent;
-use rak_core::{Agent, Content, Part};
-use rak_database_tools::{create_postgres_tools, create_sqlite_tools, DatabaseToolConfig};
-use rak_runner::{RunConfig, Runner};
-use rak_session::inmemory::InMemorySessionService;
+use zdk_agent::LLMAgent;
+use zdk_core::{Agent, Content, Part};
+use zdk_database_tools::{create_postgres_tools, create_sqlite_tools, DatabaseToolConfig};
+use zdk_runner::{RunConfig, Runner};
+use zdk_session::inmemory::InMemorySessionService;
 use futures::StreamExt;
 use std::sync::Arc;
 
@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
 }
 
 /// Example 1: SQLite with read-only tools (default)
-async fn run_sqlite_readonly_example(model: Arc<dyn rak_core::LLM>) -> Result<()> {
+async fn run_sqlite_readonly_example(model: Arc<dyn zdk_core::LLM>) -> Result<()> {
     // Create an in-memory SQLite database
     let readonly_tools = create_sqlite_tools("sqlite::memory:").await?;
 
@@ -104,11 +104,11 @@ async fn run_sqlite_readonly_example(model: Arc<dyn rak_core::LLM>) -> Result<()
 }
 
 /// Example 2: SQLite with write-enabled tools
-async fn run_sqlite_write_example(model: Arc<dyn rak_core::LLM>) -> Result<()> {
+async fn run_sqlite_write_example(model: Arc<dyn zdk_core::LLM>) -> Result<()> {
     // Create configuration with write permissions
     let config = DatabaseToolConfig::with_write_enabled();
 
-    let write_tools = rak_database_tools::create_sqlite_tools_with_config(
+    let write_tools = zdk_database_tools::create_sqlite_tools_with_config(
         "sqlite::memory:",
         config,
     )
@@ -167,7 +167,7 @@ async fn run_sqlite_write_example(model: Arc<dyn rak_core::LLM>) -> Result<()> {
 }
 
 /// Example 3: PostgreSQL with connection string
-async fn run_postgres_example(model: Arc<dyn rak_core::LLM>, connection_url: &str) -> Result<()> {
+async fn run_postgres_example(model: Arc<dyn zdk_core::LLM>, connection_url: &str) -> Result<()> {
     // Create PostgreSQL tools (read-only by default)
     let postgres_tools = create_postgres_tools(connection_url).await?;
 

@@ -1,4 +1,4 @@
-# Makefile for RAK (Rust Agent Kit)
+# Makefile for ZDK (ZAgent Development Kit)
 # Provides convenient commands for common development tasks
 #
 # Usage:
@@ -150,7 +150,7 @@ clean:
 #------------------------------------------------------------------------------
 
 help:
-	@echo "RAK (Rust Agent Kit) - Development Commands"
+	@echo "ZDK (ZAgent Development Kit) - Development Commands"
 	@echo ""
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 	@echo "PRIMARY COMMANDS"

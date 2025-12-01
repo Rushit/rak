@@ -39,7 +39,7 @@ Add **continuous profiling** capabilities to track CPU and memory usage at runti
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     RAK Application                          │
+│                     ZDK Application                          │
 │                                                              │
 │  ┌──────────────────────────────────────────────────────┐  │
 │  │          Telemetry Collector (Enhanced)              │  │
@@ -70,7 +70,7 @@ Add **continuous profiling** capabilities to track CPU and memory usage at runti
 
 ### 1. Profiling Module
 
-**File**: `crates/rak-telemetry/src/profiling/mod.rs` (NEW)
+**File**: `crates/zdk-telemetry/src/profiling/mod.rs` (NEW)
 
 ```rust
 pub mod cpu;
@@ -87,7 +87,7 @@ pub use config::ProfilingConfig;
 
 ### 2. CPU Profiling
 
-**File**: `crates/rak-telemetry/src/profiling/cpu.rs` (NEW)
+**File**: `crates/zdk-telemetry/src/profiling/cpu.rs` (NEW)
 
 ```rust
 use pprof::ProfilerGuard;
@@ -192,7 +192,7 @@ impl Default for CpuProfilingConfig {
 
 ### 3. Memory Profiling
 
-**File**: `crates/rak-telemetry/src/profiling/memory.rs` (NEW)
+**File**: `crates/zdk-telemetry/src/profiling/memory.rs` (NEW)
 
 ```rust
 use std::sync::Arc;
@@ -390,7 +390,7 @@ impl Default for MemoryProfilingConfig {
 
 ### 4. Resource Attribution
 
-**File**: `crates/rak-telemetry/src/profiling/attribution.rs` (NEW)
+**File**: `crates/zdk-telemetry/src/profiling/attribution.rs` (NEW)
 
 ```rust
 use std::sync::Arc;
@@ -502,7 +502,7 @@ pub struct AgentResourceStats {
 
 ### 5. Profiling Exporters
 
-**File**: `crates/rak-telemetry/src/profiling/exporters.rs` (NEW)
+**File**: `crates/zdk-telemetry/src/profiling/exporters.rs` (NEW)
 
 ```rust
 use pprof::protos::Message;
@@ -623,7 +623,7 @@ pub struct PyroscopeConfig {
 
 ### 6. Configuration Updates
 
-**Update**: `crates/rak-core/src/config.rs`
+**Update**: `crates/zdk-core/src/config.rs`
 
 ```rust
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -723,7 +723,7 @@ pyroscope_endpoint = "http://localhost:4040"
 
 ### 1. Runner Integration
 
-**Update**: `crates/rak-runner/src/runner.rs`
+**Update**: `crates/zdk-runner/src/runner.rs`
 
 ```rust
 use rak_telemetry::profiling::{CpuProfiler, MemoryProfiler, ResourceAttribution};
@@ -764,7 +764,7 @@ impl Runner {
 
 ### 2. Periodic Profile Collection
 
-**File**: `crates/rak-telemetry/src/profiling/collector.rs` (NEW)
+**File**: `crates/zdk-telemetry/src/profiling/collector.rs` (NEW)
 
 ```rust
 use tokio::time::{interval, Duration};
@@ -1030,18 +1030,18 @@ async fn main() -> Result<()> {
 ## 📝 Summary of Changes
 
 ### New Files
-- `crates/rak-telemetry/src/profiling/mod.rs`
-- `crates/rak-telemetry/src/profiling/cpu.rs`
-- `crates/rak-telemetry/src/profiling/memory.rs`
-- `crates/rak-telemetry/src/profiling/attribution.rs`
-- `crates/rak-telemetry/src/profiling/exporters.rs`
-- `crates/rak-telemetry/src/profiling/collector.rs`
+- `crates/zdk-telemetry/src/profiling/mod.rs`
+- `crates/zdk-telemetry/src/profiling/cpu.rs`
+- `crates/zdk-telemetry/src/profiling/memory.rs`
+- `crates/zdk-telemetry/src/profiling/attribution.rs`
+- `crates/zdk-telemetry/src/profiling/exporters.rs`
+- `crates/zdk-telemetry/src/profiling/collector.rs`
 
 ### Modified Files
-- `crates/rak-core/src/config.rs` - Add profiling config
-- `crates/rak-runner/src/runner.rs` - Add profiler integration
-- `crates/rak-telemetry/src/spans.rs` - Add resource attributes
-- `crates/rak-telemetry/Cargo.toml` - Add dependencies
+- `crates/zdk-core/src/config.rs` - Add profiling config
+- `crates/zdk-runner/src/runner.rs` - Add profiler integration
+- `crates/zdk-telemetry/src/spans.rs` - Add resource attributes
+- `crates/zdk-telemetry/Cargo.toml` - Add dependencies
 
 ### New Dependencies
 - `pprof` - CPU profiling

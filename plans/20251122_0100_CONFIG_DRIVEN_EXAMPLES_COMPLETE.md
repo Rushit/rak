@@ -3,16 +3,16 @@
 **Created:** 2025-11-22 01:00  
 **Last Updated:** 2025-11-22 01:00  
 **Status:** Complete  
-**Author(s):** RAK Team  
+**Author(s):** ZDK Team  
 **Type:** COMPLETE
 
 ## Purpose
 
-Document completion of Phase 3: Converting all RAK examples to use config-driven authentication.
+Document completion of Phase 3: Converting all ZDK examples to use config-driven authentication.
 
 ## Summary
 
-All RAK examples now use a shared `common.rs` module that reads authentication from `config.toml`. Users control auth method by editing config, not code.
+All ZDK examples now use a shared `common.rs` module that reads authentication from `config.toml`. Users control auth method by editing config, not code.
 
 ## What Changed
 

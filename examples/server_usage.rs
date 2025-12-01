@@ -69,13 +69,13 @@
 //! ```
 
 use anyhow::{Context, Result};
-use rak_agent::LLMAgent;
-use rak_core::{AuthCredentials, RakConfig, LLM};
-use rak_model::GeminiModel;
-use rak_runner::Runner;
-use rak_server::rest::create_router;
-use rak_session::inmemory::InMemorySessionService;
-use rak_tool::Tool;
+use zdk_agent::LLMAgent;
+use zdk_core::{AuthCredentials, RakConfig, LLM};
+use zdk_model::GeminiModel;
+use zdk_runner::Runner;
+use zdk_server::rest::create_router;
+use zdk_session::inmemory::InMemorySessionService;
+use zdk_tool::Tool;
 use std::env;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -225,7 +225,7 @@ fn create_model_from_auth(creds: AuthCredentials, config: &RakConfig) -> Result<
 }
 
 /// Create an agent with tools
-fn create_agent(model: Arc<dyn LLM>) -> Result<Arc<dyn rak_core::Agent>> {
+fn create_agent(model: Arc<dyn LLM>) -> Result<Arc<dyn zdk_core::Agent>> {
     // For this example, we'll create a simple agent without tools
     // In a real application, you would register tools here
     let tools: Vec<Arc<dyn Tool>> = vec![];
