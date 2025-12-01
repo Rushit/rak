@@ -43,4 +43,3 @@ pub struct ConstraintInfo {
     pub constraint_type: String,
     pub definition: String,
 }
-

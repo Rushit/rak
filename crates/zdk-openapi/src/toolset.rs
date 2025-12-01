@@ -5,9 +5,9 @@ use crate::error::Result;
 use crate::parser::OpenApiParser;
 use crate::rest_api_tool::RestApiTool;
 use crate::types::ParsedOperation;
-use zdk_tool::Tool;
 use std::sync::Arc;
 use tracing::{debug, info};
+use zdk_tool::Tool;
 
 /// A collection of tools generated from an OpenAPI specification.
 ///
@@ -143,8 +143,7 @@ impl OpenApiToolset {
             .operations
             .iter()
             .map(|op| {
-                let tool = RestApiTool::from_parsed_operation(op.clone())
-                    .with_auth(auth.clone());
+                let tool = RestApiTool::from_parsed_operation(op.clone()).with_auth(auth.clone());
                 Arc::new(tool) as Arc<dyn Tool>
             })
             .collect();
@@ -256,4 +255,3 @@ paths:
         assert_eq!(toolset.len(), 2);
     }
 }
-

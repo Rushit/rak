@@ -9,7 +9,7 @@
 mod spans;
 mod tracer;
 
-pub use spans::{trace_llm_call, trace_tool_call, LLMSpanAttributes, ToolSpanAttributes};
+pub use spans::{LLMSpanAttributes, ToolSpanAttributes, trace_llm_call, trace_tool_call};
 pub use tracer::{init_telemetry, register_span_processor};
 
 /// OpenTelemetry span attribute constants for AI agent observability.
@@ -54,4 +54,3 @@ mod tests {
         assert_eq!(attributes::SYSTEM_NAME, "gcp.vertex.agent");
     }
 }
-

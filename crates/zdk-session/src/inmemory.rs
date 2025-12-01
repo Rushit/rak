@@ -1,8 +1,8 @@
 use super::*;
-use zdk_core::Error;
 use std::collections::HashMap as StdHashMap;
 use std::sync::RwLock;
 use uuid::Uuid;
+use zdk_core::Error;
 
 pub struct InMemorySessionService {
     sessions: Arc<RwLock<StdHashMap<String, Arc<InMemorySession>>>>,

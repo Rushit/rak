@@ -33,7 +33,7 @@ impl Default for DatabaseToolConfig {
     fn default() -> Self {
         let mut allowed_operations = HashSet::new();
         allowed_operations.insert(SqlOperation::Select);
-        
+
         Self {
             read_only: true,
             max_rows: 1000,
@@ -53,7 +53,7 @@ impl DatabaseToolConfig {
         config.allowed_operations.insert(SqlOperation::Delete);
         config
     }
-    
+
     /// Create a new config with DDL permissions enabled
     pub fn with_ddl_enabled() -> Self {
         let mut config = Self::with_write_enabled();
@@ -65,4 +65,3 @@ impl DatabaseToolConfig {
         config
     }
 }
-

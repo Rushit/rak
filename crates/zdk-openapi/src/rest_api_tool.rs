@@ -4,12 +4,12 @@ use crate::auth::AuthConfig;
 use crate::error::{OpenApiError, Result};
 use crate::types::{ApiParameter, OperationEndpoint, ParameterLocation, ParsedOperation};
 use async_trait::async_trait;
-use zdk_core::ToolResponse;
-use zdk_tool::{Tool, ToolContext};
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tracing::{debug, error, instrument};
+use zdk_core::ToolResponse;
+use zdk_tool::{Tool, ToolContext};
 
 /// A tool that executes a REST API operation.
 ///
@@ -78,27 +78,21 @@ impl RestApiTool {
                     ParameterLocation::Path => {
                         path_params.insert(
                             param.original_name.clone(),
-                            val.as_str()
-                                .unwrap_or(&val.to_string())
-                                .to_string(),
+                            val.as_str().unwrap_or(&val.to_string()).to_string(),
                         );
                     }
                     ParameterLocation::Query => {
                         if !val.is_null() {
                             query_params.push((
                                 param.original_name.clone(),
-                                val.as_str()
-                                    .unwrap_or(&val.to_string())
-                                    .to_string(),
+                                val.as_str().unwrap_or(&val.to_string()).to_string(),
                             ));
                         }
                     }
                     ParameterLocation::Header => {
                         header_params.push((
                             param.original_name.clone(),
-                            val.as_str()
-                                .unwrap_or(&val.to_string())
-                                .to_string(),
+                            val.as_str().unwrap_or(&val.to_string()).to_string(),
                         ));
                     }
                     ParameterLocation::Body => {
@@ -158,7 +152,7 @@ impl RestApiTool {
         if status.is_success() {
             // Get response bytes once
             let bytes = response.bytes().await?;
-            
+
             // Try to parse as JSON first
             match serde_json::from_slice::<Value>(&bytes) {
                 Ok(json) => Ok(json),
@@ -237,18 +231,21 @@ impl Tool for RestApiTool {
         debug!("Parameters: {:?}", params);
 
         // Build request
-        let builder = self.build_request(&params)
+        let builder = self
+            .build_request(&params)
             .map_err(|e| zdk_core::Error::ToolFailed {
                 tool: self.name.clone(),
                 source: e.into(),
             })?;
 
         // Execute request
-        let result = self.execute_request(builder).await
-            .map_err(|e| zdk_core::Error::ToolFailed {
-                tool: self.name.clone(),
-                source: e.into(),
-            })?;
+        let result =
+            self.execute_request(builder)
+                .await
+                .map_err(|e| zdk_core::Error::ToolFailed {
+                    tool: self.name.clone(),
+                    source: e.into(),
+                })?;
 
         Ok(ToolResponse { result })
     }
@@ -309,4 +306,3 @@ mod tests {
         assert!(required.contains(&json!("id")));
     }
 }
-

@@ -19,7 +19,12 @@ pub trait Agent: Send + Sync {
     ) -> Box<dyn Stream<Item = Result<Event>> + Send + Unpin>;
 
     /// Returns the sub-agents of this agent
-    fn sub_agents(&self) -> &[Arc<dyn Agent>];
+    ///
+    /// Default implementation returns an empty slice. Override this method
+    /// for agents that manage sub-agents (e.g., workflow agents).
+    fn sub_agents(&self) -> &[Arc<dyn Agent>] {
+        &[]
+    }
 }
 
 /// LLM trait - abstraction for language models
@@ -62,7 +67,7 @@ pub trait Tool: Send + Sync {
 }
 
 /// Toolset trait - abstraction for dynamic tool collections
-/// 
+///
 /// A toolset is a collection of tools that can be dynamically loaded at runtime.
 /// This is particularly useful for MCP (Model Context Protocol) integrations where
 /// tools are provided by external servers.
@@ -72,7 +77,7 @@ pub trait Toolset: Send + Sync {
     fn name(&self) -> &str;
 
     /// Gets all tools available in this toolset
-    /// 
+    ///
     /// This method is called when an agent needs to discover available tools.
     /// For MCP toolsets, this will connect to the MCP server and list available tools.
     async fn get_tools(&self, ctx: &dyn InvocationContext) -> Result<Vec<Arc<dyn Tool>>>;

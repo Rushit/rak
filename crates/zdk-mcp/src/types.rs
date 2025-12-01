@@ -12,4 +12,3 @@ pub struct McpToolInfo {
 
 /// Tool execution result content
 pub type ToolContent = serde_json::Value;
-

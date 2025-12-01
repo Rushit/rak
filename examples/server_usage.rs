@@ -13,10 +13,10 @@
 //! ```bash
 //! # Authenticate with gcloud
 //! gcloud auth login
-//! 
+//!
 //! # Set your project
 //! gcloud config set project YOUR_PROJECT_ID
-//! 
+//!
 //! # Update config.test.toml (or config.toml) to use gcloud
 //! [auth]
 //! provider = "gcloud"
@@ -26,11 +26,11 @@
 //! ```bash
 //! # Set environment variable
 //! export GOOGLE_API_KEY="your-api-key"
-//! 
+//!
 //! # Update config.test.toml (or config.toml) to use API key
 //! [auth]
 //! provider = "api_key"
-//! 
+//!
 //! [auth.api_key]
 //! key = "${GOOGLE_API_KEY}"
 //! ```
@@ -56,12 +56,12 @@
 //! ```bash
 //! # Health check
 //! curl http://localhost:18080/health
-//! 
+//!
 //! # Create session
 //! curl -X POST http://localhost:18080/api/v1/sessions \
 //!   -H "Content-Type: application/json" \
 //!   -d '{"appName":"test","userId":"user1"}'
-//! 
+//!
 //! # Run agent (SSE streaming)
 //! curl -X POST http://localhost:18080/api/v1/sessions/SESSION_ID/run/sse \
 //!   -H "Content-Type: application/json" \
@@ -69,16 +69,15 @@
 //! ```
 
 use anyhow::{Context, Result};
+use std::env;
+use std::path::PathBuf;
+use std::sync::Arc;
 use zdk_agent::LLMAgent;
-use zdk_core::{AuthCredentials, ZConfig, LLM};
-use zdk_model::GeminiModel;
+use zdk_core::{AuthCredentials, LLM, ZConfig};
 use zdk_runner::Runner;
 use zdk_server::rest::create_router;
 use zdk_session::inmemory::InMemorySessionService;
 use zdk_tool::Tool;
-use std::env;
-use std::path::PathBuf;
-use std::sync::Arc;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -189,39 +188,21 @@ fn describe_auth(creds: &AuthCredentials) -> String {
         AuthCredentials::ApiKey { .. } => "API Key (Public Gemini API)".to_string(),
         AuthCredentials::GCloud {
             project, location, ..
-        } => format!("Google Cloud (project: {}, location: {})", project, location),
+        } => format!(
+            "Google Cloud (project: {}, location: {})",
+            project, location
+        ),
     }
 }
 
-/// Create model from authentication credentials
+/// Create model from configuration using the factory
 ///
-/// This demonstrates how to use the new auth abstraction to create models
-/// based on the configured authentication method.
-fn create_model_from_auth(creds: AuthCredentials, config: &ZConfig) -> Result<Arc<dyn LLM>> {
-    let model: Arc<dyn LLM> = match creds {
-        AuthCredentials::ApiKey { key } => {
-            // Public Gemini API with API key
-            Arc::new(GeminiModel::new(
-                key,
-                config.model.model_name.clone(),
-            ))
-        }
-        AuthCredentials::GCloud {
-            token,
-            project,
-            location,
-            ..
-        } => {
-            // Vertex AI with gcloud bearer token
-            Arc::new(GeminiModel::with_bearer_token(
-                token,
-                config.model.model_name.clone(),
-                project,
-                location,
-            ))
-        }
-    };
-    Ok(model)
+/// This uses the simplified ModelFactory pattern which automatically
+/// selects the appropriate provider and authentication method.
+fn create_model_from_auth(_creds: AuthCredentials, config: &ZConfig) -> Result<Arc<dyn LLM>> {
+    use zdk_model::ZConfigExt;
+    config.create_model()
+        .context("Failed to create model from configuration")
 }
 
 /// Create an agent with tools

@@ -1,17 +1,19 @@
 use crate::builder::LLMAgentBuilder;
-use zdk_core::{
-    Agent, Content, Event, FunctionCall, InvocationContext, LLMRequest, Part, Result, Tool, Toolset, LLM,
-};
-use zdk_telemetry::{trace_llm_call, LLMSpanAttributes};
+use crate::utils::load_toolsets;
 use async_stream::stream;
 use async_trait::async_trait;
 use futures::stream::{Stream, StreamExt};
 use std::collections::HashMap;
 use std::sync::Arc;
+use zdk_core::{
+    Agent, Content, Event, FunctionCall, InvocationContext, LLM, LLMRequest, Part, Result, Tool,
+    Toolset,
+};
+use zdk_telemetry::{LLMSpanAttributes, trace_llm_call};
 
 pub struct LLMAgent {
-    pub(crate) name: String,
-    pub(crate) description: String,
+    pub(crate) name: Arc<str>,
+    pub(crate) description: Arc<str>,
     pub(crate) model: Arc<dyn LLM>,
     pub(crate) system_instruction: Option<String>,
     pub(crate) sub_agents: Vec<Arc<dyn Agent>>,
@@ -31,8 +33,8 @@ impl LLMAgent {
         system_instruction: Option<String>,
     ) -> Self {
         Self {
-            name,
-            description,
+            name: Arc::from(name),
+            description: Arc::from(description),
             model,
             system_instruction,
             sub_agents: Vec::new(),
@@ -64,33 +66,13 @@ impl Agent for LLMAgent {
         let ctx_clone = ctx.clone();
 
         Box::new(Box::pin(stream! {
-            // Load tools from toolsets
-            for toolset in &toolsets {
-                match toolset.get_tools(&*ctx_clone).await {
-                    Ok(toolset_tools) => {
-                        tracing::info!(
-                            invocation_id = %invocation_id,
-                            toolset = %toolset.name(),
-                            count = toolset_tools.len(),
-                            "Loaded tools from toolset"
-                        );
-                        for tool in toolset_tools {
-                            tools.insert(tool.name().to_string(), tool);
-                        }
-                    }
-                    Err(e) => {
-                        tracing::error!(
-                            invocation_id = %invocation_id,
-                            toolset = %toolset.name(),
-                            error = %e,
-                            "Failed to load toolset"
-                        );
-                    }
-                }
-            }
+            // Load tools from toolsets in parallel for better performance
+            let loaded_tools = load_toolsets(&toolsets, &ctx_clone, &invocation_id).await;
+            tools.extend(loaded_tools);
 
             // Build LLM request from context
-            let mut conversation = Vec::new();
+            // Pre-allocate for typical conversation size (2-10 turns)
+            let mut conversation = Vec::with_capacity(10);
 
             // Add user content if available
             if let Some(user_content) = ctx.user_content() {
@@ -111,7 +93,7 @@ impl Agent for LLMAgent {
             for iteration in 0..max_iterations {
                 // Convert tools HashMap to Vec for LLMRequest
                 let tool_list: Vec<Arc<dyn Tool>> = tools.values().cloned().collect();
-                
+
                 let request = LLMRequest {
                     model: model.name().to_string(),
                     contents: conversation.clone(),
@@ -139,7 +121,7 @@ impl Agent for LLMAgent {
                         Ok(llm_response) => {
                             let mut event = Event::new(
                                 invocation_id.clone(),
-                                agent_name.clone(),
+                                agent_name.to_string(),
                             );
 
                             last_event_id = Some(event.id.clone());
@@ -193,7 +175,7 @@ impl Agent for LLMAgent {
                         request.model,
                         request.contents.len()
                     );
-                    
+
                     let response_json = if let Some(ref content) = accumulated_content {
                         serde_json::to_string(&content).unwrap_or_else(|_| "{}".to_string())
                     } else {
@@ -248,7 +230,7 @@ impl Agent for LLMAgent {
                     if let Some(tool) = tools.get(&fc.name) {
                         // Generate ID if not provided by API
                         let call_id = fc.id.clone().unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
-                        
+
                         tracing::debug!(
                             invocation_id = %invocation_id,
                             session_id = %session_id,
@@ -277,7 +259,7 @@ impl Agent for LLMAgent {
                                 // Emit tool execution event
                                 let mut tool_event = Event::new(
                                     invocation_id.clone(),
-                                    agent_name.clone(),
+                                    agent_name.to_string(),
                                 );
                                 tool_event.content = Some(Content {
                                     role: "function".to_string(),
@@ -289,7 +271,7 @@ impl Agent for LLMAgent {
                                 // Emit error event
                                 let mut error_event = Event::new(
                                     invocation_id.clone(),
-                                    agent_name.clone(),
+                                    agent_name.to_string(),
                                 );
                                 error_event.error_code = "TOOL_ERROR".to_string();
                                 error_event.error_message = format!("Tool {} failed: {}", fc.name, e);
@@ -300,7 +282,7 @@ impl Agent for LLMAgent {
                         // Tool not found
                         let mut error_event = Event::new(
                             invocation_id.clone(),
-                            agent_name.clone(),
+                            agent_name.to_string(),
                         );
                         error_event.error_code = "TOOL_NOT_FOUND".to_string();
                         error_event.error_message = format!("Tool {} not found", fc.name);
@@ -319,9 +301,5 @@ impl Agent for LLMAgent {
                 // Continue to next iteration for LLM to process tool results
             }
         }))
-    }
-
-    fn sub_agents(&self) -> &[Arc<dyn Agent>] {
-        &self.sub_agents
     }
 }

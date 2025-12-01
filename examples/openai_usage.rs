@@ -1,10 +1,10 @@
+use futures::StreamExt;
+use std::sync::Arc;
 use zdk_agent::LLMAgent;
 use zdk_core::{Content, ZConfig};
 use zdk_model::OpenAIModel;
 use zdk_runner::Runner;
-use zdk_session::{inmemory::InMemorySessionService, SessionService};
-use futures::StreamExt;
-use std::sync::Arc;
+use zdk_session::{SessionService, inmemory::InMemorySessionService};
 
 #[path = "common.rs"]
 mod common;
@@ -21,22 +21,12 @@ async fn main() -> anyhow::Result<()> {
     // Load configuration
     println!("Loading configuration...");
     let config = ZConfig::load()?;
-    
-    // Get OpenAI API key from config
-    // You can set it in config.toml:
-    //   openai_api_key = "sk-..."
-    // Or via environment variable:
-    //   export OPENAI_API_KEY="sk-..."
-    let openai_api_key = config
-        .openai_api_key
-        .ok_or_else(|| anyhow::anyhow!("OpenAI API key not found. Set openai_api_key in config.toml or OPENAI_API_KEY environment variable"))?;
 
-    // Create OpenAI model
+    // Create OpenAI model using the simplified factory
+    // The factory will automatically use the provider and credentials from config
     println!("Creating OpenAI model...");
-    let model = Arc::new(OpenAIModel::new(
-        openai_api_key,
-        "gpt-4o-mini".to_string(), // or gpt-4o, gpt-3.5-turbo, etc.
-    ));
+    use zdk_model::ZConfigExt;
+    let model = config.create_model()?;
 
     // Create agent
     println!("Creating LLM agent...");
@@ -151,4 +141,3 @@ async fn main() -> anyhow::Result<()> {
 
     Ok(())
 }
-

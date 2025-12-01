@@ -2,20 +2,20 @@
 
 use crate::rest::AppState;
 use crate::ws_types::{WsClientMessage, WsServerMessage};
-use zdk_core::Content;
-use zdk_runner::RunConfig;
 use axum::{
-    extract::{ws::{Message, WebSocket}, State, WebSocketUpgrade},
+    extract::{
+        State, WebSocketUpgrade,
+        ws::{Message, WebSocket},
+    },
     response::IntoResponse,
 };
 use futures::{SinkExt, StreamExt};
 use tracing::{error, info, warn};
+use zdk_core::Content;
+use zdk_runner::RunConfig;
 
 /// WebSocket handler for agent interaction
-pub async fn ws_handler(
-    ws: WebSocketUpgrade,
-    State(state): State<AppState>,
-) -> impl IntoResponse {
+pub async fn ws_handler(ws: WebSocketUpgrade, State(state): State<AppState>) -> impl IntoResponse {
     ws.on_upgrade(|socket| handle_socket(socket, state))
 }
 
@@ -27,25 +27,23 @@ async fn handle_socket(socket: WebSocket, state: AppState) {
 
     while let Some(msg) = receiver.next().await {
         match msg {
-            Ok(Message::Text(text)) => {
-                match serde_json::from_str::<WsClientMessage>(&text) {
-                    Ok(WsClientMessage::Run {
-                        session_id,
-                        new_message,
-                    }) => {
-                        handle_run(&session_id, new_message, &state, &mut sender).await;
-                    }
-                    Ok(WsClientMessage::Cancel { invocation_id }) => {
-                        handle_cancel(&invocation_id, &state, &mut sender).await;
-                    }
-                    Ok(WsClientMessage::Status { invocation_id }) => {
-                        handle_status(&invocation_id, &state, &mut sender).await;
-                    }
-                    Err(e) => {
-                        send_error(&mut sender, format!("Invalid message format: {}", e)).await;
-                    }
+            Ok(Message::Text(text)) => match serde_json::from_str::<WsClientMessage>(&text) {
+                Ok(WsClientMessage::Run {
+                    session_id,
+                    new_message,
+                }) => {
+                    handle_run(&session_id, new_message, &state, &mut sender).await;
                 }
-            }
+                Ok(WsClientMessage::Cancel { invocation_id }) => {
+                    handle_cancel(&invocation_id, &state, &mut sender).await;
+                }
+                Ok(WsClientMessage::Status { invocation_id }) => {
+                    handle_status(&invocation_id, &state, &mut sender).await;
+                }
+                Err(e) => {
+                    send_error(&mut sender, format!("Invalid message format: {}", e)).await;
+                }
+            },
             Ok(Message::Close(_)) => {
                 info!("WebSocket connection closed by client");
                 break;
@@ -161,7 +159,10 @@ async fn handle_cancel(
         warn!("Attempted to cancel unknown invocation: {}", invocation_id);
         send_error(
             sender,
-            format!("Invocation {} not found or already completed", invocation_id),
+            format!(
+                "Invocation {} not found or already completed",
+                invocation_id
+            ),
         )
         .await;
     }
@@ -184,10 +185,7 @@ async fn handle_status(
 }
 
 /// Send an error message
-async fn send_error(
-    sender: &mut futures::stream::SplitSink<WebSocket, Message>,
-    message: String,
-) {
+async fn send_error(sender: &mut futures::stream::SplitSink<WebSocket, Message>, message: String) {
     let error_msg = WsServerMessage::Error { message };
     if let Err(e) = send_message(sender, &error_msg).await {
         error!("Failed to send error message: {}", e);
@@ -205,4 +203,3 @@ async fn send_message(
     })?;
     sender.send(Message::Text(json)).await
 }
-

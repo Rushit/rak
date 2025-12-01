@@ -113,4 +113,3 @@ mod tests {
         assert!(tracer_provider().is_none() || tracer_provider().is_some());
     }
 }
-

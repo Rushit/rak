@@ -1,9 +1,10 @@
-use zdk_core::{Agent, Error, Event, InvocationContext, Result};
+use crate::builder_common::AgentBuilderCore;
 use async_stream::stream;
 use async_trait::async_trait;
 use futures::stream::{Stream, StreamExt};
 use std::sync::Arc;
 use tokio::sync::mpsc;
+use zdk_core::{Agent, Error, Event, InvocationContext, Result};
 
 /// ParallelAgent runs its sub-agents in parallel in an isolated manner.
 ///
@@ -12,8 +13,8 @@ use tokio::sync::mpsc;
 /// - Running different algorithms simultaneously
 /// - Generating multiple responses for review by a subsequent evaluation agent
 pub struct ParallelAgent {
-    pub(crate) name: String,
-    pub(crate) description: String,
+    pub(crate) name: Arc<str>,
+    pub(crate) description: Arc<str>,
     pub(crate) sub_agents: Vec<Arc<dyn Agent>>,
 }
 
@@ -74,27 +75,25 @@ impl Agent for ParallelAgent {
 
 /// Builder for ParallelAgent
 pub struct ParallelAgentBuilder {
-    name: Option<String>,
-    description: Option<String>,
+    core: AgentBuilderCore,
     sub_agents: Vec<Arc<dyn Agent>>,
 }
 
 impl ParallelAgentBuilder {
     pub fn new() -> Self {
         Self {
-            name: None,
-            description: None,
+            core: AgentBuilderCore::new(),
             sub_agents: Vec::new(),
         }
     }
 
     pub fn name(mut self, name: impl Into<String>) -> Self {
-        self.name = Some(name.into());
+        self.core.with_name(name);
         self
     }
 
     pub fn description(mut self, description: impl Into<String>) -> Self {
-        self.description = Some(description.into());
+        self.core.with_description(description);
         self
     }
 
@@ -109,22 +108,20 @@ impl ParallelAgentBuilder {
     }
 
     pub fn build(self) -> Result<ParallelAgent> {
-        let name = self
-            .name
-            .ok_or_else(|| Error::Other(anyhow::anyhow!("ParallelAgent name is required")))?;
-        let description = self
-            .description
-            .unwrap_or_else(|| "A parallel agent that runs sub-agents concurrently".to_string());
+        let (name, description) = self.core.validate(
+            "ParallelAgent",
+            "A parallel agent that runs sub-agents concurrently",
+        )?;
 
         if self.sub_agents.is_empty() {
-            return Err(Error::Other(anyhow::anyhow!(
-                "ParallelAgent requires at least one sub-agent"
-            )));
+            return Err(Error::Config(
+                "ParallelAgent requires at least one sub-agent".to_string(),
+            ));
         }
 
         Ok(ParallelAgent {
-            name,
-            description,
+            name: Arc::from(name),
+            description: Arc::from(description),
             sub_agents: self.sub_agents,
         })
     }
@@ -139,55 +136,11 @@ impl Default for ParallelAgentBuilder {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use zdk_core::{Content, Part};
-    use futures::StreamExt;
-
-    struct MockAgent {
-        name: String,
-        response: String,
-    }
-
-    #[async_trait]
-    impl Agent for MockAgent {
-        fn name(&self) -> &str {
-            &self.name
-        }
-
-        fn description(&self) -> &str {
-            "Mock agent"
-        }
-
-        async fn run(
-            &self,
-            ctx: Arc<dyn InvocationContext>,
-        ) -> Box<dyn Stream<Item = Result<Event>> + Send + Unpin> {
-            let response = self.response.clone();
-            let invocation_id = ctx.invocation_id().to_string();
-            let name = self.name.clone();
-
-            Box::new(Box::pin(stream! {
-                let mut event = Event::new(invocation_id, name);
-                event.content = Some(Content {
-                    role: "model".to_string(),
-                    parts: vec![Part::Text { text: response }],
-                });
-                event.turn_complete = true;
-
-                yield Ok(event);
-            }))
-        }
-
-        fn sub_agents(&self) -> &[Arc<dyn Agent>] {
-            &[]
-        }
-    }
+    use crate::testing::MockAgent;
 
     #[test]
     fn test_parallel_agent_builder() {
-        let agent1 = Arc::new(MockAgent {
-            name: "agent1".to_string(),
-            response: "Response 1".to_string(),
-        });
+        let agent1 = Arc::new(MockAgent::new("agent1").with_response("Response 1"));
 
         let parallel_agent = ParallelAgent::builder()
             .name("test_parallel")
@@ -202,10 +155,7 @@ mod tests {
 
     #[test]
     fn test_parallel_agent_requires_name() {
-        let agent1 = Arc::new(MockAgent {
-            name: "agent1".to_string(),
-            response: "Response 1".to_string(),
-        });
+        let agent1 = Arc::new(MockAgent::new("agent1").with_response("Response 1"));
 
         let result = ParallelAgent::builder().sub_agent(agent1).build();
 

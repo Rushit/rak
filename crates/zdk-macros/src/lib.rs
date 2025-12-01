@@ -4,7 +4,7 @@
 
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, ItemFn, Lit};
+use syn::{ItemFn, Lit, parse_macro_input};
 
 /// Derives the `Tool` trait for a struct
 ///

@@ -42,4 +42,3 @@ pub use parser::OpenApiParser;
 pub use rest_api_tool::RestApiTool;
 pub use toolset::OpenApiToolset;
 pub use types::{ApiParameter, OperationEndpoint, ParsedOperation};
-

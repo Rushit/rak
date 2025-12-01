@@ -5,14 +5,13 @@
 
 pub mod client;
 pub mod connection;
-pub mod toolset;
 pub mod tool_wrapper;
+pub mod toolset;
 pub mod types;
 
 // Re-exports
 pub use client::McpClient;
 pub use connection::StdioConnectionParams;
-pub use toolset::McpToolset;
 pub use tool_wrapper::McpToolWrapper;
+pub use toolset::McpToolset;
 pub use types::McpToolInfo;
-

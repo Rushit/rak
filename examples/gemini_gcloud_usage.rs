@@ -42,12 +42,12 @@
 //! - Consistent auth pattern across all examples
 //! - Production-ready
 
+use futures::StreamExt;
+use std::sync::Arc;
 use zdk_agent::LLMAgent;
 use zdk_core::Content;
 use zdk_runner::Runner;
-use zdk_session::{inmemory::InMemorySessionService, SessionService};
-use futures::StreamExt;
-use std::sync::Arc;
+use zdk_session::{SessionService, inmemory::InMemorySessionService};
 
 #[path = "common.rs"]
 mod common;
@@ -155,4 +155,3 @@ async fn main() -> anyhow::Result<()> {
 
     Ok(())
 }
-

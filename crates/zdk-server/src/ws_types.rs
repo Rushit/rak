@@ -1,7 +1,7 @@
 //! WebSocket protocol types for bidirectional communication
 
-use zdk_core::{Content, Event};
 use serde::{Deserialize, Serialize};
+use zdk_core::{Content, Event};
 
 /// Messages sent from client to server
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -74,4 +74,3 @@ pub enum InvocationStatus {
     /// Invocation not found (may have expired)
     NotFound,
 }
-

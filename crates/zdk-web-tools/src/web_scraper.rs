@@ -2,12 +2,12 @@
 
 use anyhow::anyhow;
 use async_trait::async_trait;
-use zdk_core::{Result as ZResult, Tool, ToolContext, ToolResponse};
 use scraper::{Html, Selector};
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::sync::Arc;
 use std::time::Duration;
 use tracing::{debug, warn};
+use zdk_core::{Result as ZResult, Tool, ToolContext, ToolResponse};
 
 /// Web Scraper tool
 ///
@@ -61,10 +61,7 @@ impl WebScraperTool {
     }
 
     /// Create with custom name and description
-    pub fn with_config(
-        name: String,
-        description: String,
-    ) -> anyhow::Result<Self> {
+    pub fn with_config(name: String, description: String) -> anyhow::Result<Self> {
         let client = reqwest::Client::builder()
             .user_agent("Mozilla/5.0 (compatible; ZDK-Web-Tools/0.1.0)")
             .timeout(Duration::from_secs(30))
@@ -87,11 +84,12 @@ impl WebScraperTool {
         debug!("Fetching URL: {}", url);
 
         // Validate URL
-        let parsed_url = url::Url::parse(url)
-            .map_err(|e| anyhow!("Invalid URL '{}': {}", url, e))?;
+        let parsed_url =
+            url::Url::parse(url).map_err(|e| anyhow!("Invalid URL '{}': {}", url, e))?;
 
         // Fetch content
-        let response = self.client
+        let response = self
+            .client
             .get(url)
             .send()
             .await
@@ -101,7 +99,9 @@ impl WebScraperTool {
             return Err(anyhow!("HTTP error {}: {}", response.status(), url));
         }
 
-        let html = response.text().await
+        let html = response
+            .text()
+            .await
             .map_err(|e| anyhow!("Failed to read response body: {}", e))?;
 
         // Parse HTML
@@ -119,7 +119,7 @@ impl WebScraperTool {
             // Extract specific elements
             let selector = Selector::parse(css_selector)
                 .map_err(|e| anyhow!("Invalid CSS selector '{}': {:?}", css_selector, e))?;
-            
+
             let elements: Vec<String> = document
                 .select(&selector)
                 .map(|el| el.text().collect::<Vec<_>>().join(" ").trim().to_string())
@@ -158,7 +158,7 @@ impl WebScraperTool {
                 .filter_map(|el| {
                     let href = el.value().attr("href")?;
                     let absolute_url = parsed_url.join(href).ok()?;
-                    
+
                     Some(LinkInfo {
                         url: absolute_url.to_string(),
                         text: el.text().collect::<Vec<_>>().join(" ").trim().to_string(),
@@ -211,11 +211,7 @@ impl Tool for WebScraperTool {
         })
     }
 
-    async fn execute(
-        &self,
-        _ctx: Arc<dyn ToolContext>,
-        params: Value,
-    ) -> ZResult<ToolResponse> {
+    async fn execute(&self, _ctx: Arc<dyn ToolContext>, params: Value) -> ZResult<ToolResponse> {
         // Extract parameters
         let url = params["url"]
             .as_str()
@@ -234,7 +230,11 @@ impl Tool for WebScraperTool {
 
                 // Truncate text to avoid overwhelming LLM (5000 chars max)
                 let truncated = if content.text.len() > 5000 {
-                    format!("{}... (truncated from {} chars)", &content.text[..5000], content.text.len())
+                    format!(
+                        "{}... (truncated from {} chars)",
+                        &content.text[..5000],
+                        content.text.len()
+                    )
                 } else {
                     content.text
                 };
@@ -283,7 +283,7 @@ mod tests {
         // Test basic properties without creating HTTP client
         let name = "web_scraper".to_string();
         let desc = "test description".to_string();
-        
+
         // Just verify the tool can be conceptually created
         assert_eq!(name, "web_scraper");
         assert!(!desc.is_empty());
@@ -310,11 +310,16 @@ mod tests {
             },
             "required": ["url"]
         });
-        
+
         assert!(schema["properties"]["url"].is_object());
         assert!(schema["properties"]["selector"].is_object());
         assert!(schema["properties"]["extract_links"].is_object());
-        assert!(schema["required"].as_array().unwrap().contains(&json!("url")));
+        assert!(
+            schema["required"]
+                .as_array()
+                .unwrap()
+                .contains(&json!("url"))
+        );
     }
 
     #[test]
@@ -333,7 +338,7 @@ mod tests {
         "#;
 
         let document = Html::parse_document(html);
-        
+
         // Test title extraction
         let title_selector = Selector::parse("title").unwrap();
         let title = document.select(&title_selector).next().unwrap();
@@ -350,4 +355,3 @@ mod tests {
         assert_eq!(links.len(), 2);
     }
 }
-

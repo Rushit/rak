@@ -3,10 +3,10 @@
 use crate::client::McpClient;
 use crate::types::McpToolInfo;
 use async_trait::async_trait;
-use zdk_core::{Error, Result, Tool, ToolContext, ToolResponse};
 use serde_json::Value;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use zdk_core::{Error, Result, Tool, ToolContext, ToolResponse};
 
 /// Wrapper that adapts an MCP tool to the ZDK Tool trait
 pub struct McpToolWrapper {
@@ -65,4 +65,3 @@ impl Tool for McpToolWrapper {
         })
     }
 }
-

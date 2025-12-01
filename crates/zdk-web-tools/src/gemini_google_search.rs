@@ -4,9 +4,9 @@
 //! **inside the Gemini API**, not locally.
 
 use async_trait::async_trait;
-use zdk_core::{Result as ZResult, Tool, ToolContext, ToolResponse};
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::sync::Arc;
+use zdk_core::{Result as ZResult, Tool, ToolContext, ToolResponse};
 
 /// Gemini Google Search Tool
 ///
@@ -128,11 +128,7 @@ impl Tool for GeminiGoogleSearchTool {
         })
     }
 
-    async fn execute(
-        &self,
-        _ctx: Arc<dyn ToolContext>,
-        _params: Value,
-    ) -> ZResult<ToolResponse> {
+    async fn execute(&self, _ctx: Arc<dyn ToolContext>, _params: Value) -> ZResult<ToolResponse> {
         // This tool doesn't execute locally - it's handled by Gemini API
         // When model-level tool support is added, this will never be called
         //
@@ -163,7 +159,12 @@ mod tests {
         let tool = GeminiGoogleSearchTool::new();
         let schema = tool.schema();
         assert!(schema["properties"]["query"].is_object());
-        assert!(schema["required"].as_array().unwrap().contains(&json!("query")));
+        assert!(
+            schema["required"]
+                .as_array()
+                .unwrap()
+                .contains(&json!("query"))
+        );
     }
 
     #[test]
@@ -182,4 +183,3 @@ mod tests {
         assert_eq!(tool.description(), "Custom description");
     }
 }
-

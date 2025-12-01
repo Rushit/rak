@@ -23,16 +23,16 @@
 
 use anyhow::{Context, Result};
 use futures::{SinkExt, StreamExt};
-use zdk_agent::LLMAgent;
-use zdk_core::Content;
-use zdk_runner::Runner;
-use zdk_server::{rest::create_router, WsClientMessage, WsServerMessage};
-use zdk_session::inmemory::InMemorySessionService;
 use serde_json;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
 use tokio_tungstenite::{connect_async, tungstenite::Message};
+use zdk_agent::LLMAgent;
+use zdk_core::Content;
+use zdk_runner::Runner;
+use zdk_server::{WsClientMessage, WsServerMessage, rest::create_router};
+use zdk_session::inmemory::InMemorySessionService;
 
 #[path = "common.rs"]
 mod common;
@@ -46,11 +46,11 @@ async fn main() -> Result<()> {
     // Start server in background
     println!("1. Starting temporary server...");
     let server_handle = tokio::spawn(start_server());
-    
+
     // Wait for server to be ready
     println!("2. Waiting for server to be ready...");
     sleep(Duration::from_secs(2)).await;
-    
+
     // Check if server is healthy
     if !check_server_health().await {
         anyhow::bail!("Server failed to start properly");
@@ -63,15 +63,15 @@ async fn main() -> Result<()> {
 
     // Give server time to finish processing
     sleep(Duration::from_millis(500)).await;
-    
+
     // Stop server
     println!("\n4. Stopping server...");
     server_handle.abort();
-    
+
     println!("\n╔═══════════════════════════════════════════════════════════╗");
     println!("║                    Example Complete                       ║");
     println!("╚═══════════════════════════════════════════════════════════╝\n");
-    
+
     println!("Key takeaways:");
     println!("  • WebSocket enables bidirectional communication");
     println!("  • Server started automatically for this demo");
@@ -117,7 +117,7 @@ async fn start_server() -> Result<()> {
     // Start server
     let addr = "127.0.0.1:18080";
     let listener = tokio::net::TcpListener::bind(addr).await?;
-    
+
     axum::serve(listener, app).await?;
 
     Ok(())
@@ -126,7 +126,10 @@ async fn start_server() -> Result<()> {
 /// Check if server is healthy by attempting to connect to the port
 async fn check_server_health() -> bool {
     for _ in 0..10 {
-        if tokio::net::TcpStream::connect("127.0.0.1:18080").await.is_ok() {
+        if tokio::net::TcpStream::connect("127.0.0.1:18080")
+            .await
+            .is_ok()
+        {
             return true;
         }
         sleep(Duration::from_millis(500)).await;
@@ -143,7 +146,7 @@ async fn run_websocket_client() -> Result<()> {
     let (ws_stream, _) = connect_async(url)
         .await
         .context("Failed to connect to WebSocket")?;
-    
+
     println!("   ✓ Connected to WebSocket\n");
 
     let (mut write, mut read) = ws_stream.split();
@@ -151,52 +154,50 @@ async fn run_websocket_client() -> Result<()> {
     // Spawn task to receive messages
     let read_handle = tokio::spawn(async move {
         println!("   → Listening for messages...\n");
-        
+
         while let Some(msg) = read.next().await {
             match msg {
-                Ok(Message::Text(text)) => {
-                    match serde_json::from_str::<WsServerMessage>(&text) {
-                        Ok(server_msg) => match server_msg {
-                            WsServerMessage::Started { invocation_id } => {
-                                println!("   ✓ Invocation started: {}", invocation_id);
-                            }
-                            WsServerMessage::Event {
-                                invocation_id: _,
-                                data,
-                            } => {
-                                if let Some(content) = &data.content {
-                                    for part in &content.parts {
-                                        if let zdk_core::Part::Text { text } = part {
-                                            print!("   📨 {}: {}", data.author, text);
-                                            std::io::Write::flush(&mut std::io::stdout()).ok();
-                                        }
+                Ok(Message::Text(text)) => match serde_json::from_str::<WsServerMessage>(&text) {
+                    Ok(server_msg) => match server_msg {
+                        WsServerMessage::Started { invocation_id } => {
+                            println!("   ✓ Invocation started: {}", invocation_id);
+                        }
+                        WsServerMessage::Event {
+                            invocation_id: _,
+                            data,
+                        } => {
+                            if let Some(content) = &data.content {
+                                for part in &content.parts {
+                                    if let zdk_core::Part::Text { text } = part {
+                                        print!("   📨 {}: {}", data.author, text);
+                                        std::io::Write::flush(&mut std::io::stdout()).ok();
                                     }
                                 }
-                                if data.turn_complete {
-                                    println!();
-                                }
                             }
-                            WsServerMessage::Completed { invocation_id } => {
-                                println!("\n   ✓ Invocation completed: {}", invocation_id);
+                            if data.turn_complete {
+                                println!();
                             }
-                            WsServerMessage::Cancelled { invocation_id } => {
-                                println!("   ⚠️  Invocation cancelled: {}", invocation_id);
-                            }
-                            WsServerMessage::Status {
-                                invocation_id,
-                                status,
-                            } => {
-                                println!("   ℹ️  Status for {}: {:?}", invocation_id, status);
-                            }
-                            WsServerMessage::Error { message } => {
-                                println!("   ❌ Error: {}", message);
-                            }
-                        },
-                        Err(e) => {
-                            eprintln!("   ⚠️  Failed to parse message: {}", e);
                         }
+                        WsServerMessage::Completed { invocation_id } => {
+                            println!("\n   ✓ Invocation completed: {}", invocation_id);
+                        }
+                        WsServerMessage::Cancelled { invocation_id } => {
+                            println!("   ⚠️  Invocation cancelled: {}", invocation_id);
+                        }
+                        WsServerMessage::Status {
+                            invocation_id,
+                            status,
+                        } => {
+                            println!("   ℹ️  Status for {}: {:?}", invocation_id, status);
+                        }
+                        WsServerMessage::Error { message } => {
+                            println!("   ❌ Error: {}", message);
+                        }
+                    },
+                    Err(e) => {
+                        eprintln!("   ⚠️  Failed to parse message: {}", e);
                     }
-                }
+                },
                 Ok(Message::Close(_)) => {
                     println!("   → WebSocket closed");
                     break;

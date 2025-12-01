@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use uuid::Uuid;
 
 /// Event represents a single interaction in a conversation.
-/// 
+///
 /// Each event captures a moment in the agent's execution flow, including user messages,
 /// agent responses, tool calls, and metadata. Events are JSON-serializable for streaming
 /// and storage, with camelCase field names for API compatibility.

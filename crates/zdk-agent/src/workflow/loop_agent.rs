@@ -1,8 +1,9 @@
-use zdk_core::{Agent, Error, Event, InvocationContext, Result};
+use crate::builder_common::AgentBuilderCore;
 use async_stream::stream;
 use async_trait::async_trait;
 use futures::stream::{Stream, StreamExt};
 use std::sync::Arc;
+use zdk_core::{Agent, Error, Event, InvocationContext, Result};
 
 /// LoopAgent repeatedly runs its sub-agents in sequence for a specified number
 /// of iterations or until a termination condition is met.
@@ -10,8 +11,8 @@ use std::sync::Arc;
 /// Use the LoopAgent when your workflow involves repetition or iterative
 /// refinement, such as revising code or iteratively improving responses.
 pub struct LoopAgent {
-    pub(crate) name: String,
-    pub(crate) description: String,
+    pub(crate) name: Arc<str>,
+    pub(crate) description: Arc<str>,
     pub(crate) sub_agents: Vec<Arc<dyn Agent>>,
     pub(crate) max_iterations: u32,
 }
@@ -90,8 +91,7 @@ impl Agent for LoopAgent {
 
 /// Builder for LoopAgent
 pub struct LoopAgentBuilder {
-    name: Option<String>,
-    description: Option<String>,
+    core: AgentBuilderCore,
     sub_agents: Vec<Arc<dyn Agent>>,
     max_iterations: u32,
 }
@@ -99,20 +99,19 @@ pub struct LoopAgentBuilder {
 impl LoopAgentBuilder {
     pub fn new() -> Self {
         Self {
-            name: None,
-            description: None,
+            core: AgentBuilderCore::new(),
             sub_agents: Vec::new(),
             max_iterations: 0, // 0 = infinite
         }
     }
 
     pub fn name(mut self, name: impl Into<String>) -> Self {
-        self.name = Some(name.into());
+        self.core.with_name(name);
         self
     }
 
     pub fn description(mut self, description: impl Into<String>) -> Self {
-        self.description = Some(description.into());
+        self.core.with_description(description);
         self
     }
 
@@ -132,22 +131,19 @@ impl LoopAgentBuilder {
     }
 
     pub fn build(self) -> Result<LoopAgent> {
-        let name = self
-            .name
-            .ok_or_else(|| Error::Other(anyhow::anyhow!("LoopAgent name is required")))?;
-        let description = self
-            .description
-            .unwrap_or_else(|| "A loop agent that iterates over sub-agents".to_string());
+        let (name, description) = self
+            .core
+            .validate("LoopAgent", "A loop agent that iterates over sub-agents")?;
 
         if self.sub_agents.is_empty() {
-            return Err(Error::Other(anyhow::anyhow!(
-                "LoopAgent requires at least one sub-agent"
-            )));
+            return Err(Error::Config(
+                "LoopAgent requires at least one sub-agent".to_string(),
+            ));
         }
 
         Ok(LoopAgent {
-            name,
-            description,
+            name: Arc::from(name),
+            description: Arc::from(description),
             sub_agents: self.sub_agents,
             max_iterations: self.max_iterations,
         })
@@ -163,59 +159,15 @@ impl Default for LoopAgentBuilder {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use zdk_core::{Content, Part};
-
-    // Mock agent for testing
-    struct MockAgent {
-        name: String,
-        response: String,
-        escalate: bool,
-    }
-
-    #[async_trait]
-    impl Agent for MockAgent {
-        fn name(&self) -> &str {
-            &self.name
-        }
-
-        fn description(&self) -> &str {
-            "Mock agent"
-        }
-
-        async fn run(
-            &self,
-            ctx: Arc<dyn InvocationContext>,
-        ) -> Box<dyn Stream<Item = Result<Event>> + Send + Unpin> {
-            let response = self.response.clone();
-            let escalate = self.escalate;
-            let invocation_id = ctx.invocation_id().to_string();
-            let name = self.name.clone();
-
-            Box::new(Box::pin(stream! {
-                let mut event = Event::new(invocation_id, name);
-                event.content = Some(Content {
-                    role: "model".to_string(),
-                    parts: vec![Part::Text { text: response }],
-                });
-                event.turn_complete = true;
-                event.actions.escalate = escalate;
-
-                yield Ok(event);
-            }))
-        }
-
-        fn sub_agents(&self) -> &[Arc<dyn Agent>] {
-            &[]
-        }
-    }
+    use crate::testing::MockAgent;
 
     #[test]
     fn test_loop_agent_builder() {
-        let agent1 = Arc::new(MockAgent {
-            name: "agent1".to_string(),
-            response: "Response 1".to_string(),
-            escalate: false,
-        });
+        let agent1 = Arc::new(
+            MockAgent::new("agent1")
+                .with_response("Response 1")
+                .with_escalate(false),
+        );
 
         let loop_agent = LoopAgent::builder()
             .name("test_loop")
@@ -231,11 +183,11 @@ mod tests {
 
     #[test]
     fn test_loop_agent_requires_name() {
-        let agent1 = Arc::new(MockAgent {
-            name: "agent1".to_string(),
-            response: "Response 1".to_string(),
-            escalate: false,
-        });
+        let agent1 = Arc::new(
+            MockAgent::new("agent1")
+                .with_response("Response 1")
+                .with_escalate(false),
+        );
 
         let result = LoopAgent::builder().sub_agent(agent1).build();
 

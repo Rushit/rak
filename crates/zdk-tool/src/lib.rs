@@ -14,7 +14,7 @@ pub mod schema;
 // Re-exports
 pub use context::DefaultToolContext;
 pub use function_tool::FunctionTool;
-pub use schema::{generate_schema, ToolSchema};
+pub use schema::{ToolSchema, generate_schema};
 
 // Re-export core types
 pub use zdk_core::{Result, Tool, ToolContext, ToolResponse};

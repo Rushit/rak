@@ -62,7 +62,7 @@ pub enum ArtifactPart {
 }
 
 mod base64_serde {
-    use base64::{engine::general_purpose, Engine as _};
+    use base64::{Engine as _, engine::general_purpose};
     use serde::{Deserialize, Deserializer, Serializer};
 
     pub fn serialize<S>(data: &Vec<u8>, serializer: S) -> Result<S::Ok, S::Error>

@@ -7,11 +7,11 @@
 //!
 //! Run with: cargo run --example memory_usage
 
+use std::collections::HashMap;
+use std::sync::Arc;
 use zdk_core::{Content, Event};
 use zdk_memory::{InMemoryMemoryService, MemoryService, SearchRequest};
 use zdk_session::Session;
-use std::collections::HashMap;
-use std::sync::Arc;
 
 /// Simple mock session for demonstration
 struct DemoSession {

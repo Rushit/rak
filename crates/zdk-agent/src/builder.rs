@@ -1,11 +1,11 @@
+use crate::builder_common::AgentBuilderCore;
 use crate::llm_agent::LLMAgent;
-use zdk_core::{Agent, Error, Result, Tool, Toolset, LLM};
 use std::collections::HashMap;
 use std::sync::Arc;
+use zdk_core::{Agent, Error, LLM, Result, Tool, Toolset};
 
 pub struct LLMAgentBuilder {
-    name: Option<String>,
-    description: Option<String>,
+    core: AgentBuilderCore,
     model: Option<Arc<dyn LLM>>,
     system_instruction: Option<String>,
     sub_agents: Vec<Arc<dyn Agent>>,
@@ -16,8 +16,7 @@ pub struct LLMAgentBuilder {
 impl LLMAgentBuilder {
     pub fn new() -> Self {
         Self {
-            name: None,
-            description: None,
+            core: AgentBuilderCore::new(),
             model: None,
             system_instruction: None,
             sub_agents: Vec::new(),
@@ -27,12 +26,12 @@ impl LLMAgentBuilder {
     }
 
     pub fn name(mut self, name: impl Into<String>) -> Self {
-        self.name = Some(name.into());
+        self.core.with_name(name);
         self
     }
 
     pub fn description(mut self, description: impl Into<String>) -> Self {
-        self.description = Some(description.into());
+        self.core.with_description(description);
         self
     }
 
@@ -69,19 +68,14 @@ impl LLMAgentBuilder {
     }
 
     pub fn build(self) -> Result<LLMAgent> {
-        let name = self
-            .name
-            .ok_or_else(|| Error::Other(anyhow::anyhow!("Agent name is required")))?;
-        let description = self
-            .description
-            .unwrap_or_else(|| "An LLM-powered agent".to_string());
+        let (name, description) = self.core.validate("LLMAgent", "An LLM-powered agent")?;
         let model = self
             .model
-            .ok_or_else(|| Error::Other(anyhow::anyhow!("Model is required")))?;
+            .ok_or_else(|| Error::Config("Model is required".to_string()))?;
 
         Ok(LLMAgent {
-            name,
-            description,
+            name: Arc::from(name),
+            description: Arc::from(description),
             model,
             system_instruction: self.system_instruction,
             sub_agents: self.sub_agents,

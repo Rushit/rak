@@ -67,10 +67,16 @@ key = "${GOOGLE_API_KEY}"
 # =============================================================================
 # Model Configuration
 # =============================================================================
+# ZDK supports multiple LLM providers:
+# - "gemini"     : Google Gemini models (via API key or Vertex AI)
+# - "openai"     : OpenAI GPT models
+# - "anthropic"  : Anthropic Claude models (coming soon)
+# - "local"      : Local models via Ollama (coming soon)
 
 [model]
-provider = "gemini"
-model_name = "gemini-2.0-flash-exp"
+# Select your provider
+provider = "gemini"          # Options: "gemini", "openai", "anthropic", "local"
+model_name = "gemini-2.0-flash-exp"  # Model ID for your chosen provider
 
 # Legacy: API key can also be set here (deprecated, use [auth] instead)
 # api_key = "${GEMINI_API_KEY}"
@@ -78,12 +84,25 @@ model_name = "gemini-2.0-flash-exp"
 # =============================================================================
 # OpenAI Configuration (Optional)
 # =============================================================================
-# Set this if you want to use OpenAI models (gpt-4o, gpt-4o-mini, etc.)
+# Set these if provider = "openai" or if you want OpenAI available as fallback
+# Get your API key from: https://platform.openai.com/api-keys
 
 # Option 1: Environment variable (recommended)
-openai_api_key = "${OPENAI_API_KEY}"
+# openai_api_key = "${OPENAI_API_KEY}"
 # Option 2: Direct value (only for local development, never commit!)
 # openai_api_key = "sk-your-openai-api-key-here"
+
+# Optional: Custom OpenAI-compatible endpoint
+# openai_base_url = "https://api.openai.com/v1"  # Default OpenAI endpoint
+# openai_base_url = "http://localhost:11434/v1"  # Example: Ollama OpenAI-compatible endpoint
+
+# =============================================================================
+# Anthropic Configuration (Optional - Coming Soon)
+# =============================================================================
+# Set these if provider = "anthropic"
+# Get your API key from: https://console.anthropic.com/
+
+# anthropic_api_key = "${ANTHROPIC_API_KEY}"
 
 # =============================================================================
 # Server Configuration

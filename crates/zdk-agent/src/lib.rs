@@ -1,7 +1,11 @@
 //! Agent implementations for ZDK
 
 pub mod builder;
+pub mod builder_common;
 pub mod llm_agent;
+#[cfg(test)]
+pub mod testing;
+pub mod utils;
 pub mod workflow;
 
 pub use builder::LLMAgentBuilder;
@@ -14,45 +18,13 @@ pub use workflow::{
 #[cfg(test)]
 mod tests {
     use super::*;
-    use zdk_core::{Agent, Content, LLMRequest, LLMResponse, Part, Result, LLM};
-    use async_stream::stream;
-    use async_trait::async_trait;
-    use futures::stream::Stream;
+    use crate::testing::MockLLM;
     use std::sync::Arc;
-
-    struct MockLLM;
-
-    #[async_trait]
-    impl LLM for MockLLM {
-        fn name(&self) -> &str {
-            "mock"
-        }
-
-        async fn generate_content(
-            &self,
-            _request: LLMRequest,
-            _stream: bool,
-        ) -> Box<dyn Stream<Item = Result<LLMResponse>> + Send + Unpin> {
-            Box::new(Box::pin(stream! {
-                yield Ok(LLMResponse {
-                    content: Some(Content {
-                        role: "model".to_string(),
-                        parts: vec![Part::Text { text: "Test response".to_string() }],
-                    }),
-                    partial: false,
-                    turn_complete: true,
-                    interrupted: false,
-                    finish_reason: Some("STOP".to_string()),
-                    error_code: None,
-                    error_message: None,
-                });
-            }))
-        }
-    }
+    use zdk_core::Agent;
 
     #[test]
     fn test_builder_creates_agent() {
-        let model = Arc::new(MockLLM);
+        let model = Arc::new(MockLLM::new());
 
         let agent = LLMAgent::builder()
             .name("test-agent")
@@ -67,7 +39,7 @@ mod tests {
 
     #[test]
     fn test_builder_requires_name() {
-        let model = Arc::new(MockLLM);
+        let model = Arc::new(MockLLM::new());
 
         let result = LLMAgent::builder().model(model).build();
 

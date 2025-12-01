@@ -1,9 +1,9 @@
 use super::types::*;
-use zdk_core::{Error, LLMRequest, LLMResponse, Result, LLM};
 use async_stream::stream;
 use async_trait::async_trait;
 use futures::stream::{Stream, StreamExt};
 use reqwest::Client;
+use zdk_core::{Error, LLM, LLMRequest, LLMResponse, Result};
 
 /// Authentication method for Gemini API
 #[derive(Clone, Debug)]
@@ -80,7 +80,6 @@ impl GeminiModel {
             }
         }
     }
-
 }
 
 #[async_trait]
@@ -138,12 +137,12 @@ impl LLM for GeminiModel {
             // Streaming response
             Box::new(Box::pin(stream! {
                 let mut req_builder = client.post(&url).json(&gemini_req);
-                
+
                 // Add auth header if using bearer token
                 if let GeminiAuth::BearerToken(token) = &auth {
                     req_builder = req_builder.bearer_auth(token);
                 }
-                
+
                 let response = req_builder.send().await;
 
                 match response {
@@ -207,12 +206,12 @@ impl LLM for GeminiModel {
             // Non-streaming response
             Box::new(Box::pin(stream! {
                 let mut req_builder = client.post(&url).json(&gemini_req);
-                
+
                 // Add auth header if using bearer token
                 if let GeminiAuth::BearerToken(token) = &auth {
                     req_builder = req_builder.bearer_auth(token);
                 }
-                
+
                 let response = req_builder.send().await;
 
                 match response {
@@ -220,7 +219,7 @@ impl LLM for GeminiModel {
                         // Get response text for debugging
                         let response_text = resp.text().await.unwrap_or_else(|_| "failed to read response".to_string());
                         // eprintln!("DEBUG: Gemini API response: {}", response_text);
-                        
+
                         match serde_json::from_str::<GeminiResponse>(&response_text) {
                             Ok(gemini_resp) => {
                                 if let Some(candidate) = gemini_resp.candidates.first() {
@@ -253,18 +252,18 @@ impl LLM for GeminiModel {
 fn extract_json(buffer: &mut String) -> Option<String> {
     // Find the start of a JSON object
     let start = buffer.find('{')?;
-    
+
     // Track brace depth to find the matching closing brace
     let mut depth = 0;
     let mut in_string = false;
     let mut escape_next = false;
-    
+
     for (i, c) in buffer[start..].char_indices() {
         if escape_next {
             escape_next = false;
             continue;
         }
-        
+
         match c {
             '\\' if in_string => escape_next = true,
             '"' => in_string = !in_string,
@@ -282,6 +281,6 @@ fn extract_json(buffer: &mut String) -> Option<String> {
             _ => {}
         }
     }
-    
+
     None
 }

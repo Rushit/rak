@@ -1,10 +1,10 @@
+use futures::StreamExt;
+use std::sync::Arc;
 use zdk_agent::LLMAgent;
 use zdk_core::Content;
 use zdk_runner::Runner;
 use zdk_session::inmemory::InMemorySessionService;
 use zdk_tool::builtin::{create_calculator_tool, create_echo_tool};
-use futures::StreamExt;
-use std::sync::Arc;
 
 #[path = "common.rs"]
 mod common;
@@ -77,7 +77,7 @@ async fn main() -> anyhow::Result<()> {
                             zdk_core::Part::FunctionCall { function_call } => {
                                 println!(
                                     "  Function Call: {} ({})",
-                                    function_call.name, 
+                                    function_call.name,
                                     function_call.id.as_deref().unwrap_or("no-id")
                                 );
                                 println!("    Args: {}", function_call.args);
@@ -85,7 +85,7 @@ async fn main() -> anyhow::Result<()> {
                             zdk_core::Part::FunctionResponse { function_response } => {
                                 println!(
                                     "  Function Response: {} ({})",
-                                    function_response.name, 
+                                    function_response.name,
                                     function_response.id.as_deref().unwrap_or("no-id")
                                 );
                                 println!("    Result: {}", function_response.response);

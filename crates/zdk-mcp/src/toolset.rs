@@ -4,9 +4,9 @@ use crate::client::McpClient;
 use crate::connection::StdioConnectionParams;
 use crate::tool_wrapper::McpToolWrapper;
 use async_trait::async_trait;
-use zdk_core::{InvocationContext, Result, Tool, Toolset};
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use zdk_core::{InvocationContext, Result, Tool, Toolset};
 
 /// A toolset that dynamically loads tools from an MCP server
 pub struct McpToolset {
@@ -37,7 +37,9 @@ impl Toolset for McpToolset {
         if client_guard.is_none() {
             let client = McpClient::new(self.connection_params.clone())
                 .await
-                .map_err(|e| zdk_core::Error::Other(anyhow::anyhow!("Failed to create MCP client: {}", e)))?;
+                .map_err(|e| {
+                    zdk_core::Error::Other(anyhow::anyhow!("Failed to create MCP client: {}", e))
+                })?;
             *client_guard = Some(client);
         }
 
@@ -130,4 +132,3 @@ impl McpToolsetBuilder {
         })
     }
 }
-

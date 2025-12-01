@@ -1,10 +1,6 @@
 // Integration tests for ZDK
 // These tests verify the full stack E2E functionality
 
-use zdk_agent::LLMAgent;
-use zdk_core::{Content, Event, LLMRequest, LLMResponse, Part, Result, LLM};
-use zdk_runner::{RunConfig, Runner};
-use zdk_session::{inmemory::InMemorySessionService, SessionService};
 use async_stream::stream;
 use async_trait::async_trait;
 use axum::{
@@ -14,6 +10,10 @@ use axum::{
 use futures::stream::{Stream, StreamExt};
 use std::sync::Arc;
 use tower::ServiceExt;
+use zdk_agent::LLMAgent;
+use zdk_core::{Content, Event, LLM, LLMRequest, LLMResponse, Part, Result};
+use zdk_runner::{RunConfig, Runner};
+use zdk_session::{SessionService, inmemory::InMemorySessionService};
 
 // Mock LLM for deterministic testing
 struct TestLLM {
@@ -281,7 +281,6 @@ async fn test_e2e_multiple_turns_in_session() {
 
 #[tokio::test]
 async fn test_event_format_matches_spec() {
-
     let event = Event::new("test-inv".to_string(), "test-agent".to_string());
 
     // Serialize to JSON

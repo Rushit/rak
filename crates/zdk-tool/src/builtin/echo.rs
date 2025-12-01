@@ -39,8 +39,8 @@ pub fn create_echo_tool() -> Result<FunctionTool> {
 mod tests {
     use super::*;
     use crate::context::DefaultToolContext;
-    use zdk_core::Tool;
     use std::sync::Arc;
+    use zdk_core::Tool;
 
     #[tokio::test]
     async fn test_echo_tool() {

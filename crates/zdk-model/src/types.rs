@@ -1,5 +1,5 @@
-use zdk_core::Content;
 use serde::{Deserialize, Serialize};
+use zdk_core::Content;
 
 // ============================================================================
 // Gemini Types

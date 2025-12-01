@@ -1,9 +1,9 @@
 use super::types::*;
-use zdk_core::{Content, Error, LLMRequest, LLMResponse, Part, Result, LLM};
 use async_stream::stream;
 use async_trait::async_trait;
 use futures::stream::{Stream, StreamExt};
 use reqwest::Client;
+use zdk_core::{Content, Error, LLM, LLMRequest, LLMResponse, Part, Result};
 
 pub struct OpenAIModel {
     client: Client,
@@ -139,7 +139,7 @@ impl LLM for OpenAIModel {
                                         for line in text.lines() {
                                             if line.starts_with("data: ") {
                                                 let json_str = &line[6..];
-                                                
+
                                                 // Check for end of stream
                                                 if json_str.trim() == "[DONE]" {
                                                     continue;
@@ -150,7 +150,7 @@ impl LLM for OpenAIModel {
                                                         if let Some(choice) = stream_resp.choices.first() {
                                                             if let Some(ref content) = choice.delta.content {
                                                                 accumulated_text.push_str(content);
-                                                                
+
                                                                 let finish_reason = choice.finish_reason.clone();
                                                                 let is_done = finish_reason.is_some();
 
@@ -248,4 +248,3 @@ impl LLM for OpenAIModel {
         }
     }
 }
-

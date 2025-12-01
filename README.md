@@ -87,18 +87,17 @@ zdk-mcp = { path = "path/to/zdk-rs/crates/zdk-mcp" }  # Optional: for MCP protoc
 
 ```rust
 use zdk_agent::LLMAgent;
-use zdk_model::GeminiModel;
 use zdk_runner::Runner;
 use zdk_session::inmemory::InMemorySessionService;
-use zdk_core::{Content, ZConfig};  // NEW: ZConfig
+use zdk_core::{Content, ZConfig};
+use zdk_model::ZConfigExt;  // Adds create_model() extension
 use std::sync::Arc;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    // Setup (NEW: Load from config.toml)
+    // Setup: Load config and create model (handles provider & auth)
     let config = ZConfig::load()?;
-    let api_key = config.api_key()?;
-    let model = Arc::new(GeminiModel::new(api_key, config.model.model_name));
+    let model = config.create_model()?;  // ✨ Simplified!
     
     let agent = LLMAgent::builder()
         .name("assistant")

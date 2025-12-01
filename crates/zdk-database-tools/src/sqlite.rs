@@ -2,12 +2,12 @@
 
 use crate::config::{DatabaseToolConfig, SqlOperation};
 use crate::types::{ColumnInfo, ConstraintInfo, IndexInfo, TableInfo, TableSchema};
-use zdk_core::{Error as ZError, Result as ZResult, Tool, ToolContext, ToolResponse};
-use zdk_tool::{FunctionTool, ToolSchema};
 use async_trait::async_trait;
 use sqlx::{sqlite::SqlitePoolOptions, Column, Pool, Row, Sqlite};
 use std::sync::Arc;
 use std::time::Duration;
+use zdk_core::{Error as ZError, Result as ZResult, Tool, ToolContext, ToolResponse};
+use zdk_tool::{FunctionTool, ToolSchema};
 
 /// Create SQLite tools with default configuration (read-only)
 pub async fn create_sqlite_tools(connection_string: &str) -> ZResult<Vec<Arc<dyn Tool>>> {
@@ -84,8 +84,9 @@ fn create_list_tables_tool(pool: Pool<Sqlite>) -> ZResult<FunctionTool> {
                     .collect();
 
                 Ok(ToolResponse {
-                    result: serde_json::to_value(&tables)
-                        .map_err(|e| ZError::Other(anyhow::anyhow!("Serialization error: {}", e)))?,
+                    result: serde_json::to_value(&tables).map_err(|e| {
+                        ZError::Other(anyhow::anyhow!("Serialization error: {}", e))
+                    })?,
                 })
             }
         })
@@ -106,9 +107,9 @@ fn create_describe_table_tool(pool: Pool<Sqlite>) -> ZResult<FunctionTool> {
         .execute(move |ctx, params| {
             let pool = pool.clone();
             async move {
-                let table_name = params["table_name"]
-                    .as_str()
-                    .ok_or_else(|| ZError::Other(anyhow::anyhow!("Missing table_name parameter")))?;
+                let table_name = params["table_name"].as_str().ok_or_else(|| {
+                    ZError::Other(anyhow::anyhow!("Missing table_name parameter"))
+                })?;
 
                 tracing::debug!(
                     invocation_id = %ctx.invocation_id(),
@@ -119,10 +120,9 @@ fn create_describe_table_tool(pool: Pool<Sqlite>) -> ZResult<FunctionTool> {
                 // Get column information using PRAGMA
                 let query = format!("PRAGMA table_info({})", table_name);
 
-                let rows = sqlx::query(&query)
-                    .fetch_all(&pool)
-                    .await
-                    .map_err(|e| ZError::Other(anyhow::anyhow!("Failed to describe table: {}", e)))?;
+                let rows = sqlx::query(&query).fetch_all(&pool).await.map_err(|e| {
+                    ZError::Other(anyhow::anyhow!("Failed to describe table: {}", e))
+                })?;
 
                 let columns: Vec<ColumnInfo> = rows
                     .iter()
@@ -137,13 +137,14 @@ fn create_describe_table_tool(pool: Pool<Sqlite>) -> ZResult<FunctionTool> {
                 let table_schema = TableSchema {
                     table_name: table_name.to_string(),
                     columns,
-                    indexes: Vec::new(), // Would need PRAGMA index_list
+                    indexes: Vec::new(),     // Would need PRAGMA index_list
                     constraints: Vec::new(), // Would need additional queries
                 };
 
                 Ok(ToolResponse {
-                    result: serde_json::to_value(&table_schema)
-                        .map_err(|e| ZError::Other(anyhow::anyhow!("Serialization error: {}", e)))?,
+                    result: serde_json::to_value(&table_schema).map_err(|e| {
+                        ZError::Other(anyhow::anyhow!("Serialization error: {}", e))
+                    })?,
                 })
             }
         })
@@ -204,7 +205,9 @@ fn create_query_tool(pool: Pool<Sqlite>, config: DatabaseToolConfig) -> ZResult<
                             let value: Option<String> = row.try_get(i).ok();
                             map.insert(
                                 column.name().to_string(),
-                                value.map(serde_json::Value::String).unwrap_or(serde_json::Value::Null),
+                                value
+                                    .map(serde_json::Value::String)
+                                    .unwrap_or(serde_json::Value::Null),
                             );
                         }
                         serde_json::Value::Object(map)
@@ -225,7 +228,11 @@ fn create_query_tool(pool: Pool<Sqlite>, config: DatabaseToolConfig) -> ZResult<
 /// Create a tool to execute INSERT/UPDATE/DELETE queries
 fn create_execute_tool(pool: Pool<Sqlite>, config: DatabaseToolConfig) -> ZResult<FunctionTool> {
     let schema = ToolSchema::new()
-        .property("sql", "string", "SQL query to execute (INSERT, UPDATE, DELETE)")
+        .property(
+            "sql",
+            "string",
+            "SQL query to execute (INSERT, UPDATE, DELETE)",
+        )
         .required("sql")
         .build();
 
@@ -287,4 +294,3 @@ mod tests {
         assert_eq!(tools[0].name(), "sqlite_list_tables");
     }
 }
-

@@ -18,6 +18,8 @@
 //! RUST_LOG=debug cargo run --example telemetry_usage
 //! ```
 
+use futures::StreamExt;
+use std::sync::Arc;
 use zdk_agent::LLMAgent;
 use zdk_core::{AuthCredentials, Content, Part, ZConfig};
 use zdk_model::GeminiModel;
@@ -25,8 +27,6 @@ use zdk_runner::Runner;
 use zdk_session::inmemory::InMemorySessionService;
 use zdk_telemetry::init_telemetry;
 use zdk_tool::builtin::{create_calculator_tool, create_echo_tool};
-use futures::StreamExt;
-use std::sync::Arc;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -43,17 +43,22 @@ async fn main() -> anyhow::Result<()> {
 
     // Load configuration
     let config = ZConfig::load()?;
-    
+
     // Get authentication credentials from config
     let creds = config.get_auth_credentials()?;
-    
+
     // Create LLM model based on auth type
     let model: Arc<GeminiModel> = match creds {
         AuthCredentials::ApiKey { key } => {
             println!("✓ Using API Key authentication\n");
             Arc::new(GeminiModel::new(key, config.model.model_name.clone()))
         }
-        AuthCredentials::GCloud { token, project, location, .. } => {
+        AuthCredentials::GCloud {
+            token,
+            project,
+            location,
+            ..
+        } => {
             println!("✓ Using Google Cloud authentication");
             println!("  Project: {}", project);
             println!("  Location: {}\n", location);
@@ -133,4 +138,3 @@ async fn main() -> anyhow::Result<()> {
 
     Ok(())
 }
-

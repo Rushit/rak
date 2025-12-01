@@ -133,7 +133,9 @@ impl AuthConfig {
                 AuthLocation::Query => builder.query(&[(name, key)]),
             },
             AuthConfig::Bearer { token } => builder.bearer_auth(token),
-            AuthConfig::Basic { username, password } => builder.basic_auth(username, Some(password)),
+            AuthConfig::Basic { username, password } => {
+                builder.basic_auth(username, Some(password))
+            }
         }
     }
 }
@@ -173,4 +175,3 @@ mod tests {
         assert!(matches!(auth, AuthConfig::Basic { .. }));
     }
 }
-

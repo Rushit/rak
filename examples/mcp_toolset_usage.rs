@@ -13,13 +13,13 @@
 mod common;
 
 use anyhow::Result;
+use futures::StreamExt;
+use std::sync::Arc;
 use zdk_agent::LLMAgent;
 use zdk_core::{Agent, Content, Part};
 use zdk_mcp::{McpToolset, StdioConnectionParams};
 use zdk_runner::{RunConfig, Runner};
 use zdk_session::inmemory::InMemorySessionService;
-use futures::StreamExt;
-use std::sync::Arc;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -79,9 +79,15 @@ async fn main() -> Result<()> {
         .build()?;
 
     // Run the agent - tools will be dynamically loaded from MCP server
-    let content = Content::new_user_text("List all tables in the database and show their structure");
+    let content =
+        Content::new_user_text("List all tables in the database and show their structure");
     let mut stream = runner
-        .run("user-1".to_string(), "session-mcp".to_string(), content, RunConfig::default())
+        .run(
+            "user-1".to_string(),
+            "session-mcp".to_string(),
+            content,
+            RunConfig::default(),
+        )
         .await?;
 
     tracing::info!("Starting agent execution with MCP tools...");
@@ -100,7 +106,10 @@ async fn main() -> Result<()> {
                                 tracing::info!("Calling MCP tool: {}", function_call.name);
                             }
                             Part::FunctionResponse { function_response } => {
-                                tracing::info!("MCP tool response: {:?}", function_response.response);
+                                tracing::info!(
+                                    "MCP tool response: {:?}",
+                                    function_response.response
+                                );
                             }
                             _ => {}
                         }
@@ -117,4 +126,3 @@ async fn main() -> Result<()> {
 
     Ok(())
 }
-

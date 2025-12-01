@@ -1,9 +1,9 @@
-use zdk_agent::{LoopAgent, ParallelAgent, SequentialAgent};
-use zdk_core::{Agent, Content, Event, InvocationContext, Part, ReadonlyContext, Result};
 use async_stream::stream;
 use async_trait::async_trait;
 use futures::stream::{Stream, StreamExt};
 use std::sync::Arc;
+use zdk_agent::{LoopAgent, ParallelAgent, SequentialAgent};
+use zdk_core::{Agent, Content, Event, InvocationContext, Part, ReadonlyContext, Result};
 
 // Mock context for testing
 struct MockContext {

@@ -10,9 +10,9 @@
 #![allow(dead_code)] // Functions are used by examples that include this module
 
 use anyhow::{Context, Result};
-use zdk_core::{AuthCredentials, ZConfig, LLM};
-use zdk_model::GeminiModel;
 use std::sync::Arc;
+use zdk_core::{AuthCredentials, LLM, ZConfig};
+use zdk_model::{GeminiModel, ZConfigExt};
 
 /// Create an authenticated Gemini model from configuration
 ///
@@ -48,34 +48,16 @@ use std::sync::Arc;
 /// - API key is missing or invalid (when using api_key provider)
 /// - GCP project cannot be determined
 pub fn create_gemini_model(config: &ZConfig) -> Result<Arc<dyn LLM>> {
-    // Get authentication credentials from config
-    let creds = config
-        .get_auth_credentials()
-        .context("Failed to get authentication credentials from config")?;
+    // Use the new simplified factory pattern
+    let model = config
+        .create_model()
+        .context("Failed to create model from config")?;
 
-    // Create model based on auth type
-    let model: Arc<dyn LLM> = match creds {
-        AuthCredentials::ApiKey { key } => {
-            println!("✓ Using API Key authentication");
-            Arc::new(GeminiModel::new(key, config.model.model_name.clone()))
-        }
-        AuthCredentials::GCloud {
-            token,
-            project,
-            location,
-            ..
-        } => {
-            println!("✓ Using Google Cloud authentication");
-            println!("  Project: {}", project);
-            println!("  Location: {}", location);
-            Arc::new(GeminiModel::with_bearer_token(
-                token,
-                config.model.model_name.clone(),
-                project,
-                location,
-            ))
-        }
-    };
+    // Print what we're using
+    println!(
+        "✓ Model created: {} (provider: {})",
+        config.model.model_name, config.model.provider
+    );
 
     Ok(model)
 }
@@ -177,7 +159,7 @@ pub fn show_auth_info(config: &ZConfig) -> Result<()> {
 pub fn print_header(title: &str) {
     let width = 60;
     let padding = (width - title.len() - 2) / 2;
-    
+
     println!("\n╔{}╗", "═".repeat(width));
     println!(
         "║{}{title}{}║",
@@ -197,4 +179,3 @@ mod tests {
         // Actual functionality tested in integration tests
     }
 }
-

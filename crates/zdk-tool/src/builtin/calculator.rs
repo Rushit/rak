@@ -69,8 +69,8 @@ fn evaluate_expression(expr: &str) -> Result<f64> {
 mod tests {
     use super::*;
     use crate::context::DefaultToolContext;
-    use zdk_core::Tool;
     use std::sync::Arc;
+    use zdk_core::Tool;
 
     #[tokio::test]
     async fn test_calculator_tool() {

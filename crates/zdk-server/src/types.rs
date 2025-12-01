@@ -1,5 +1,5 @@
-use zdk_core::{Content, Event};
 use serde::{Deserialize, Serialize};
+use zdk_core::{Content, Event};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateSessionRequest {

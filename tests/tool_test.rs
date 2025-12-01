@@ -1,13 +1,13 @@
-use zdk_agent::LLMAgent;
-use zdk_core::{
-    Agent, Content, FunctionCall, InvocationContext, LLMRequest, LLMResponse, Part, Tool, LLM,
-};
-use zdk_tool::builtin::{create_calculator_tool, create_echo_tool};
-use zdk_tool::DefaultToolContext;
 use async_stream::stream;
 use async_trait::async_trait;
 use futures::stream::{Stream, StreamExt};
 use std::sync::Arc;
+use zdk_agent::LLMAgent;
+use zdk_core::{
+    Agent, Content, FunctionCall, InvocationContext, LLM, LLMRequest, LLMResponse, Part, Tool,
+};
+use zdk_tool::DefaultToolContext;
+use zdk_tool::builtin::{create_calculator_tool, create_echo_tool};
 
 // Mock LLM for testing
 struct MockLLM {

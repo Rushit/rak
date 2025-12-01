@@ -38,3 +38,38 @@ pub enum Error {
     #[error(transparent)]
     Other(#[from] anyhow::Error),
 }
+
+impl Error {
+    /// Helper for creating configuration errors
+    ///
+    /// # Example
+    /// ```
+    /// use zdk_core::Error;
+    /// let err = Error::config_error("Invalid model configuration");
+    /// ```
+    pub fn config_error(msg: impl Into<String>) -> Self {
+        Error::Config(msg.into())
+    }
+
+    /// Helper for creating general errors with a message
+    ///
+    /// # Example
+    /// ```
+    /// use zdk_core::Error;
+    /// let err = Error::message("Something went wrong");
+    /// ```
+    pub fn message(msg: impl Into<String>) -> Self {
+        Error::Other(anyhow::anyhow!("{}", msg.into()))
+    }
+
+    /// Helper for creating authentication errors
+    ///
+    /// # Example
+    /// ```
+    /// use zdk_core::Error;
+    /// let err = Error::auth_error("Invalid API key");
+    /// ```
+    pub fn auth_error(msg: impl Into<String>) -> Self {
+        Error::Auth(msg.into())
+    }
+}

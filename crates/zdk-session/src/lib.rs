@@ -1,9 +1,9 @@
 //! Session management for ZDK
 
-use zdk_core::{Event, Result};
 use async_trait::async_trait;
 use std::collections::HashMap;
 use std::sync::Arc;
+use zdk_core::{Event, Result};
 
 pub mod inmemory;
 pub mod types;

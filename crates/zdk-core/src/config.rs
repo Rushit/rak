@@ -6,7 +6,7 @@
 //! 3. Defaults
 
 use crate::auth::{AuthCredentials, AuthProvider};
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::fs;
@@ -17,21 +17,27 @@ use std::path::{Path, PathBuf};
 pub struct ZConfig {
     /// Authentication configuration (API key or gcloud)
     pub auth: AuthProvider,
-    
+
     #[serde(default)]
     pub model: ModelConfig,
-    
+
     #[serde(default)]
     pub server: ServerConfig,
-    
+
     #[serde(default)]
     pub session: SessionConfig,
-    
+
     #[serde(default)]
     pub observability: ObservabilityConfig,
-    
+
     /// OpenAI API key (optional, for OpenAI models)
     pub openai_api_key: Option<String>,
+
+    /// OpenAI base URL (optional, for OpenAI-compatible endpoints)
+    pub openai_base_url: Option<String>,
+
+    /// Anthropic API key (optional, for Claude models)
+    pub anthropic_api_key: Option<String>,
 }
 
 /// Model/LLM configuration
@@ -40,10 +46,10 @@ pub struct ModelConfig {
     /// Model provider (gemini, anthropic, openai, etc.)
     #[serde(default = "default_provider")]
     pub provider: String,
-    
+
     /// API key (can reference env var with ${VAR_NAME})
     pub api_key: Option<String>,
-    
+
     /// Model name
     #[serde(default = "default_model_name")]
     pub model_name: String,
@@ -54,7 +60,7 @@ pub struct ModelConfig {
 pub struct ServerConfig {
     #[serde(default = "default_host")]
     pub host: String,
-    
+
     #[serde(default = "default_port")]
     pub port: u16,
 }
@@ -64,7 +70,7 @@ pub struct ServerConfig {
 pub struct SessionConfig {
     #[serde(default = "default_session_provider")]
     pub provider: String,
-    
+
     pub connection_string: Option<String>,
 }
 
@@ -159,7 +165,7 @@ impl ZConfig {
     /// Find config.toml by searching current directory and parents
     fn find_config_file() -> Result<PathBuf> {
         let mut current = env::current_dir()?;
-        
+
         loop {
             let config_path = current.join("config.toml");
             if config_path.exists() {
@@ -184,7 +190,7 @@ impl ZConfig {
                 config.key = resolved;
             }
         }
-        
+
         // Resolve model.api_key (legacy support)
         if let Some(ref key) = self.model.api_key {
             if let Some(resolved) = Self::resolve_env_var(key) {
@@ -209,6 +215,26 @@ impl ZConfig {
         } else {
             // No openai_api_key in config, try environment variable as fallback
             self.openai_api_key = env::var("OPENAI_API_KEY").ok();
+        }
+
+        // Resolve openai_base_url
+        if let Some(ref url) = self.openai_base_url {
+            if let Some(resolved) = Self::resolve_env_var(url) {
+                self.openai_base_url = Some(resolved);
+            }
+        }
+
+        // Resolve anthropic_api_key
+        if let Some(ref key) = self.anthropic_api_key {
+            if let Some(resolved) = Self::resolve_env_var(key) {
+                self.anthropic_api_key = Some(resolved);
+            } else if key.is_empty() || key == "${ANTHROPIC_API_KEY}" {
+                // If not resolved and it's a reference, try env var directly
+                self.anthropic_api_key = env::var("ANTHROPIC_API_KEY").ok();
+            }
+        } else {
+            // No anthropic_api_key in config, try environment variable as fallback
+            self.anthropic_api_key = env::var("ANTHROPIC_API_KEY").ok();
         }
 
         // Resolve session.connection_string
@@ -239,7 +265,7 @@ impl ZConfig {
         if let AuthProvider::ApiKey { ref config } = self.auth {
             return Ok(config.key.clone());
         }
-        
+
         // Fall back to legacy model.api_key
         self.model.api_key.clone().ok_or_else(|| {
             anyhow!(
@@ -254,7 +280,7 @@ impl ZConfig {
             )
         })
     }
-    
+
     /// Get authentication credentials from configured provider
     ///
     /// This method resolves the authentication configuration into concrete credentials.
@@ -264,7 +290,7 @@ impl ZConfig {
     /// ```ignore
     /// let config = ZConfig::load()?;
     /// let creds = config.get_auth_credentials()?;
-    /// 
+    ///
     /// match creds {
     ///     AuthCredentials::ApiKey { key } => {
     ///         // Use API key
@@ -295,6 +321,8 @@ impl ZConfig {
             session: SessionConfig::default(),
             observability: ObservabilityConfig::default(),
             openai_api_key: Some("test-openai-key".to_string()),
+            openai_base_url: None,
+            anthropic_api_key: Some("test-anthropic-key".to_string()),
         }
     }
 }
@@ -335,13 +363,13 @@ mod tests {
         unsafe {
             env::set_var("TEST_VAR", "test_value");
         }
-        
+
         let resolved = ZConfig::resolve_env_var("${TEST_VAR}");
         assert_eq!(resolved, Some("test_value".to_string()));
-        
+
         let not_var = ZConfig::resolve_env_var("plain_value");
         assert_eq!(not_var, Some("plain_value".to_string()));
-        
+
         unsafe {
             env::remove_var("TEST_VAR");
         }
@@ -364,6 +392,8 @@ mod tests {
             session: SessionConfig::default(),
             observability: ObservabilityConfig::default(),
             openai_api_key: None,
+            openai_base_url: None,
+            anthropic_api_key: None,
         };
 
         // This test now just validates the structure compiles correctly
@@ -372,4 +402,3 @@ mod tests {
         assert!(result.is_ok());
     }
 }
-

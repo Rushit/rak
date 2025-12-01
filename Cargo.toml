@@ -96,7 +96,7 @@ required-features = ["__nonexistent_feature__"]
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
-authors = ["ZDK Team"]
+authors = ["ZVectorLabs.com"]
 license = "Apache-2.0"
 
 [workspace.dependencies]

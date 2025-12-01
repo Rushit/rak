@@ -90,4 +90,3 @@ pub use web_scraper::WebScraperTool;
 
 /// Result type for web tools
 pub type Result<T> = std::result::Result<T, anyhow::Error>;
-

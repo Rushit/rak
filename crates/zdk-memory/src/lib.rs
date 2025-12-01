@@ -53,10 +53,10 @@ pub use service::*;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use zdk_core::{Content, Event};
-    use zdk_session::Session;
     use std::collections::HashMap;
     use std::sync::Arc;
+    use zdk_core::{Content, Event};
+    use zdk_session::Session;
 
     // Mock session for testing
     struct MockSession {

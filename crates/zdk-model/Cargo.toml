@@ -16,7 +16,9 @@ async-stream = { workspace = true }
 anyhow = { workspace = true }
 
 [features]
-default = ["gemini"]
+default = ["gemini", "openai"]
 gemini = []
 openai = []
+anthropic = []  # Not yet implemented
+local = []      # Not yet implemented
 

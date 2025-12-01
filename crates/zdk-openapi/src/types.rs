@@ -84,4 +84,3 @@ pub struct SecurityRequirement {
     /// Required scopes (for OAuth2)
     pub scopes: Vec<String>,
 }
-

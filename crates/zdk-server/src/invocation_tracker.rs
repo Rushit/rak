@@ -133,10 +133,6 @@ mod tests {
 
         tracker.complete(&id);
         // After complete, status should be NotFound (removed)
-        assert!(matches!(
-            tracker.status(&id),
-            InvocationStatus::NotFound
-        ));
+        assert!(matches!(tracker.status(&id), InvocationStatus::NotFound));
     }
 }
-

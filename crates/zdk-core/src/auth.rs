@@ -298,9 +298,7 @@ mod tests {
     #[test]
     fn test_empty_api_key_fails() {
         let auth = AuthProvider::ApiKey {
-            config: ApiKeyConfig {
-                key: String::new(),
-            },
+            config: ApiKeyConfig { key: String::new() },
         };
 
         assert!(auth.get_credentials().is_err());
@@ -345,4 +343,3 @@ mod tests {
         }
     }
 }
-

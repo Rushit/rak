@@ -22,14 +22,14 @@ impl OpenApiParser {
     /// Supports both JSON and YAML formats.
     pub fn from_file(path: &str) -> Result<Self> {
         let content = std::fs::read_to_string(path)?;
-        
+
         // Try JSON first, then YAML
         let spec = if path.ends_with(".json") {
             serde_json::from_str(&content)?
         } else {
             serde_yaml::from_str(&content)?
         };
-        
+
         Ok(Self { spec })
     }
 
@@ -37,11 +37,10 @@ impl OpenApiParser {
     pub async fn from_url(url: &str) -> Result<Self> {
         let response = reqwest::get(url).await?;
         let content = response.text().await?;
-        
+
         // Try JSON first, then YAML
-        let spec = serde_json::from_str(&content)
-            .or_else(|_| serde_yaml::from_str(&content))?;
-        
+        let spec = serde_json::from_str(&content).or_else(|_| serde_yaml::from_str(&content))?;
+
         Ok(Self { spec })
     }
 
@@ -53,14 +52,14 @@ impl OpenApiParser {
         let spec = serde_json::from_str(content)
             .or_else(|_| serde_yaml::from_str(content))
             .map_err(|e| OpenApiError::ParseError(e.to_string()))?;
-        
+
         Ok(Self { spec })
     }
 
     /// Parse the OpenAPI spec and extract all operations.
     pub fn parse(&self) -> Result<Vec<ParsedOperation>> {
         let mut operations = Vec::new();
-        
+
         // Get base URL from servers
         let base_url = self
             .spec
@@ -68,9 +67,9 @@ impl OpenApiParser {
             .first()
             .and_then(|s| Some(s.url.clone()))
             .unwrap_or_default();
-        
+
         debug!("Base URL: {}", base_url);
-        
+
         // Iterate through all paths
         for (path, path_item_ref) in &self.spec.paths.paths {
             let path_item = match path_item_ref {
@@ -80,7 +79,7 @@ impl OpenApiParser {
                     continue;
                 }
             };
-            
+
             // Check all HTTP methods
             let methods = [
                 ("get", &path_item.get),
@@ -92,7 +91,7 @@ impl OpenApiParser {
                 ("options", &path_item.options),
                 ("trace", &path_item.trace),
             ];
-            
+
             for (method_name, operation_opt) in methods {
                 if let Some(operation) = operation_opt {
                     match self.parse_operation(
@@ -115,7 +114,7 @@ impl OpenApiParser {
                 }
             }
         }
-        
+
         debug!("Parsed {} operations", operations.len());
         Ok(operations)
     }
@@ -134,9 +133,9 @@ impl OpenApiParser {
             .as_ref()
             .map(|s| s.to_string())
             .unwrap_or_else(|| self.generate_operation_id(path, method));
-        
+
         let name = to_snake_case(&operation_id);
-        
+
         // Get description
         let description = operation
             .description
@@ -144,10 +143,10 @@ impl OpenApiParser {
             .or(operation.summary.as_ref())
             .map(|s| s.clone())
             .unwrap_or_else(|| format!("{} {}", method.to_uppercase(), path));
-        
+
         // Parse parameters
         let mut parameters = Vec::new();
-        
+
         // Add path-level parameters
         for param_ref in path_params {
             if let ReferenceOr::Item(param) = param_ref {
@@ -156,7 +155,7 @@ impl OpenApiParser {
                 }
             }
         }
-        
+
         // Add operation-level parameters
         for param_ref in &operation.parameters {
             let param = match param_ref {
@@ -166,12 +165,12 @@ impl OpenApiParser {
                     continue;
                 }
             };
-            
+
             if let Some(api_param) = self.parse_parameter(param)? {
                 parameters.push(api_param);
             }
         }
-        
+
         // Parse request body if present
         if let Some(request_body_ref) = &operation.request_body {
             match request_body_ref {
@@ -187,7 +186,7 @@ impl OpenApiParser {
                                 ReferenceOr::Item(schema) => {
                                     let schema_json = serde_json::to_value(schema)
                                         .unwrap_or(Value::Object(Default::default()));
-                                    
+
                                     parameters.push(ApiParameter {
                                         original_name: "body".to_string(),
                                         name: "body".to_string(),
@@ -209,7 +208,7 @@ impl OpenApiParser {
                 }
             }
         }
-        
+
         // Parse security requirements
         let security = operation
             .security
@@ -227,7 +226,7 @@ impl OpenApiParser {
                     .collect()
             })
             .unwrap_or_default();
-        
+
         // Get response schema (use 200 response if available)
         let response_schema = operation
             .responses
@@ -241,14 +240,12 @@ impl OpenApiParser {
                     .or_else(|| response.content.values().next())
                     .and_then(|media_type| media_type.schema.as_ref())
                     .and_then(|schema_ref| match schema_ref {
-                        ReferenceOr::Item(schema) => {
-                            serde_json::to_value(schema).ok()
-                        }
+                        ReferenceOr::Item(schema) => serde_json::to_value(schema).ok(),
                         ReferenceOr::Reference { .. } => None,
                     }),
                 ReferenceOr::Reference { .. } => None,
             });
-        
+
         Ok(ParsedOperation {
             name,
             description,
@@ -270,9 +267,9 @@ impl OpenApiParser {
             Parameter::Path { parameter_data, .. } => (parameter_data, ParameterLocation::Path),
             Parameter::Cookie { parameter_data, .. } => (parameter_data, ParameterLocation::Cookie),
         };
-        
+
         let (data, location) = param_data;
-        
+
         // Get schema
         let schema = match &data.format {
             ParameterSchemaOrContent::Schema(schema_ref) => match schema_ref {
@@ -289,7 +286,7 @@ impl OpenApiParser {
                 return Ok(None);
             }
         };
-        
+
         Ok(Some(ApiParameter {
             original_name: data.name.clone(),
             name: to_snake_case(&data.name),
@@ -306,13 +303,13 @@ impl OpenApiParser {
             .split('/')
             .filter(|s| !s.is_empty() && !s.starts_with('{'))
             .collect();
-        
+
         let path_str = if path_parts.is_empty() {
             "root".to_string()
         } else {
             path_parts.join("_")
         };
-        
+
         format!("{}_{}", method, path_str)
     }
 }
@@ -321,7 +318,7 @@ impl OpenApiParser {
 fn to_snake_case(s: &str) -> String {
     let mut result = String::new();
     let mut prev_upper = false;
-    
+
     for (i, c) in s.chars().enumerate() {
         if c.is_uppercase() {
             if i > 0 && !prev_upper {
@@ -338,7 +335,7 @@ fn to_snake_case(s: &str) -> String {
             prev_upper = false;
         }
     }
-    
+
     result
 }
 
@@ -355,4 +352,3 @@ mod tests {
         assert_eq!(to_snake_case("listUsers"), "list_users");
     }
 }
-

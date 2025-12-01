@@ -139,4 +139,3 @@ mod tests {
         trace_tool_call(attrs);
     }
 }
-

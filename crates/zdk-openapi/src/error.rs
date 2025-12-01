@@ -56,4 +56,3 @@ pub enum OpenApiError {
     #[error("{0}")]
     Other(String),
 }
-

@@ -2,13 +2,13 @@
 
 use super::models::{AppStateRow, EventRow, SessionRow, UserStateRow};
 use crate::{CreateRequest, GetRequest, Session, SessionService};
-use zdk_core::{Error as ZError, Event, Result as ZResult};
 use anyhow::anyhow;
 use async_trait::async_trait;
 use sqlx::{Pool, Sqlite};
 use std::collections::HashMap;
 use std::sync::Arc;
 use uuid::Uuid;
+use zdk_core::{Error as ZError, Event, Result as ZResult};
 
 /// SQLite-backed session service
 pub struct SqliteSessionService {
@@ -179,8 +179,7 @@ impl SessionService for SqliteSessionService {
 
         let events: Result<Vec<Event>, _> = event_rows.iter().map(|row| row.to_event()).collect();
 
-        let events =
-            events.map_err(|e| ZError::Other(anyhow!("Failed to parse events: {}", e)))?;
+        let events = events.map_err(|e| ZError::Other(anyhow!("Failed to parse events: {}", e)))?;
 
         Ok(Arc::new(DatabaseSession {
             id: session_row.id,

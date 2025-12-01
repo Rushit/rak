@@ -7,13 +7,13 @@
 mod common;
 
 use anyhow::Result;
-use zdk_agent::LLMAgent;
-use zdk_core::{Agent, Content, Part};
-use zdk_database_tools::{create_postgres_tools, create_sqlite_tools, DatabaseToolConfig};
-use zdk_runner::{RunConfig, Runner};
-use zdk_session::inmemory::InMemorySessionService;
 use futures::StreamExt;
 use std::sync::Arc;
+use zdk_agent::LLMAgent;
+use zdk_core::{Agent, Content, Part};
+use zdk_database_tools::{DatabaseToolConfig, create_postgres_tools, create_sqlite_tools};
+use zdk_runner::{RunConfig, Runner};
+use zdk_session::inmemory::InMemorySessionService;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -42,7 +42,9 @@ async fn main() -> Result<()> {
         run_postgres_example(model.clone(), &postgres_url).await?;
     } else {
         tracing::info!("Skipping PostgreSQL example (DATABASE_URL not set)");
-        tracing::info!("To run PostgreSQL example, set: export DATABASE_URL=postgresql://user:pass@localhost/db");
+        tracing::info!(
+            "To run PostgreSQL example, set: export DATABASE_URL=postgresql://user:pass@localhost/db"
+        );
     }
 
     Ok(())
@@ -79,7 +81,12 @@ async fn run_sqlite_readonly_example(model: Arc<dyn zdk_core::LLM>) -> Result<()
     // Run agent with query
     let content = Content::new_user_text("List all available database tools");
     let mut stream = runner
-        .run("user-1".to_string(), "session-readonly".to_string(), content, RunConfig::default())
+        .run(
+            "user-1".to_string(),
+            "session-readonly".to_string(),
+            content,
+            RunConfig::default(),
+        )
         .await?;
 
     // Process events
@@ -108,11 +115,8 @@ async fn run_sqlite_write_example(model: Arc<dyn zdk_core::LLM>) -> Result<()> {
     // Create configuration with write permissions
     let config = DatabaseToolConfig::with_write_enabled();
 
-    let write_tools = zdk_database_tools::create_sqlite_tools_with_config(
-        "sqlite::memory:",
-        config,
-    )
-    .await?;
+    let write_tools =
+        zdk_database_tools::create_sqlite_tools_with_config("sqlite::memory:", config).await?;
 
     tracing::info!(
         tool_count = write_tools.len(),
@@ -139,10 +143,15 @@ async fn run_sqlite_write_example(model: Arc<dyn zdk_core::LLM>) -> Result<()> {
 
     // Run agent with query
     let content = Content::new_user_text(
-        "Create a table named 'users' with columns: id (integer), name (text), email (text)"
+        "Create a table named 'users' with columns: id (integer), name (text), email (text)",
     );
     let mut stream = runner
-        .run("user-1".to_string(), "session-write".to_string(), content, RunConfig::default())
+        .run(
+            "user-1".to_string(),
+            "session-write".to_string(),
+            content,
+            RunConfig::default(),
+        )
         .await?;
 
     // Process events
@@ -195,9 +204,15 @@ async fn run_postgres_example(model: Arc<dyn zdk_core::LLM>, connection_url: &st
         .build()?;
 
     // Run agent with query
-    let content = Content::new_user_text("List all tables in the database and describe the first one");
+    let content =
+        Content::new_user_text("List all tables in the database and describe the first one");
     let mut stream = runner
-        .run("user-1".to_string(), "session-postgres".to_string(), content, RunConfig::default())
+        .run(
+            "user-1".to_string(),
+            "session-postgres".to_string(),
+            content,
+            RunConfig::default(),
+        )
         .await?;
 
     // Process events
@@ -220,4 +235,3 @@ async fn run_postgres_example(model: Arc<dyn zdk_core::LLM>, connection_url: &st
 
     Ok(())
 }
-

@@ -1,10 +1,10 @@
 //! Memory service trait and types
 
-use zdk_core::{Content, Result};
-use zdk_session::Session;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use std::sync::Arc;
+use zdk_core::{Content, Result};
+use zdk_session::Session;
 
 /// Memory service trait for long-term knowledge storage.
 ///

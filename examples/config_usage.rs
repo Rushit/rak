@@ -18,9 +18,9 @@
 //! ```
 
 use anyhow::Result;
-use zdk_core::ZConfig;
 use std::env;
 use std::path::Path;
+use zdk_core::ZConfig;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -33,9 +33,18 @@ async fn main() -> Result<()> {
             println!("   ✅ Config loaded successfully!");
             println!("   📁 Provider: {}", config.model.provider);
             println!("   🤖 Model: {}", config.model.model_name);
-            println!("   🔑 API Key: {}", 
-                if config.model.api_key.is_some() { "✅ Set" } else { "❌ Not Set" });
-            println!("   🌐 Server: {}:{}", config.server.host, config.server.port);
+            println!(
+                "   🔑 API Key: {}",
+                if config.model.api_key.is_some() {
+                    "✅ Set"
+                } else {
+                    "❌ Not Set"
+                }
+            );
+            println!(
+                "   🌐 Server: {}:{}",
+                config.server.host, config.server.port
+            );
             println!("   💾 Session: {}", config.session.provider);
         }
         Err(e) => {
@@ -51,7 +60,10 @@ async fn main() -> Result<()> {
             println!("   ✅ Test config loaded!");
             println!("   📁 Provider: {}", config.model.provider);
             println!("   🤖 Model: {}", config.model.model_name);
-            println!("   🔑 API Key: {}", config.model.api_key.unwrap_or_default());
+            println!(
+                "   🔑 API Key: {}",
+                config.model.api_key.unwrap_or_default()
+            );
         }
         Err(e) => {
             println!("   ⚠️  Could not load test config: {}", e);
@@ -64,7 +76,10 @@ async fn main() -> Result<()> {
 
     // Check environment variable
     if let Ok(env_key) = env::var("GEMINI_API_KEY") {
-        println!("   🌍 GEMINI_API_KEY env var: Set (length: {})", env_key.len());
+        println!(
+            "   🌍 GEMINI_API_KEY env var: Set (length: {})",
+            env_key.len()
+        );
     } else {
         println!("   🌍 GEMINI_API_KEY env var: Not set");
     }
@@ -140,4 +155,3 @@ async fn main() -> Result<()> {
 
     Ok(())
 }
-

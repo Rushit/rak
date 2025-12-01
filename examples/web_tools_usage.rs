@@ -30,14 +30,14 @@
 //! cargo run --example web_tools_usage
 //! ```
 
+use std::sync::Arc;
 use zdk_agent::LLMAgent;
 use zdk_core::{AuthCredentials, Content, ZConfig};
 use zdk_model::GeminiModel;
 use zdk_runner::Runner;
-use zdk_session::inmemory::InMemorySessionService;
 use zdk_session::SessionService;
+use zdk_session::inmemory::InMemorySessionService;
 use zdk_web_tools::{GeminiGoogleSearchTool, GeminiUrlContextTool, WebScraperTool};
-use std::sync::Arc;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -49,19 +49,24 @@ async fn main() -> anyhow::Result<()> {
 
     // Load configuration
     let config = ZConfig::load()?;
-    
+
     println!("✅ Configuration loaded from config.toml");
-    
+
     // Get authentication credentials from config
     let creds = config.get_auth_credentials()?;
-    
+
     // Create Gemini model based on auth type
     let model: Arc<GeminiModel> = match creds {
         AuthCredentials::ApiKey { key } => {
             println!("🔑 Using API Key authentication");
             Arc::new(GeminiModel::new(key, config.model.model_name.clone()))
         }
-        AuthCredentials::GCloud { token, project, location, .. } => {
+        AuthCredentials::GCloud {
+            token,
+            project,
+            location,
+            ..
+        } => {
             println!("🔑 Using Google Cloud authentication");
             println!("   Project: {}", project);
             println!("   Location: {}", location);
@@ -73,7 +78,7 @@ async fn main() -> anyhow::Result<()> {
             ))
         }
     };
-    
+
     println!("🔑 Note: NO additional API keys needed for web tools!\n");
 
     println!("📦 Creating web tools...");
@@ -124,7 +129,7 @@ async fn main() -> anyhow::Result<()> {
     println!("═══════════════════════════════════════\n");
 
     let search_message = Content::new_user_text(
-        "What are the latest features in Rust 1.80? Search the web for recent updates."
+        "What are the latest features in Rust 1.80? Search the web for recent updates.",
     );
 
     println!("User: What are the latest features in Rust 1.80? Search the web for recent updates.");
@@ -158,7 +163,7 @@ async fn main() -> anyhow::Result<()> {
     println!("═══════════════════════════════════════\n");
 
     let url_message = Content::new_user_text(
-        "Read the content from https://www.rust-lang.org and summarize what Rust is."
+        "Read the content from https://www.rust-lang.org and summarize what Rust is.",
     );
 
     println!("User: Read the content from https://www.rust-lang.org and summarize what Rust is.");
@@ -191,10 +196,12 @@ async fn main() -> anyhow::Result<()> {
     println!("═══════════════════════════════════════\n");
 
     let scrape_message = Content::new_user_text(
-        "Use the web_scraper tool to fetch https://httpbin.org/html and extract the main heading."
+        "Use the web_scraper tool to fetch https://httpbin.org/html and extract the main heading.",
     );
 
-    println!("User: Use the web_scraper tool to fetch https://httpbin.org/html and extract the main heading.");
+    println!(
+        "User: Use the web_scraper tool to fetch https://httpbin.org/html and extract the main heading."
+    );
     println!("\n🕷️  Agent response:\n");
 
     let mut stream = runner
@@ -230,4 +237,3 @@ async fn main() -> anyhow::Result<()> {
 
     Ok(())
 }
-

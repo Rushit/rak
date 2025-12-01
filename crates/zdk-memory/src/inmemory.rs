@@ -1,12 +1,12 @@
 //! In-memory memory service implementation
 
 use crate::{MemoryEntry, MemoryService, SearchRequest, SearchResponse};
-use zdk_core::{Content, Result};
-use zdk_session::Session;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, RwLock};
+use zdk_core::{Content, Result};
+use zdk_session::Session;
 
 /// Key for memory storage, scoped to app and user
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

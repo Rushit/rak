@@ -9,9 +9,9 @@
 //! Run with:
 //!   cargo test openapi_usage_test -- --ignored --nocapture
 
-use zdk_openapi::{AuthConfig, OpenApiToolset};
 use tracing::{error, info};
 use tracing_subscriber;
+use zdk_openapi::{AuthConfig, OpenApiToolset};
 
 #[tokio::test]
 #[ignore] // Optional test - run with: cargo test -- --ignored
@@ -84,15 +84,18 @@ paths:
             }
 
             // Example 2: Add authentication
-            let toolset_with_auth = toolset
-                .with_auth(AuthConfig::api_key_header("X-API-Key", "demo-key-12345"));
+            let toolset_with_auth =
+                toolset.with_auth(AuthConfig::api_key_header("X-API-Key", "demo-key-12345"));
             info!("\n✓ Configured API Key authentication for all tools");
 
             // Example 3: Use specific tools
             if let Some(tool) = toolset_with_auth.get_tool("get_user") {
                 info!("\nTool: {}", tool.name());
                 info!("Description: {}", tool.description());
-                info!("Schema: {}", serde_json::to_string_pretty(&tool.schema()).unwrap());
+                info!(
+                    "Schema: {}",
+                    serde_json::to_string_pretty(&tool.schema()).unwrap()
+                );
             }
 
             info!("\n✓ Tools are ready to be used in agents!");
@@ -126,4 +129,3 @@ paths:
     info!("\n---");
     info!("✓ OpenAPI tool generation test complete!");
 }
-

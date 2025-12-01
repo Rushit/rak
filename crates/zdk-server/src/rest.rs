@@ -1,17 +1,15 @@
 use crate::invocation_tracker::InvocationTracker;
 use crate::types::*;
 use crate::websocket::ws_handler;
-use zdk_runner::{RunConfig, Runner};
-use zdk_session::{CreateRequest, SessionService};
 use axum::{
+    Router,
     extract::{Json, Path, State},
     http::StatusCode,
     response::{
-        sse::{Event as SseEvent, Sse},
         IntoResponse, Response,
+        sse::{Event as SseEvent, Sse},
     },
     routing::{get, post},
-    Router,
 };
 use futures::stream::{Stream, StreamExt};
 use std::convert::Infallible;
@@ -19,6 +17,8 @@ use std::sync::Arc;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer};
 use tracing::Level;
+use zdk_runner::{RunConfig, Runner};
+use zdk_session::{CreateRequest, SessionService};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -47,7 +47,7 @@ pub fn create_router(runner: Arc<Runner>, session_service: Arc<dyn SessionServic
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
-                .on_response(DefaultOnResponse::new().level(Level::INFO))
+                .on_response(DefaultOnResponse::new().level(Level::INFO)),
         )
         .layer(CorsLayer::permissive())
         .with_state(state)
@@ -64,12 +64,12 @@ async fn readiness_check(State(_state): State<AppState>) -> impl IntoResponse {
     // Check if services are available
     // For now, just return OK as services are injected at startup
     tracing::debug!("Readiness check requested");
-    
+
     // Could add checks like:
     // - Database connectivity (if using database session service)
     // - Runner availability
     // - etc.
-    
+
     (StatusCode::OK, "READY")
 }
 

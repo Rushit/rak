@@ -27,20 +27,20 @@ impl Content {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Part {
-    Text { 
-        text: String 
+    Text {
+        text: String,
     },
-    InlineData { 
+    InlineData {
         #[serde(rename = "inlineData")]
-        inline_data: InlineData 
+        inline_data: InlineData,
     },
-    FunctionCall { 
+    FunctionCall {
         #[serde(rename = "functionCall")]
-        function_call: FunctionCall 
+        function_call: FunctionCall,
     },
-    FunctionResponse { 
+    FunctionResponse {
         #[serde(rename = "functionResponse")]
-        function_response: FunctionResponse 
+        function_response: FunctionResponse,
     },
 }
 

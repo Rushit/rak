@@ -1,10 +1,10 @@
+use futures::StreamExt;
+use std::sync::Arc;
 use zdk_agent::{LLMAgent, LoopAgent, ParallelAgent, SequentialAgent};
 use zdk_core::{Content, LLM};
 use zdk_runner::Runner;
 use zdk_session::inmemory::InMemorySessionService;
 use zdk_tool::builtin::create_echo_tool;
-use futures::StreamExt;
-use std::sync::Arc;
 
 #[path = "common.rs"]
 mod common;
@@ -19,15 +19,13 @@ async fn main() -> anyhow::Result<()> {
     // Load configuration (drives authentication method)
     println!("Loading configuration...");
     let config = common::load_config()?;
-    
+
     // Show auth info
     common::show_auth_info(&config)?;
     println!();
 
     // Create model factory function using config-driven auth
-    let create_model = || -> anyhow::Result<Arc<dyn LLM>> {
-        common::create_gemini_model(&config)
-    };
+    let create_model = || -> anyhow::Result<Arc<dyn LLM>> { common::create_gemini_model(&config) };
 
     // ===================================================================
     // Example 1: Sequential Workflow
