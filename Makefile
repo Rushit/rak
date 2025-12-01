@@ -6,7 +6,7 @@
 #   make help         - Show all available commands
 #   make example-NAME - Run a specific example
 
-.PHONY: test check build clippy fmt doc clean help test-verbose release
+.PHONY: test check build clippy clippy-strict fmt doc clean help test-verbose release
 .PHONY: example-quickstart example-tool_usage example-workflow_agents
 .PHONY: example-artifact_usage example-database_session example-memory_usage
 .PHONY: example-websocket_usage example-server_usage example-telemetry_usage
@@ -38,6 +38,11 @@ build:
 # Run clippy linter on all workspace crates
 clippy:
 	@echo "Running clippy on all crates..."
+	@cargo clippy --workspace
+
+# Run clippy with strict mode (fail on warnings)
+clippy-strict:
+	@echo "Running clippy in strict mode (fail on warnings)..."
 	@cargo clippy --workspace -- -D warnings
 
 # Format all code with rustfmt
@@ -159,7 +164,8 @@ help:
 	@echo "  make test          - Run all workspace tests (default, 72 tests)"
 	@echo "  make check         - Check all crates without building (fast)"
 	@echo "  make build         - Build all workspace crates"
-	@echo "  make clippy        - Run clippy linter on all crates"
+	@echo "  make clippy        - Run clippy linter (warnings allowed)"
+	@echo "  make clippy-strict - Run clippy with -D warnings (recommended)"
 	@echo "  make fmt           - Format all code with rustfmt"
 	@echo "  make doc           - Generate and open documentation"
 	@echo ""

@@ -2,7 +2,7 @@
 
 use anyhow::anyhow;
 use async_trait::async_trait;
-use zdk_core::{Result as ZdkResult, Tool, ToolContext, ToolResponse};
+use zdk_core::{Result as ZResult, Tool, ToolContext, ToolResponse};
 use scraper::{Html, Selector};
 use serde_json::{json, Value};
 use std::sync::Arc;
@@ -215,7 +215,7 @@ impl Tool for WebScraperTool {
         &self,
         _ctx: Arc<dyn ToolContext>,
         params: Value,
-    ) -> ZdkResult<ToolResponse> {
+    ) -> ZResult<ToolResponse> {
         // Extract parameters
         let url = params["url"]
             .as_str()

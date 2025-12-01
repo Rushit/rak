@@ -2,7 +2,7 @@
 
 use crate::config::{DatabaseToolConfig, SqlOperation};
 use crate::types::{ColumnInfo, ConstraintInfo, IndexInfo, TableInfo, TableSchema};
-use zdk_core::{Error as ZdkError, Result as ZdkResult, Tool, ToolContext, ToolResponse};
+use zdk_core::{Error as ZError, Result as ZResult, Tool, ToolContext, ToolResponse};
 use zdk_tool::{FunctionTool, ToolSchema};
 use async_trait::async_trait;
 use sqlx::{sqlite::SqlitePoolOptions, Column, Pool, Row, Sqlite};
@@ -10,7 +10,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 /// Create SQLite tools with default configuration (read-only)
-pub async fn create_sqlite_tools(connection_string: &str) -> ZdkResult<Vec<Arc<dyn Tool>>> {
+pub async fn create_sqlite_tools(connection_string: &str) -> ZResult<Vec<Arc<dyn Tool>>> {
     create_sqlite_tools_with_config(connection_string, DatabaseToolConfig::default()).await
 }
 
@@ -18,13 +18,13 @@ pub async fn create_sqlite_tools(connection_string: &str) -> ZdkResult<Vec<Arc<d
 pub async fn create_sqlite_tools_with_config(
     connection_string: &str,
     config: DatabaseToolConfig,
-) -> ZdkResult<Vec<Arc<dyn Tool>>> {
+) -> ZResult<Vec<Arc<dyn Tool>>> {
     let pool = SqlitePoolOptions::new()
         .max_connections(10)
         .acquire_timeout(Duration::from_secs(config.timeout_secs))
         .connect(connection_string)
         .await
-        .map_err(|e| ZdkError::Other(anyhow::anyhow!("Failed to connect to SQLite: {}", e)))?;
+        .map_err(|e| ZError::Other(anyhow::anyhow!("Failed to connect to SQLite: {}", e)))?;
 
     let mut tools: Vec<Arc<dyn Tool>> = Vec::new();
 
@@ -46,7 +46,7 @@ pub async fn create_sqlite_tools_with_config(
 }
 
 /// Create a tool to list all tables
-fn create_list_tables_tool(pool: Pool<Sqlite>) -> ZdkResult<FunctionTool> {
+fn create_list_tables_tool(pool: Pool<Sqlite>) -> ZResult<FunctionTool> {
     let schema = ToolSchema::new().build();
 
     FunctionTool::builder()
@@ -72,7 +72,7 @@ fn create_list_tables_tool(pool: Pool<Sqlite>) -> ZdkResult<FunctionTool> {
                 let rows = sqlx::query(query)
                     .fetch_all(&pool)
                     .await
-                    .map_err(|e| ZdkError::Other(anyhow::anyhow!("Failed to list tables: {}", e)))?;
+                    .map_err(|e| ZError::Other(anyhow::anyhow!("Failed to list tables: {}", e)))?;
 
                 let tables: Vec<TableInfo> = rows
                     .iter()
@@ -85,7 +85,7 @@ fn create_list_tables_tool(pool: Pool<Sqlite>) -> ZdkResult<FunctionTool> {
 
                 Ok(ToolResponse {
                     result: serde_json::to_value(&tables)
-                        .map_err(|e| ZdkError::Other(anyhow::anyhow!("Serialization error: {}", e)))?,
+                        .map_err(|e| ZError::Other(anyhow::anyhow!("Serialization error: {}", e)))?,
                 })
             }
         })
@@ -93,7 +93,7 @@ fn create_list_tables_tool(pool: Pool<Sqlite>) -> ZdkResult<FunctionTool> {
 }
 
 /// Create a tool to describe a table's schema
-fn create_describe_table_tool(pool: Pool<Sqlite>) -> ZdkResult<FunctionTool> {
+fn create_describe_table_tool(pool: Pool<Sqlite>) -> ZResult<FunctionTool> {
     let schema = ToolSchema::new()
         .property("table_name", "string", "Name of the table to describe")
         .required("table_name")
@@ -108,7 +108,7 @@ fn create_describe_table_tool(pool: Pool<Sqlite>) -> ZdkResult<FunctionTool> {
             async move {
                 let table_name = params["table_name"]
                     .as_str()
-                    .ok_or_else(|| ZdkError::Other(anyhow::anyhow!("Missing table_name parameter")))?;
+                    .ok_or_else(|| ZError::Other(anyhow::anyhow!("Missing table_name parameter")))?;
 
                 tracing::debug!(
                     invocation_id = %ctx.invocation_id(),
@@ -122,7 +122,7 @@ fn create_describe_table_tool(pool: Pool<Sqlite>) -> ZdkResult<FunctionTool> {
                 let rows = sqlx::query(&query)
                     .fetch_all(&pool)
                     .await
-                    .map_err(|e| ZdkError::Other(anyhow::anyhow!("Failed to describe table: {}", e)))?;
+                    .map_err(|e| ZError::Other(anyhow::anyhow!("Failed to describe table: {}", e)))?;
 
                 let columns: Vec<ColumnInfo> = rows
                     .iter()
@@ -143,7 +143,7 @@ fn create_describe_table_tool(pool: Pool<Sqlite>) -> ZdkResult<FunctionTool> {
 
                 Ok(ToolResponse {
                     result: serde_json::to_value(&table_schema)
-                        .map_err(|e| ZdkError::Other(anyhow::anyhow!("Serialization error: {}", e)))?,
+                        .map_err(|e| ZError::Other(anyhow::anyhow!("Serialization error: {}", e)))?,
                 })
             }
         })
@@ -151,7 +151,7 @@ fn create_describe_table_tool(pool: Pool<Sqlite>) -> ZdkResult<FunctionTool> {
 }
 
 /// Create a tool to execute SELECT queries
-fn create_query_tool(pool: Pool<Sqlite>, config: DatabaseToolConfig) -> ZdkResult<FunctionTool> {
+fn create_query_tool(pool: Pool<Sqlite>, config: DatabaseToolConfig) -> ZResult<FunctionTool> {
     let schema = ToolSchema::new()
         .property("sql", "string", "SQL SELECT query to execute")
         .required("sql")
@@ -167,12 +167,12 @@ fn create_query_tool(pool: Pool<Sqlite>, config: DatabaseToolConfig) -> ZdkResul
             async move {
                 let sql = params["sql"]
                     .as_str()
-                    .ok_or_else(|| ZdkError::Other(anyhow::anyhow!("Missing sql parameter")))?;
+                    .ok_or_else(|| ZError::Other(anyhow::anyhow!("Missing sql parameter")))?;
 
                 // Basic SQL validation - ensure it's a SELECT query
                 let sql_upper = sql.trim().to_uppercase();
                 if !sql_upper.starts_with("SELECT") {
-                    return Err(ZdkError::Other(anyhow::anyhow!(
+                    return Err(ZError::Other(anyhow::anyhow!(
                         "Only SELECT queries are allowed in read-only mode"
                     )));
                 }
@@ -193,7 +193,7 @@ fn create_query_tool(pool: Pool<Sqlite>, config: DatabaseToolConfig) -> ZdkResul
                 let rows = sqlx::query(&final_sql)
                     .fetch_all(&pool)
                     .await
-                    .map_err(|e| ZdkError::Other(anyhow::anyhow!("Query failed: {}", e)))?;
+                    .map_err(|e| ZError::Other(anyhow::anyhow!("Query failed: {}", e)))?;
 
                 // Convert rows to JSON
                 let result: Vec<serde_json::Value> = rows
@@ -223,7 +223,7 @@ fn create_query_tool(pool: Pool<Sqlite>, config: DatabaseToolConfig) -> ZdkResul
 }
 
 /// Create a tool to execute INSERT/UPDATE/DELETE queries
-fn create_execute_tool(pool: Pool<Sqlite>, config: DatabaseToolConfig) -> ZdkResult<FunctionTool> {
+fn create_execute_tool(pool: Pool<Sqlite>, config: DatabaseToolConfig) -> ZResult<FunctionTool> {
     let schema = ToolSchema::new()
         .property("sql", "string", "SQL query to execute (INSERT, UPDATE, DELETE)")
         .required("sql")
@@ -238,7 +238,7 @@ fn create_execute_tool(pool: Pool<Sqlite>, config: DatabaseToolConfig) -> ZdkRes
             async move {
                 let sql = params["sql"]
                     .as_str()
-                    .ok_or_else(|| ZdkError::Other(anyhow::anyhow!("Missing sql parameter")))?;
+                    .ok_or_else(|| ZError::Other(anyhow::anyhow!("Missing sql parameter")))?;
 
                 // Basic SQL validation
                 let sql_upper = sql.trim().to_uppercase();
@@ -247,7 +247,7 @@ fn create_execute_tool(pool: Pool<Sqlite>, config: DatabaseToolConfig) -> ZdkRes
                     || sql_upper.starts_with("DELETE");
 
                 if !is_allowed {
-                    return Err(ZdkError::Other(anyhow::anyhow!(
+                    return Err(ZError::Other(anyhow::anyhow!(
                         "Only INSERT, UPDATE, and DELETE queries are allowed"
                     )));
                 }
@@ -261,7 +261,7 @@ fn create_execute_tool(pool: Pool<Sqlite>, config: DatabaseToolConfig) -> ZdkRes
                 let result = sqlx::query(sql)
                     .execute(&pool)
                     .await
-                    .map_err(|e| ZdkError::Other(anyhow::anyhow!("Execute failed: {}", e)))?;
+                    .map_err(|e| ZError::Other(anyhow::anyhow!("Execute failed: {}", e)))?;
 
                 Ok(ToolResponse {
                     result: serde_json::json!({

@@ -90,13 +90,13 @@ use zdk_agent::LLMAgent;
 use zdk_model::GeminiModel;
 use zdk_runner::Runner;
 use zdk_session::inmemory::InMemorySessionService;
-use zdk_core::{Content, ZdkConfig};  // NEW: ZdkConfig
+use zdk_core::{Content, ZConfig};  // NEW: ZConfig
 use std::sync::Arc;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // Setup (NEW: Load from config.toml)
-    let config = ZdkConfig::load()?;
+    let config = ZConfig::load()?;
     let api_key = config.api_key()?;
     let model = Arc::new(GeminiModel::new(api_key, config.model.model_name));
     
@@ -458,29 +458,175 @@ curl http://localhost:8080/readiness
 
 ZDK uses `make` for all common development tasks. Run `make help` to see all available commands.
 
+### Quick Reference
+
+```bash
+# Fast workflow (before committing)
+make fmt                # Format code
+make clippy             # Lint with warnings
+make test               # Run all tests
+make test-examples      # Test all examples
+
+# Development cycle
+make check              # Fast check without building
+make build              # Build all crates
+make doc                # Generate and open docs
+
+# Cleanup
+make clean              # Remove build artifacts
+```
+
 ### Building and Testing
 
 ```bash
-# Run all tests (default command)
-make test
+# Build Commands
+make build              # Build all workspace crates
+make check              # Fast check without full build
+make release            # Build optimized release version
+make clean              # Clean build artifacts and lock files
 
-# Build all workspace crates
-make build
+# Testing Commands
+make test               # Run all tests (80+ tests)
+make test-verbose       # Run tests with debug logging (RUST_LOG=debug)
+make test-examples      # Test all examples with scripts/test_examples.sh
 
-# Check code without building
-make check
+# Code Quality
+make fmt                # Format all code with rustfmt
+make clippy             # Lint with clippy (warnings allowed)
+make clippy-strict      # Lint with -D warnings (recommended for high quality)
 
-# Run clippy linter
-make clippy
+# Documentation
+make doc                # Generate and open documentation in browser
+```
 
+### Detailed Cargo Commands
+
+If you prefer direct `cargo` commands or need more control:
+
+#### Build Commands
+```bash
+# Standard build
+cargo build
+
+# Release build (optimized)
+cargo build --release
+
+# Build specific crate
+cargo build -p zdk-core
+
+# Check without building (fast)
+cargo check --workspace
+
+# Build with all features
+cargo build --all-features
+```
+
+#### Test Commands
+```bash
+# Run all tests
+cargo test --workspace
+
+# Run tests with output
+cargo test --workspace -- --nocapture
+
+# Run specific test
+cargo test test_name
+
+# Run tests for specific crate
+cargo test -p zdk-agent
+
+# Run tests with debug logging
+RUST_LOG=debug cargo test --workspace
+
+# Run integration tests only
+cargo test --test '*'
+
+# Run doc tests
+cargo test --doc
+```
+
+#### Code Quality Commands
+```bash
 # Format code
-make fmt
+cargo fmt --all
 
-# Generate and open documentation
-make doc
+# Check formatting without modifying
+cargo fmt --all -- --check
 
+# Run clippy
+cargo clippy --workspace
+
+# Clippy with all warnings
+cargo clippy --workspace -- -D warnings
+
+# Clippy for specific crate
+cargo clippy -p zdk-core
+
+# Fix automatically fixable issues
+cargo clippy --fix --workspace --allow-dirty
+```
+
+#### Documentation Commands
+```bash
+# Generate docs
+cargo doc --workspace --no-deps
+
+# Generate and open docs
+cargo doc --workspace --no-deps --open
+
+# Generate docs with private items
+cargo doc --workspace --no-deps --document-private-items
+
+# Check doc links
+cargo doc --workspace --no-deps --all-features
+```
+
+#### Example Commands
+```bash
+# Run specific example
+cargo run --example quickstart
+
+# Run with logging
+RUST_LOG=debug cargo run --example tool_usage
+
+# List all examples
+cargo run --example 2>&1 | grep "    "
+
+# Run example with release optimizations
+cargo run --release --example workflow_agents
+```
+
+#### Dependency Management
+```bash
+# Update dependencies
+cargo update
+
+# Check for outdated dependencies
+cargo outdated  # requires cargo-outdated
+
+# Show dependency tree
+cargo tree
+
+# Show dependencies for specific crate
+cargo tree -p zdk-core
+
+# Audit dependencies for security issues
+cargo audit  # requires cargo-audit
+```
+
+#### Cleaning Commands
+```bash
 # Clean build artifacts
-make clean
+cargo clean
+
+# Clean specific target
+cargo clean --release
+
+# Clean and rebuild
+cargo clean && cargo build
+
+# Remove Cargo.lock and clean
+rm Cargo.lock && cargo clean
 ```
 
 ### Running Examples
@@ -501,80 +647,429 @@ export GEMINI_API_KEY="your-api-key-here"
 cargo run --example quickstart
 ```
 
-**Available Examples**:
+**Option 3: Use gcloud authentication** (No API key needed!)
 ```bash
-# Quickstart example
-make example-quickstart
+gcloud auth application-default login
+gcloud config set project YOUR_PROJECT_ID
+cargo run --example quickstart
+```
 
-# Tool usage example
-make example-tool_usage
+### Available Examples
 
-# Database tools example (NEW)
-cargo run --example database_tools_usage
+#### Core Examples
+| Example | Command | Description |
+|---------|---------|-------------|
+| **Quickstart** | `make example-quickstart` | Basic agent with LLM interaction |
+| **Config Usage** | `make example-config_usage` | Configuration system demo |
+| **Tool Usage** | `make example-tool_usage` | Function calling with tools |
+| **Workflow Agents** | `make example-workflow_agents` | Sequential/Parallel/Loop orchestration |
 
-# MCP toolset example (NEW)
-export DATABASE_URI=postgresql://localhost/mydb
-cargo run --example mcp_toolset_usage
+#### Agent Features
+| Example | Command | Description |
+|---------|---------|-------------|
+| **Memory Usage** | `make example-memory_usage` | Long-term memory service |
+| **Artifact Usage** | `make example-artifact_usage` | File and document storage |
+| **Database Session** | `make example-database_session` | PostgreSQL/SQLite session storage |
 
-# Workflow agents example
-make example-workflow_agents
+#### Tool Integration
+| Example | Command | Description |
+|---------|---------|-------------|
+| **OpenAPI Usage** | `make example-openapi_usage` | Generate tools from OpenAPI specs |
+| **Web Tools** | `make example-web_tools_usage` | Search & scrape the web (zero API keys!) |
+| **Database Tools** | `cargo run --example database_tools_usage` | Query PostgreSQL/SQLite with agents |
+| **MCP Toolset** | `cargo run --example mcp_toolset_usage` | Dynamic tool loading via MCP protocol |
 
-# Artifact usage example
-make example-artifact_usage
+#### Server & Streaming
+| Example | Command | Description |
+|---------|---------|-------------|
+| **Server Usage** | `make example-server_usage` | REST API with SSE streaming |
+| **WebSocket Usage** | `make example-websocket_usage` | Bidirectional WebSocket streaming |
+| **Telemetry Usage** | `make example-telemetry_usage` | OpenTelemetry tracing & logging |
 
-# Database session example
-make example-database_session
+#### Advanced
+| Example | Command | Description |
+|---------|---------|-------------|
+| **Gemini Gcloud** | `cargo run --example gemini_gcloud_usage` | Vertex AI authentication |
 
-# Memory service example
-make example-memory_usage
+#### Testing Examples
+```bash
+# Test all examples at once
+make test-examples
 
-# WebSocket client example
-make example-websocket_usage
+# Or use the script directly
+./scripts/test_examples.sh
 
-# Telemetry example (with debug logging)
-make example-telemetry_usage
-
-# OpenAPI tool generator example
-make example-openapi_usage
-
-# Web tools example (search and scrape the web)
-make example-web_tools_usage
-
-# Configuration system example
-make example-config_usage
+# Test specific example with logging
+RUST_LOG=debug cargo run --example quickstart
 ```
 
 ### Advanced Commands
 
 ```bash
-# Run tests with verbose output
-make test-verbose
+# Build & Quality
+make release            # Build optimized release version
+make clippy-strict      # Strict linting (recommended)
+make watch              # Watch for changes and rebuild (requires cargo-watch)
 
-# Test all examples
+# Testing
+make test-verbose       # Tests with debug logging
+make test-examples      # Test all examples with validation
+cargo test -p zdk-core  # Test specific crate
+
+# Documentation
+make doc                # Generate and open docs
+cargo doc --document-private-items --open  # Include private items
+
+# Help
+make help               # View all available commands
+```
+
+### Common Development Workflows
+
+#### Before Committing
+```bash
+# Full pre-commit check (recommended)
+make fmt && make clippy-strict && make test && make test-examples
+```
+
+#### Adding a New Feature
+```bash
+# 1. Create feature branch
+git checkout -b feature/my-feature
+
+# 2. Develop with fast feedback
+make check              # Quick syntax check
+
+# 3. Add tests and validate
+make test
+
+# 4. Format and lint
+make fmt && make clippy
+
+# 5. Test examples still work
 make test-examples
 
-# Build release version
-make release
-
-# View all available commands
-make help
+# 6. Commit
+git add .
+git commit -m "feat: Add my feature"
 ```
+
+#### Debugging Failed Tests
+```bash
+# Run specific test with logging
+RUST_LOG=debug cargo test test_name -- --nocapture
+
+# Run test in specific crate
+cargo test -p zdk-agent test_name -- --nocapture
+
+# Run integration test
+cargo test --test integration_test -- --nocapture
+```
+
+#### Debugging Examples
+```bash
+# Run with full debug logging
+RUST_LOG=trace cargo run --example quickstart
+
+# Run with specific module logging
+RUST_LOG=zdk_agent=debug,zdk_runner=info cargo run --example tool_usage
+
+# Run with backtrace on panic
+RUST_BACKTRACE=1 cargo run --example workflow_agents
+```
+
+#### Performance Profiling
+```bash
+# Build with release optimizations
+cargo build --release
+
+# Run with profiling
+cargo run --release --example quickstart
+
+# Benchmark (if benchmarks exist)
+cargo bench
+
+# Check binary size
+cargo build --release && ls -lh target/release/
+```
+
+#### Dependency Management
+```bash
+# Check for outdated dependencies
+cargo outdated
+
+# Update dependencies
+cargo update
+
+# Audit for security vulnerabilities
+cargo audit
+
+# Show what depends on a crate
+cargo tree -i zdk-core
+```
+
+### Makefile Targets Reference
+
+The ZDK Makefile provides convenient shortcuts for common tasks. Here's a complete reference:
+
+#### Build Targets
+```bash
+make build              # Build all workspace crates
+make check              # Fast check without building binaries
+make release            # Build with --release optimizations
+make clean              # Remove target/ directory and Cargo.lock
+```
+
+#### Testing Targets
+```bash
+make test               # Run all tests (default target)
+make test-verbose       # Run tests with RUST_LOG=debug
+make test-examples      # Run ./scripts/test_examples.sh
+```
+
+#### Code Quality Targets
+```bash
+make fmt                # Format code with rustfmt
+make clippy             # Lint with clippy (warnings allowed)
+make clippy-strict      # Lint with -D warnings (fail on warnings - recommended)
+```
+
+#### Documentation Targets
+```bash
+make doc                # Generate and open documentation
+```
+
+#### Example Targets
+```bash
+make example-quickstart              # Run quickstart example
+make example-config_usage            # Run config usage example
+make example-openai_usage            # Run OpenAI example
+make example-tool_usage              # Run tool usage example
+make example-workflow_agents         # Run workflow agents example
+make example-artifact_usage          # Run artifact usage example
+make example-database_session        # Run database session example
+make example-memory_usage            # Run memory usage example
+make example-websocket_usage         # Run WebSocket example
+make example-telemetry_usage         # Run telemetry example (with logging)
+make example-openapi_usage           # Run OpenAPI tool generator
+make example-web_tools_usage         # Run web tools example
+make example-database_tools_usage    # Run database tools example
+make example-mcp_toolset_usage       # Run MCP toolset example
+make example-gemini_gcloud_usage     # Run Gemini gcloud example
+```
+
+#### Utility Targets
+```bash
+make help               # Show all available targets with descriptions
+```
+
+#### Example: Full Pre-Commit Workflow
+```bash
+# One-liner to prepare for commit (recommended)
+make fmt && make clippy-strict && make test && make test-examples
+```
+
+---
 
 ## Testing
 
-Run the test suite with `make`:
+ZDK has a comprehensive testing strategy with multiple test types for different scenarios.
+
+### Test Types
+
+#### 1. Unit Tests (Default)
+Fast, isolated tests using mocks. Run by default with `cargo test`.
 
 ```bash
-# Run all tests (recommended)
+# Run all unit tests
 make test
 
-# Run tests with debug logging
+# Run with debug logging
 make test-verbose
+
+# Run tests for specific crate
+cargo test -p zdk-core
 ```
 
-**Note**: This runs all 80+ tests across all workspace crates.
+#### 2. Integration Tests (Default)
+End-to-end tests with mock services. Run automatically.
 
-For advanced testing options and cargo commands, see [CONTRIBUTING.md](CONTRIBUTING.md).
+```bash
+# Run specific integration test
+cargo test --test integration_test
+cargo test --test tool_test
+cargo test --test workflow_agents_test
+```
+
+#### 3. Optional Tests (Ignored)
+Tests requiring external setup (gcloud auth, API keys, etc.). Run explicitly when needed.
+
+```bash
+# Run all ignored tests
+cargo test -- --ignored
+
+# Run specific ignored test with output
+cargo test openapi_usage_test -- --ignored --nocapture
+```
+
+### Authentication Options
+
+ZDK supports three authentication methods for testing and examples:
+
+#### Option 1: Config File (Recommended)
+```bash
+# Copy and edit config
+cp config.toml.example config.toml
+# Add your API keys to config.toml
+
+# Run tests/examples
+make test
+cargo run --example quickstart
+```
+
+#### Option 2: GCloud Authentication (No API Keys!)
+```bash
+# One-time setup
+gcloud auth login
+gcloud auth application-default login
+gcloud config set project YOUR_PROJECT_ID
+
+# Run tests/examples - uses your gcloud credentials
+cargo run --example gemini_gcloud_usage
+cargo test -- --ignored  # Tests using gcloud auth
+```
+
+#### Option 3: Environment Variables (Fallback)
+```bash
+export GOOGLE_API_KEY="your-api-key"
+export OPENAI_API_KEY="sk-..."
+cargo run --example quickstart
+```
+
+### Quick Testing Commands
+
+```bash
+# Standard workflow
+make test               # Run all unit + integration tests (80+ tests)
+make test-verbose       # Run with debug logging (RUST_LOG=debug)
+make test-examples      # Test all examples with validation script
+
+# Specific tests
+cargo test test_name                    # Run specific test
+cargo test -p zdk-agent                 # Test specific crate
+cargo test -- --nocapture              # Show test output
+
+# Optional tests (require auth setup)
+cargo test -- --ignored                 # Run all optional tests
+cargo test openapi_test -- --ignored   # Run specific optional test
+```
+
+### Test Organization
+
+```
+zdk/
+├── tests/
+│   ├── common.rs              # Shared utilities (gcloud auth helpers)
+│   ├── integration_test.rs    # E2E integration tests
+│   ├── tool_test.rs           # Tool execution tests
+│   ├── workflow_agents_test.rs # Workflow orchestration tests
+│   └── openapi_usage_test.rs  # OpenAPI toolset test (#[ignore])
+└── crates/*/src/
+    └── lib.rs                 # Unit tests in #[cfg(test)] modules
+```
+
+### Writing Tests
+
+#### Unit Test Pattern
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_something() {
+        let mock = MockLLM::new();
+        // Test with mock...
+    }
+}
+```
+
+#### Optional Integration Test Pattern
+```rust
+mod common;
+
+#[tokio::test]
+#[ignore]  // Only run when explicitly requested
+async fn test_real_api() {
+    // Get gcloud credentials
+    let token = common::get_gcloud_access_token()
+        .expect("Run: gcloud auth application-default login");
+    let project = common::get_gcloud_project()
+        .expect("Run: gcloud config set project PROJECT_ID");
+    
+    // Use real API
+    let model = GeminiModel::with_bearer_token(
+        token,
+        "gemini-1.5-flash".to_string(),
+        project,
+        "us-central1".to_string(),
+    );
+    // Test...
+}
+```
+
+### Continuous Integration
+
+CI/CD pipelines run:
+- ✅ All unit tests (fast, no external dependencies)
+- ✅ All integration tests with mocks
+- ❌ **Not** ignored tests (require manual setup)
+
+To run the same tests as CI locally:
+```bash
+make test  # Same as CI
+```
+
+### Troubleshooting
+
+#### "gcloud command not found"
+```bash
+# Install gcloud CLI
+brew install google-cloud-sdk  # macOS
+# OR
+curl https://sdk.cloud.google.com | bash  # Linux
+```
+
+#### "Failed to get gcloud token"
+```bash
+gcloud auth login
+gcloud auth application-default login
+```
+
+#### "No default project set"
+```bash
+gcloud config set project YOUR_PROJECT_ID
+```
+
+#### "API key not found"
+Either:
+1. Set in `config.toml`: `api_key = "your-key"`
+2. Set environment: `export GOOGLE_API_KEY="your-key"`
+3. Use gcloud auth (recommended)
+
+### Best Practices
+
+1. **Use mocks for unit tests** - Fast, reliable, no setup required
+2. **Mark API tests as `#[ignore]`** - Only run when needed
+3. **Use gcloud auth** - Easier than managing API keys
+4. **Document prerequisites** - Clear instructions in test comments
+5. **Provide helpful errors** - Guide users to fix auth issues
+
+### See Also
+
+- **Detailed Testing Guide**: [README_TESTING.md](README_TESTING.md)
+- **Contributing Guidelines**: [CONTRIBUTING.md](CONTRIBUTING.md)
+- **Documentation Index**: [../zdk-idocs/INDEX.md](../zdk-idocs/INDEX.md)
 
 ## Architecture
 

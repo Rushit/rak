@@ -1,0 +1,294 @@
+# ZDK Rust SDK - Cursor Rules
+
+**Language:** Rust  
+**Project:** ZDK (ZAgent Development Kit)  
+**Focus:** Production-ready agent development kit
+
+---
+
+## Rust Best Practices
+
+### Code Style
+- Use `rustfmt` for all formatting: `cargo fmt`
+- Use `clippy` for linting: `make clippy-strict` (fails on warnings for high quality)
+- Follow Rust naming conventions: snake_case for variables/functions, PascalCase for types
+- Prefer iterators over explicit loops when appropriate
+- Use `?` operator for error propagation
+- **Zero tolerance for warnings** - All clippy warnings must be fixed
+
+### Error Handling
+- **Use ZDK error types**: `ZError`, `ZResult`
+- Pattern: `use zdk_core::{Error as ZError, Result as ZResult}`
+- Always handle errors explicitly, avoid `unwrap()` in production code
+- Use `expect()` with meaningful messages only when panic is intentional
+- Return `ZResult<T>` from all fallible functions
+
+Example:
+```rust
+use zdk_core::{Error as ZError, Result as ZResult};
+
+pub async fn process_request(input: &str) -> ZResult<String> {
+    let result = some_operation(input)
+        .await
+        .map_err(|e| ZError::Other(anyhow!("Processing failed: {}", e)))?;
+    Ok(result)
+}
+```
+
+### Async Code
+- Use `tokio` runtime for async operations
+- Prefer async/await syntax over combinators
+- Use `Arc` for shared state across async tasks
+- Be mindful of `Send` + `Sync` bounds for async types
+- All public async functions should be `Send`
+
+### Type Safety
+- Leverage the type system to prevent bugs
+- Use enums for state machines and variants
+- Prefer `Option` and `Result` over null/exception patterns
+- Use newtype pattern for domain-specific types
+- ZDK core types: `ZConfig`, `ZError`, `ZResult`
+
+### Documentation
+- Add doc comments (`///`) for all public APIs
+- Include examples in doc comments when helpful
+- Use `#[doc(hidden)]` for internal-only public items
+- Run `cargo doc --open` to preview documentation
+- Document panics, errors, and edge cases
+
+Example:
+```rust
+/// Executes an agent with the given context.
+///
+/// # Arguments
+/// * `ctx` - Invocation context with session and tools
+///
+/// # Returns
+/// Returns a `ZResult<Event>` containing the agent's response
+///
+/// # Example
+/// ```no_run
+/// let event = agent.run(ctx).await?;
+/// ```
+pub async fn run(&self, ctx: Arc<dyn InvocationContext>) -> ZResult<Event> {
+    // implementation
+}
+```
+
+### Testing
+- Write unit tests in the same file (`#[cfg(test)]` module)
+- Write integration tests in `tests/` directory
+- Use `cargo test --workspace` before committing
+- Aim for meaningful test coverage, not just percentage
+- Test both success and error paths
+- Mock external dependencies
+
+### Logging
+- **Always use `tracing`** for logging
+- Prefer async versions: `info!`, `warn!`, `error!`, `debug!`, `trace!`
+- Include context in spans and events
+- Use structured logging with fields
+
+Example:
+```rust
+use tracing::{info, instrument};
+
+#[instrument(skip(model), fields(invocation_id = %invocation_id))]
+async fn process_invocation(invocation_id: &str, model: Arc<dyn LLM>) -> ZResult<Event> {
+    info!("Starting invocation processing");
+    // implementation
+}
+```
+
+### Performance
+- Profile before optimizing
+- Use `&str` over `String` when possible
+- Avoid unnecessary clones with proper borrowing
+- Consider zero-copy patterns with `Cow` when needed
+- Use `Arc` for shared immutable data
+
+---
+
+## ZDK Architecture
+
+### Crate Organization
+
+| Crate | Purpose | Key Types |
+|-------|---------|-----------|
+| **zdk-core** | Core traits and types | Agent, Tool, Event, ZConfig, ZError |
+| **zdk-model** | LLM integrations | GeminiModel, OpenAIModel, LLM trait |
+| **zdk-agent** | Agent implementations | LLMAgent, SequentialAgent, ParallelAgent |
+| **zdk-runner** | Execution orchestration | Runner, InvocationContext |
+| **zdk-session** | Session management | SessionService, InMemorySessionService |
+| **zdk-tool** | Tool framework | FunctionTool, ToolContext, built-ins |
+| **zdk-server** | REST/WebSocket server | create_router, WebSocket handlers |
+| **zdk-memory** | Memory service | MemoryService, SearchRequest |
+| **zdk-artifact** | Artifact storage | ArtifactService, ArtifactPart |
+| **zdk-telemetry** | Observability | init_telemetry, tracing spans |
+| **zdk-openapi** | OpenAPI tool gen | OpenApiToolset, RestApiTool |
+| **zdk-web-tools** | Web scraping/search | WebScraperTool, GeminiGoogleSearchTool |
+| **zdk-database-tools** | Database query tools | create_sqlite_tools, create_postgres_tools |
+| **zdk-mcp** | MCP protocol | McpToolset, MCP client |
+| **zdk-macros** | Procedural macros | #[tool] attribute macro |
+
+### Inter-Crate Dependencies
+
+```
+zdk-core (foundation)
+├── zdk-model → depends on zdk-core
+├── zdk-tool → depends on zdk-core
+├── zdk-session → depends on zdk-core
+├── zdk-agent → depends on zdk-core, zdk-tool, zdk-session
+├── zdk-runner → depends on zdk-core, zdk-session
+└── zdk-server → depends on zdk-core, zdk-runner, zdk-session
+```
+
+**Rules:**
+- Keep crates focused and modular
+- Use `pub(crate)` for internal-only items
+- Minimize dependencies between crates
+- Core crate should have minimal dependencies
+
+### Common Patterns
+
+**Creating a Tool:**
+```rust
+use zdk_tool::FunctionTool;
+use zdk_core::{Result as ZResult, ToolContext, ToolResponse};
+
+pub fn create_my_tool() -> ZResult<FunctionTool> {
+    FunctionTool::new("tool_name")
+        .description("What the tool does")
+        .execute(|ctx: Arc<dyn ToolContext>, params: Value| {
+            Box::pin(async move {
+                // Implementation
+                Ok(ToolResponse { result: Value::Null })
+            })
+        })
+        .build()
+}
+```
+
+**Creating an Agent:**
+```rust
+use zdk_agent::LLMAgent;
+use zdk_core::Agent;
+
+let agent = LLMAgent::builder()
+    .model(model)
+    .session_service(session_service)
+    .tools(tools)
+    .build()?;
+```
+
+**Loading Configuration:**
+```rust
+use zdk_core::ZConfig;
+
+let config = ZConfig::load()?;  // Loads from config.toml
+let auth = config.get_auth_credentials().await?;
+```
+
+---
+
+## Development Commands
+
+See README.md for comprehensive command reference.
+
+### Quick Reference
+
+```bash
+# Build & Check
+make check              # Fast check without building
+make build              # Build all crates
+make clippy-strict      # Lint with -D warnings (recommended)
+make fmt                # Format code
+
+# Testing
+make test               # Run all tests
+make test-verbose       # Tests with debug logging
+make test-examples      # Test all examples
+
+# Examples
+make example-quickstart           # Basic agent example
+make example-workflow_agents      # Workflow orchestration
+make example-web_tools_usage      # Web scraping
+make example-database_tools_usage # Database tools
+
+# Documentation
+make doc                # Generate and open docs
+
+# Cleanup
+make clean              # Remove build artifacts
+```
+
+---
+
+## Configuration
+
+### Auth Setup
+
+**Option A - gcloud (Recommended):**
+```bash
+gcloud auth login
+gcloud config set project YOUR_PROJECT_ID
+make example-quickstart
+```
+
+**Option B - API Key:**
+```bash
+cp config.toml.example config.toml
+# Edit config.toml with your GOOGLE_API_KEY
+make example-quickstart
+```
+
+---
+
+## Testing
+
+### Before Committing
+```bash
+# Recommended pre-commit workflow
+make fmt && make clippy-strict && make test && make test-examples
+
+# Or step by step:
+cargo fmt --all                         # Format
+cargo clippy --workspace -- -D warnings # Lint (strict)
+cargo test --workspace                  # Test all
+./scripts/test_examples.sh              # Validate examples
+```
+
+### Test Organization
+- Unit tests: Same file as implementation with `#[cfg(test)]`
+- Integration tests: `tests/` directory
+- Example tests: `./scripts/test_examples.sh`
+
+---
+
+## Common Issues
+
+### Build Errors
+- **Missing dependencies?** Run `cargo update`
+- **Stale build artifacts?** Run `cargo clean && cargo build`
+- **Compilation error?** Check for type alias issues (ZError, ZResult, ZConfig)
+
+### Auth Issues
+- **Gemini API?** Check config.toml has valid GOOGLE_API_KEY
+- **Gcloud?** Run `gcloud auth application-default login`
+- **Both configured?** Auth precedence: gcloud > API key
+
+### Test Failures
+- **Session tests?** May need database setup
+- **Network tests?** Some tests require internet connection
+- **Example failures?** Check config.toml exists and has valid credentials
+
+---
+
+## References
+
+- **Master Rules:** `../.cursorrules`
+- **Documentation:** `../zdk-idocs/`
+- **Guidelines:** `../zdk-idocs/DOCUMENTATION_GUIDELINES.md`
+- **Index:** `../zdk-idocs/INDEX.md`
+- **Commands:** See README.md (this directory)
+

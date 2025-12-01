@@ -19,7 +19,7 @@
 //! ```
 
 use zdk_agent::LLMAgent;
-use zdk_core::{AuthCredentials, Content, Part, ZdkConfig};
+use zdk_core::{AuthCredentials, Content, Part, ZConfig};
 use zdk_model::GeminiModel;
 use zdk_runner::Runner;
 use zdk_session::inmemory::InMemorySessionService;
@@ -42,7 +42,7 @@ async fn main() -> anyhow::Result<()> {
     println!("Watch the logs for structured tracing output!\n");
 
     // Load configuration
-    let config = ZdkConfig::load()?;
+    let config = ZConfig::load()?;
     
     // Get authentication credentials from config
     let creds = config.get_auth_credentials()?;

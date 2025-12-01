@@ -1,5 +1,5 @@
 use zdk_agent::LLMAgent;
-use zdk_core::{Content, ZdkConfig};
+use zdk_core::{Content, ZConfig};
 use zdk_model::OpenAIModel;
 use zdk_runner::Runner;
 use zdk_session::{inmemory::InMemorySessionService, SessionService};
@@ -20,7 +20,7 @@ async fn main() -> anyhow::Result<()> {
 
     // Load configuration
     println!("Loading configuration...");
-    let config = ZdkConfig::load()?;
+    let config = ZConfig::load()?;
     
     // Get OpenAI API key from config
     // You can set it in config.toml:

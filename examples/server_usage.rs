@@ -70,7 +70,7 @@
 
 use anyhow::{Context, Result};
 use zdk_agent::LLMAgent;
-use zdk_core::{AuthCredentials, ZdkConfig, LLM};
+use zdk_core::{AuthCredentials, ZConfig, LLM};
 use zdk_model::GeminiModel;
 use zdk_runner::Runner;
 use zdk_server::rest::create_router;
@@ -163,24 +163,24 @@ async fn main() -> Result<()> {
 /// 1. CONFIG_FILE environment variable
 /// 2. config.test.toml (for examples and tests)
 /// 3. config.toml (for development)
-fn load_config() -> Result<ZdkConfig> {
+fn load_config() -> Result<ZConfig> {
     // Check for explicit config file
     if let Ok(config_path) = env::var("CONFIG_FILE") {
         println!("📄 Loading config from: {}", config_path);
-        return ZdkConfig::load_from(Some(&PathBuf::from(config_path)))
+        return ZConfig::load_from(Some(&PathBuf::from(config_path)))
             .context("Failed to load specified config file");
     }
 
     // Try config.test.toml first (for examples)
     if PathBuf::from("config.test.toml").exists() {
         println!("📄 Loading config from: config.test.toml");
-        return ZdkConfig::load_from(Some(&PathBuf::from("config.test.toml")))
+        return ZConfig::load_from(Some(&PathBuf::from("config.test.toml")))
             .context("Failed to load config.test.toml");
     }
 
     // Fall back to config.toml
     println!("📄 Loading config from: config.toml");
-    ZdkConfig::load().context("Failed to load config.toml")
+    ZConfig::load().context("Failed to load config.toml")
 }
 
 /// Describe authentication method for logging
@@ -197,7 +197,7 @@ fn describe_auth(creds: &AuthCredentials) -> String {
 ///
 /// This demonstrates how to use the new auth abstraction to create models
 /// based on the configured authentication method.
-fn create_model_from_auth(creds: AuthCredentials, config: &ZdkConfig) -> Result<Arc<dyn LLM>> {
+fn create_model_from_auth(creds: AuthCredentials, config: &ZConfig) -> Result<Arc<dyn LLM>> {
     let model: Arc<dyn LLM> = match creds {
         AuthCredentials::ApiKey { key } => {
             // Public Gemini API with API key

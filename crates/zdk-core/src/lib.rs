@@ -12,7 +12,7 @@ pub mod traits;
 
 // Re-exports
 pub use auth::{AuthCredentials, AuthProvider, ApiKeyConfig, GCloudConfig};
-pub use config::ZdkConfig;
+pub use config::ZConfig;
 pub use content::{Content, FunctionCall, FunctionResponse, InlineData, Part};
 pub use context::{InvocationContext, ReadonlyContext, ToolContext};
 pub use error::{Error, Result};

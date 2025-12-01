@@ -4,7 +4,7 @@
 //! **inside the Gemini API**, not locally.
 
 use async_trait::async_trait;
-use zdk_core::{Result as ZdkResult, Tool, ToolContext, ToolResponse};
+use zdk_core::{Result as ZResult, Tool, ToolContext, ToolResponse};
 use serde_json::{json, Value};
 use std::sync::Arc;
 
@@ -153,7 +153,7 @@ impl Tool for GeminiUrlContextTool {
         &self,
         _ctx: Arc<dyn ToolContext>,
         _params: Value,
-    ) -> ZdkResult<ToolResponse> {
+    ) -> ZResult<ToolResponse> {
         // This tool doesn't execute locally - it's handled by Gemini API
         // When model-level tool support is added, this will never be called
         //
