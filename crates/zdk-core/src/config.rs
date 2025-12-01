@@ -1,4 +1,4 @@
-//! Configuration management for RAK
+//! Configuration management for ZDK
 //!
 //! Loads configuration with priority:
 //! 1. config.toml (or specified config file)
@@ -12,9 +12,9 @@ use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-/// RAK configuration
+/// ZDK configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RakConfig {
+pub struct ZdkConfig {
     /// Authentication configuration (API key or gcloud)
     pub auth: AuthProvider,
     
@@ -112,7 +112,7 @@ impl Default for ObservabilityConfig {
     }
 }
 
-impl RakConfig {
+impl ZdkConfig {
     /// Load configuration with the following priority:
     /// 1. Specified config file (if provided)
     /// 2. config.toml in current directory
@@ -136,7 +136,7 @@ impl RakConfig {
         let contents = fs::read_to_string(&config_path)
             .with_context(|| format!("Failed to read config file: {:?}", config_path))?;
 
-        let mut config: RakConfig = toml::from_str(&contents)
+        let mut config: ZdkConfig = toml::from_str(&contents)
             .with_context(|| format!("Failed to parse config file: {:?}", config_path))?;
 
         // Resolve environment variable references
@@ -262,7 +262,7 @@ impl RakConfig {
     /// # Examples
     ///
     /// ```ignore
-    /// let config = RakConfig::load()?;
+    /// let config = ZdkConfig::load()?;
     /// let creds = config.get_auth_credentials()?;
     /// 
     /// match creds {
@@ -325,7 +325,7 @@ mod tests {
 
     #[test]
     fn test_default_config() {
-        let config = RakConfig::test_defaults();
+        let config = ZdkConfig::test_defaults();
         assert_eq!(config.model.provider, "test");
         assert!(config.model.api_key.is_some());
     }
@@ -336,10 +336,10 @@ mod tests {
             env::set_var("TEST_VAR", "test_value");
         }
         
-        let resolved = RakConfig::resolve_env_var("${TEST_VAR}");
+        let resolved = ZdkConfig::resolve_env_var("${TEST_VAR}");
         assert_eq!(resolved, Some("test_value".to_string()));
         
-        let not_var = RakConfig::resolve_env_var("plain_value");
+        let not_var = ZdkConfig::resolve_env_var("plain_value");
         assert_eq!(not_var, Some("plain_value".to_string()));
         
         unsafe {
@@ -349,7 +349,7 @@ mod tests {
 
     #[test]
     fn test_api_key_error_message() {
-        let config = RakConfig {
+        let config = ZdkConfig {
             auth: AuthProvider::ApiKey {
                 config: crate::auth::ApiKeyConfig {
                     key: "test-key".to_string(),

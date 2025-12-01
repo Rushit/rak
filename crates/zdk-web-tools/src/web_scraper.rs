@@ -2,7 +2,7 @@
 
 use anyhow::anyhow;
 use async_trait::async_trait;
-use zdk_core::{Result as RakResult, Tool, ToolContext, ToolResponse};
+use zdk_core::{Result as ZdkResult, Tool, ToolContext, ToolResponse};
 use scraper::{Html, Selector};
 use serde_json::{json, Value};
 use std::sync::Arc;
@@ -48,7 +48,7 @@ impl WebScraperTool {
     /// Create a new Web Scraper tool with default configuration
     pub fn new() -> anyhow::Result<Self> {
         let client = reqwest::Client::builder()
-            .user_agent("Mozilla/5.0 (compatible; RAK-Web-Tools/0.1.0)")
+            .user_agent("Mozilla/5.0 (compatible; ZDK-Web-Tools/0.1.0)")
             .timeout(Duration::from_secs(30))
             .redirect(reqwest::redirect::Policy::limited(10))
             .build()?;
@@ -66,7 +66,7 @@ impl WebScraperTool {
         description: String,
     ) -> anyhow::Result<Self> {
         let client = reqwest::Client::builder()
-            .user_agent("Mozilla/5.0 (compatible; RAK-Web-Tools/0.1.0)")
+            .user_agent("Mozilla/5.0 (compatible; ZDK-Web-Tools/0.1.0)")
             .timeout(Duration::from_secs(30))
             .redirect(reqwest::redirect::Policy::limited(10))
             .build()?;
@@ -143,7 +143,7 @@ impl WebScraperTool {
                 .collect::<Vec<_>>()
                 .join(" ");
 
-            // Filter out very short lines like Python RAK does
+            // Filter out very short lines like Python ZDK does
             text.lines()
                 .filter(|line| line.split_whitespace().count() > 3)
                 .collect::<Vec<_>>()
@@ -215,7 +215,7 @@ impl Tool for WebScraperTool {
         &self,
         _ctx: Arc<dyn ToolContext>,
         params: Value,
-    ) -> RakResult<ToolResponse> {
+    ) -> ZdkResult<ToolResponse> {
         // Extract parameters
         let url = params["url"]
             .as_str()

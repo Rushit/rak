@@ -14,7 +14,7 @@ async fn main() -> anyhow::Result<()> {
     // Setup logging
     tracing_subscriber::fmt::init();
 
-    common::print_header("RAK Workflow Agents Demo");
+    common::print_header("ZDK Workflow Agents Demo");
 
     // Load configuration (drives authentication method)
     println!("Loading configuration...");

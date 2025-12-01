@@ -1,4 +1,4 @@
-//! MCP (Model Context Protocol) integration for RAK
+//! MCP (Model Context Protocol) integration for ZDK
 //!
 //! This crate provides MCP support using the official rmcp Rust SDK.
 //! It allows agents to dynamically load tools from external MCP servers.

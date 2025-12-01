@@ -14,7 +14,7 @@ use tracing::{debug, error, instrument};
 /// A tool that executes a REST API operation.
 ///
 /// Each `RestApiTool` represents a single API endpoint/operation from an OpenAPI spec.
-/// It implements the `Tool` trait and can be used directly in RAK agents.
+/// It implements the `Tool` trait and can be used directly in ZDK agents.
 pub struct RestApiTool {
     /// Tool name (operation ID in snake_case)
     pub(crate) name: String,

@@ -5,7 +5,7 @@ edition = "2024"
 rust-version = "1.90.0"
 
 [dependencies]
-# Core RAK dependencies
+# Core ZDK dependencies
 zdk-core = { path = "../zdk-core" }
 zdk-tool = { path = "../zdk-tool" }
 

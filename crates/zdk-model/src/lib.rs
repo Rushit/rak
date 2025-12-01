@@ -1,4 +1,4 @@
-//! LLM model implementations for RAK
+//! LLM model implementations for ZDK
 
 pub mod gemini;
 pub mod openai;

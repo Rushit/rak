@@ -1,12 +1,12 @@
-# RAK Scripts
+# ZDK Scripts
 
-Utility scripts for RAK development and testing.
+Utility scripts for ZDK development and testing.
 
 ## 📜 Available Scripts
 
 ### `test_examples.sh`
 
-Comprehensive testing script for all RAK examples.
+Comprehensive testing script for all ZDK examples.
 
 **Usage:**
 ```bash
@@ -39,7 +39,7 @@ Comprehensive testing script for all RAK examples.
 **Example Output:**
 ```
 ╔════════════════════════════════════════════════════════════════╗
-║          RAK Examples Test Suite                              ║
+║          ZDK Examples Test Suite                              ║
 ╚════════════════════════════════════════════════════════════════╝
 
 Checking prerequisites...

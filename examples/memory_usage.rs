@@ -52,7 +52,7 @@ fn create_text_event(author: &str, text: &str, timestamp: i64) -> Event {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    println!("=== RAK Memory Service Example ===\n");
+    println!("=== ZDK Memory Service Example ===\n");
 
     // Create memory service
     let memory_service = InMemoryMemoryService::new();

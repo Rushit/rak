@@ -4,7 +4,7 @@
 //! **inside the Gemini API**, not locally.
 
 use async_trait::async_trait;
-use zdk_core::{Result as RakResult, Tool, ToolContext, ToolResponse};
+use zdk_core::{Result as ZdkResult, Tool, ToolContext, ToolResponse};
 use serde_json::{json, Value};
 use std::sync::Arc;
 
@@ -24,7 +24,7 @@ use std::sync::Arc;
 /// - **Gemini 2.0+** model (e.g., `gemini-2.0-flash-exp`, `gemini-2.0-pro-exp`)
 /// - Gemini API key (same one used for model)
 ///
-/// ⚠️ **Note**: This tool currently requires future enhancement to `rak-model` to support
+/// ⚠️ **Note**: This tool currently requires future enhancement to `zdk-model` to support
 /// adding tools to the Gemini API request config. See documentation for details.
 ///
 /// ## How It Works
@@ -50,9 +50,9 @@ use std::sync::Arc;
 /// // See examples/web_tools_usage.rs for a complete example
 /// ```
 ///
-/// ## Python RAK Equivalent
+/// ## Python ZDK Equivalent
 ///
-/// This matches Python RAK's `GoogleSearchTool`:
+/// This matches Python ZDK's `GoogleSearchTool`:
 ///
 /// ```python
 /// from google.adk.tools import google_search
@@ -65,7 +65,7 @@ use std::sync::Arc;
 ///
 /// ## Future Enhancement Needed
 ///
-/// To fully enable this tool, `rak-model`'s `GeminiModel` needs to:
+/// To fully enable this tool, `zdk-model`'s `GeminiModel` needs to:
 ///
 /// 1. Accept tools in `LLMRequest`
 /// 2. Add them to the Gemini API request config:
@@ -132,14 +132,14 @@ impl Tool for GeminiGoogleSearchTool {
         &self,
         _ctx: Arc<dyn ToolContext>,
         _params: Value,
-    ) -> RakResult<ToolResponse> {
+    ) -> ZdkResult<ToolResponse> {
         // This tool doesn't execute locally - it's handled by Gemini API
         // When model-level tool support is added, this will never be called
         //
         // For now, return a helpful message
         Ok(ToolResponse {
             result: json!({
-                "info": "This is a Gemini built-in tool. It requires model-level configuration support in rak-model.",
+                "info": "This is a Gemini built-in tool. It requires model-level configuration support in zdk-model.",
                 "status": "Model integration pending",
                 "documentation": "See gemini_google_search.rs for implementation details"
             }),

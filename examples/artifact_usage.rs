@@ -7,7 +7,7 @@ use zdk_artifact::{
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("=== RAK Artifact Service Example ===\n");
+    println!("=== ZDK Artifact Service Example ===\n");
 
     // Example 1: In-memory artifact service
     println!("1. Using InMemoryArtifactService:");
@@ -31,7 +31,7 @@ async fn demonstrate_artifact_service(
         user_id: "user123".to_string(),
         session_id: "session456".to_string(),
         file_name: "document.txt".to_string(),
-        part: ArtifactPart::text("Hello, RAK!"),
+        part: ArtifactPart::text("Hello, ZDK!"),
         version: None,
     };
 
@@ -44,7 +44,7 @@ async fn demonstrate_artifact_service(
         user_id: "user123".to_string(),
         session_id: "session456".to_string(),
         file_name: "document.txt".to_string(),
-        part: ArtifactPart::text("Hello, RAK v2!"),
+        part: ArtifactPart::text("Hello, ZDK v2!"),
         version: None,
     };
 

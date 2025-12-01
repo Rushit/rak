@@ -1,4 +1,4 @@
-//! Example demonstrating OpenTelemetry integration with RAK
+//! Example demonstrating OpenTelemetry integration with ZDK
 //!
 //! This example shows how to:
 //! - Initialize telemetry with OpenTelemetry
@@ -19,7 +19,7 @@
 //! ```
 
 use zdk_agent::LLMAgent;
-use zdk_core::{AuthCredentials, Content, Part, RakConfig};
+use zdk_core::{AuthCredentials, Content, Part, ZdkConfig};
 use zdk_model::GeminiModel;
 use zdk_runner::Runner;
 use zdk_session::inmemory::InMemorySessionService;
@@ -37,12 +37,12 @@ async fn main() -> anyhow::Result<()> {
     // - Automatic span creation for LLM calls and tool executions
     init_telemetry();
 
-    println!("RAK Telemetry Example");
+    println!("ZDK Telemetry Example");
     println!("==========================\n");
     println!("Watch the logs for structured tracing output!\n");
 
     // Load configuration
-    let config = RakConfig::load()?;
+    let config = ZdkConfig::load()?;
     
     // Get authentication credentials from config
     let creds = config.get_auth_credentials()?;

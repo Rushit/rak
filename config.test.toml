@@ -1,0 +1,53 @@
+# Test Configuration for ZDK
+# This file is used by automated tests and examples
+
+# =============================================================================
+# Authentication Configuration for Tests
+# =============================================================================
+# Using gcloud auth for server examples and real integration tests
+# This allows testing the actual authentication flow with Vertex AI
+[auth]
+provider = "gcloud"
+
+[auth.gcloud]
+# Project ID is auto-detected from gcloud config
+# If you need to override: project_id = "my-test-project"
+# Location defaults to us-central1
+
+# Note: For unit tests that use mocks, the auth provider is ignored
+# For integration tests and examples, this enables real API testing
+
+# =============================================================================
+# Model Configuration
+# =============================================================================
+[model]
+provider = "gemini"
+model_name = "gemini-2.0-flash-exp"
+
+# Legacy API key support (fallback for backward compatibility)
+# Not needed when using gcloud auth above
+
+# =============================================================================
+# OpenAI Configuration (Optional)
+# =============================================================================
+# OpenAI examples can also be tested
+# openai_api_key = "${OPENAI_API_KEY}"
+
+# =============================================================================
+# Server Configuration
+# =============================================================================
+[server]
+host = "127.0.0.1"
+port = 18080  # Different port for tests (avoids conflicts with dev server)
+
+# =============================================================================
+# Session Storage
+# =============================================================================
+[session]
+provider = "in-memory"  # Tests always use in-memory for speed
+
+# =============================================================================
+# Observability
+# =============================================================================
+[observability]
+# No observability in tests for speed and simplicity

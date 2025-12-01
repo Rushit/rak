@@ -21,7 +21,7 @@ async fn test_openapi_toolset_generation() {
         .with_max_level(tracing::Level::INFO)
         .init();
 
-    info!("RAK OpenAPI Tool Generator Test");
+    info!("ZDK OpenAPI Tool Generator Test");
 
     // Example 1: Load from YAML string
     let yaml_spec = r#"

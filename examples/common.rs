@@ -1,4 +1,4 @@
-//! Common utilities for RAK examples
+//! Common utilities for ZDK examples
 //!
 //! This module provides shared helper functions that all examples can use,
 //! making them simpler and more consistent. The key design principle is
@@ -10,7 +10,7 @@
 #![allow(dead_code)] // Functions are used by examples that include this module
 
 use anyhow::{Context, Result};
-use zdk_core::{AuthCredentials, RakConfig, LLM};
+use zdk_core::{AuthCredentials, ZdkConfig, LLM};
 use zdk_model::GeminiModel;
 use std::sync::Arc;
 
@@ -47,7 +47,7 @@ use std::sync::Arc;
 /// - gcloud CLI is not installed or authenticated (when using gcloud provider)
 /// - API key is missing or invalid (when using api_key provider)
 /// - GCP project cannot be determined
-pub fn create_gemini_model(config: &RakConfig) -> Result<Arc<dyn LLM>> {
+pub fn create_gemini_model(config: &ZdkConfig) -> Result<Arc<dyn LLM>> {
     // Get authentication credentials from config
     let creds = config
         .get_auth_credentials()
@@ -80,7 +80,7 @@ pub fn create_gemini_model(config: &RakConfig) -> Result<Arc<dyn LLM>> {
     Ok(model)
 }
 
-/// Load RAK configuration with helpful error messages
+/// Load ZDK configuration with helpful error messages
 ///
 /// Attempts to load configuration from:
 /// 1. config.toml (current directory)
@@ -100,8 +100,8 @@ pub fn create_gemini_model(config: &RakConfig) -> Result<Arc<dyn LLM>> {
 /// - Required fields are missing
 ///
 /// The error message includes setup instructions to help users get started.
-pub fn load_config() -> Result<RakConfig> {
-    RakConfig::load().map_err(|e| {
+pub fn load_config() -> Result<ZdkConfig> {
+    ZdkConfig::load().map_err(|e| {
         anyhow::anyhow!(
             "Failed to load config: {}\n\
              \n\
@@ -142,7 +142,7 @@ pub fn load_config() -> Result<RakConfig> {
 /// let config = common::load_config()?;
 /// common::show_auth_info(&config)?;
 /// ```
-pub fn show_auth_info(config: &RakConfig) -> Result<()> {
+pub fn show_auth_info(config: &ZdkConfig) -> Result<()> {
     match config.get_auth_credentials()? {
         AuthCredentials::ApiKey { .. } => {
             println!("🔑 Authentication: API Key");

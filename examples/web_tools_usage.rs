@@ -1,6 +1,6 @@
 //! Web Tools Usage Example
 //!
-//! This example demonstrates how to use RAK's web tools:
+//! This example demonstrates how to use ZDK's web tools:
 //! - GeminiGoogleSearchTool - Search the web using Gemini's built-in capability
 //! - GeminiUrlContextTool - Read web pages using Gemini's built-in capability
 //! - WebScraperTool - Parse HTML content from any URL
@@ -31,7 +31,7 @@
 //! ```
 
 use zdk_agent::LLMAgent;
-use zdk_core::{AuthCredentials, Content, RakConfig};
+use zdk_core::{AuthCredentials, Content, ZdkConfig};
 use zdk_model::GeminiModel;
 use zdk_runner::Runner;
 use zdk_session::inmemory::InMemorySessionService;
@@ -44,11 +44,11 @@ async fn main() -> anyhow::Result<()> {
     // Initialize tracing
     tracing_subscriber::fmt::init();
 
-    println!("🌐 RAK Web Tools Example");
+    println!("🌐 ZDK Web Tools Example");
     println!("========================\n");
 
     // Load configuration
-    let config = RakConfig::load()?;
+    let config = ZdkConfig::load()?;
     
     println!("✅ Configuration loaded from config.toml");
     

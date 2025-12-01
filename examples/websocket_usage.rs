@@ -1,7 +1,7 @@
 //! Example demonstrating WebSocket client for agent interaction
 //!
 //! This example shows how to:
-//! - Automatically start a RAK server with WebSocket support
+//! - Automatically start a ZDK server with WebSocket support
 //! - Connect to the WebSocket endpoint
 //! - Send run commands
 //! - Receive streamed events
@@ -40,7 +40,7 @@ mod common;
 #[tokio::main]
 async fn main() -> Result<()> {
     println!("╔═══════════════════════════════════════════════════════════╗");
-    println!("║       RAK WebSocket Example (Self-Contained)             ║");
+    println!("║       ZDK WebSocket Example (Self-Contained)             ║");
     println!("╚═══════════════════════════════════════════════════════════╝\n");
 
     // Start server in background
@@ -82,7 +82,7 @@ async fn main() -> Result<()> {
     client_result
 }
 
-/// Start the RAK server with WebSocket support
+/// Start the ZDK server with WebSocket support
 async fn start_server() -> Result<()> {
     // Load configuration
     let config = common::load_config()?;

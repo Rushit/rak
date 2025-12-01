@@ -9,10 +9,10 @@ use zdk_session::{CreateRequest, SessionService};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("=== RAK Database Session Example ===\n");
+    println!("=== ZDK Database Session Example ===\n");
 
-    // Note: This example requires the 'sqlite' feature in rak-session
-    // If you get a compilation error, ensure rak-session is built with sqlite feature
+    // Note: This example requires the 'sqlite' feature in zdk-session
+    // If you get a compilation error, ensure zdk-session is built with sqlite feature
     #[cfg(feature = "sqlite")]
     {
         use zdk_session::SqliteSessionService;
@@ -55,9 +55,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     #[cfg(not(feature = "sqlite"))]
     {
-        println!("This example requires rak-session to be built with the 'sqlite' feature.");
+        println!("This example requires zdk-session to be built with the 'sqlite' feature.");
         println!("\nThe feature is defined in the workspace but not enabled by default.");
-        println!("To run this example, the rak-session crate needs the sqlite feature enabled.");
+        println!("To run this example, the zdk-session crate needs the sqlite feature enabled.");
     }
 
     Ok(())

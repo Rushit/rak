@@ -1,4 +1,4 @@
-//! Procedural macros for RAK
+//! Procedural macros for ZDK
 //!
 //! This crate provides the `#[tool]` attribute macro for creating tools ergonomically.
 

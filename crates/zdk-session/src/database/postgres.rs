@@ -2,7 +2,7 @@
 
 use super::models::{AppStateRow, EventRow, SessionRow, UserStateRow};
 use crate::{CreateRequest, GetRequest, Session, SessionService};
-use zdk_core::{Error as RakError, Event, Result as RakResult};
+use zdk_core::{Error as ZdkError, Event, Result as ZdkResult};
 use anyhow::anyhow;
 use async_trait::async_trait;
 use sqlx::{Pool, Postgres};
@@ -138,7 +138,7 @@ impl Session for DatabaseSession {
 
 #[async_trait]
 impl SessionService for PostgresSessionService {
-    async fn get(&self, req: &GetRequest) -> RakResult<Arc<dyn Session>> {
+    async fn get(&self, req: &GetRequest) -> ZdkResult<Arc<dyn Session>> {
         // Fetch session
         let session_row: SessionRow = sqlx::query_as(
             "SELECT * FROM sessions WHERE app_name = $1 AND user_id = $2 AND id = $3",
@@ -148,23 +148,23 @@ impl SessionService for PostgresSessionService {
         .bind(&req.session_id)
         .fetch_one(&self.pool)
         .await
-        .map_err(|e| RakError::Other(anyhow!("Failed to fetch session: {}", e)))?;
+        .map_err(|e| ZdkError::Other(anyhow!("Failed to fetch session: {}", e)))?;
 
         // Parse session state
         let session_state: HashMap<String, serde_json::Value> =
             serde_json::from_str(&session_row.state)
-                .map_err(|e| RakError::Other(anyhow!("Failed to parse session state: {}", e)))?;
+                .map_err(|e| ZdkError::Other(anyhow!("Failed to parse session state: {}", e)))?;
 
         // Fetch app and user states
         let app_state = self
             .get_or_create_app_state(&req.app_name)
             .await
-            .map_err(|e| RakError::Other(anyhow!("Failed to fetch app state: {}", e)))?;
+            .map_err(|e| ZdkError::Other(anyhow!("Failed to fetch app state: {}", e)))?;
 
         let user_state = self
             .get_or_create_user_state(&req.app_name, &req.user_id)
             .await
-            .map_err(|e| RakError::Other(anyhow!("Failed to fetch user state: {}", e)))?;
+            .map_err(|e| ZdkError::Other(anyhow!("Failed to fetch user state: {}", e)))?;
 
         // Merge states
         let merged_state = Self::merge_states(app_state, user_state, session_state);
@@ -178,12 +178,12 @@ impl SessionService for PostgresSessionService {
         .bind(&req.session_id)
         .fetch_all(&self.pool)
         .await
-        .map_err(|e| RakError::Other(anyhow!("Failed to fetch events: {}", e)))?;
+        .map_err(|e| ZdkError::Other(anyhow!("Failed to fetch events: {}", e)))?;
 
         let events: Result<Vec<Event>, _> = event_rows.iter().map(|row| row.to_event()).collect();
 
         let events =
-            events.map_err(|e| RakError::Other(anyhow!("Failed to parse events: {}", e)))?;
+            events.map_err(|e| ZdkError::Other(anyhow!("Failed to parse events: {}", e)))?;
 
         Ok(Arc::new(DatabaseSession {
             id: session_row.id,
@@ -194,7 +194,7 @@ impl SessionService for PostgresSessionService {
         }))
     }
 
-    async fn create(&self, req: &CreateRequest) -> RakResult<Arc<dyn Session>> {
+    async fn create(&self, req: &CreateRequest) -> ZdkResult<Arc<dyn Session>> {
         let session_id = req
             .session_id
             .clone()
@@ -211,18 +211,18 @@ impl SessionService for PostgresSessionService {
         .bind(state_json)
         .execute(&self.pool)
         .await
-        .map_err(|e| RakError::Other(anyhow!("Failed to create session: {}", e)))?;
+        .map_err(|e| ZdkError::Other(anyhow!("Failed to create session: {}", e)))?;
 
         // Ensure app and user states exist
         let app_state = self
             .get_or_create_app_state(&req.app_name)
             .await
-            .map_err(|e| RakError::Other(anyhow!("Failed to create app state: {}", e)))?;
+            .map_err(|e| ZdkError::Other(anyhow!("Failed to create app state: {}", e)))?;
 
         let user_state = self
             .get_or_create_user_state(&req.app_name, &req.user_id)
             .await
-            .map_err(|e| RakError::Other(anyhow!("Failed to create user state: {}", e)))?;
+            .map_err(|e| ZdkError::Other(anyhow!("Failed to create user state: {}", e)))?;
 
         let merged_state = Self::merge_states(app_state, user_state, HashMap::new());
 
@@ -235,20 +235,20 @@ impl SessionService for PostgresSessionService {
         }))
     }
 
-    async fn append_event(&self, session_id: &str, event: Event) -> RakResult<()> {
+    async fn append_event(&self, session_id: &str, event: Event) -> ZdkResult<()> {
         // First, find the session to get app_name and user_id
         let session_row: (String, String) =
             sqlx::query_as("SELECT app_name, user_id FROM sessions WHERE id = $1 LIMIT 1")
                 .bind(session_id)
                 .fetch_one(&self.pool)
                 .await
-                .map_err(|e| RakError::Other(anyhow!("Failed to find session: {}", e)))?;
+                .map_err(|e| ZdkError::Other(anyhow!("Failed to find session: {}", e)))?;
 
         let (app_name, user_id) = session_row;
 
         // Convert event to EventRow
         let event_row = EventRow::from_event(&event, &app_name, &user_id, session_id)
-            .map_err(|e| RakError::Other(anyhow!("Failed to serialize event: {}", e)))?;
+            .map_err(|e| ZdkError::Other(anyhow!("Failed to serialize event: {}", e)))?;
 
         // Insert event
         sqlx::query(
@@ -283,7 +283,7 @@ impl SessionService for PostgresSessionService {
         .bind(&event_row.interrupted)
         .execute(&self.pool)
         .await
-        .map_err(|e| RakError::Other(anyhow!("Failed to insert event: {}", e)))?;
+        .map_err(|e| ZdkError::Other(anyhow!("Failed to insert event: {}", e)))?;
 
         Ok(())
     }

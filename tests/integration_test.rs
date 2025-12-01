@@ -1,4 +1,4 @@
-// Integration tests for RAK
+// Integration tests for ZDK
 // These tests verify the full stack E2E functionality
 
 use zdk_agent::LLMAgent;

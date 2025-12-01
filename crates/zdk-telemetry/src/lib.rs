@@ -1,4 +1,4 @@
-//! # RAK Telemetry
+//! # ZDK Telemetry
 //!
 //! OpenTelemetry integration for distributed tracing and observability.
 //!

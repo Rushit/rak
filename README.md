@@ -86,17 +86,17 @@ zdk-mcp = { path = "path/to/zdk-rs/crates/zdk-mcp" }  # Optional: for MCP protoc
 ### Example
 
 ```rust
-use rak_agent::LLMAgent;
-use rak_model::GeminiModel;
-use rak_runner::Runner;
-use rak_session::inmemory::InMemorySessionService;
-use rak_core::{Content, RakConfig};  // NEW: RakConfig
+use zdk_agent::LLMAgent;
+use zdk_model::GeminiModel;
+use zdk_runner::Runner;
+use zdk_session::inmemory::InMemorySessionService;
+use zdk_core::{Content, ZdkConfig};  // NEW: ZdkConfig
 use std::sync::Arc;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // Setup (NEW: Load from config.toml)
-    let config = RakConfig::load()?;
+    let config = ZdkConfig::load()?;
     let api_key = config.api_key()?;
     let model = Arc::new(GeminiModel::new(api_key, config.model.model_name));
     
@@ -144,7 +144,7 @@ async fn main() -> anyhow::Result<()> {
 ZDK supports function calling with built-in and custom tools:
 
 ```rust
-use rak_tool::builtin::create_calculator_tool;
+use zdk_tool::builtin::create_calculator_tool;
 
 // Create an agent with tools
 let calculator = Arc::new(create_calculator_tool()?);
@@ -163,7 +163,7 @@ See [examples/tool_usage.rs](examples/tool_usage.rs) for a complete example.
 ZDK supports multi-agent orchestration with workflow patterns:
 
 ```rust
-use rak_agent::{SequentialAgent, ParallelAgent, LoopAgent};
+use zdk_agent::{SequentialAgent, ParallelAgent, LoopAgent};
 
 // Sequential: Execute agents in order
 let sequential = SequentialAgent::builder()
@@ -195,7 +195,7 @@ See [examples/workflow_agents.rs](examples/workflow_agents.rs) for a complete ex
 ZDK provides long-term memory for agents to remember past conversations:
 
 ```rust
-use rak_memory::{InMemoryMemoryService, MemoryService, SearchRequest};
+use zdk_memory::{InMemoryMemoryService, MemoryService, SearchRequest};
 
 // Create memory service
 let memory_service = InMemoryMemoryService::new();
@@ -223,7 +223,7 @@ See [examples/memory_usage.rs](examples/memory_usage.rs) for a complete example.
 ZDK provides web tools for searching and scraping content - **ZERO additional API keys needed!**
 
 ```rust
-use rak_web_tools::{GeminiGoogleSearchTool, GeminiUrlContextTool, WebScraperTool};
+use zdk_web_tools::{GeminiGoogleSearchTool, GeminiUrlContextTool, WebScraperTool};
 
 // Create web tools - NO additional API keys needed!
 let google_search = Arc::new(GeminiGoogleSearchTool::new());
@@ -291,7 +291,7 @@ See [examples/websocket_usage.rs](examples/websocket_usage.rs) for a complete ex
 ZDK provides native database tools with **security-first design** - read-only by default!
 
 ```rust
-use rak_database_tools::{create_postgres_tools, create_sqlite_tools, DatabaseToolConfig};
+use zdk_database_tools::{create_postgres_tools, create_sqlite_tools, DatabaseToolConfig};
 
 // Read-only mode (default) - safe for data analysts
 let readonly_tools = create_postgres_tools("postgresql://localhost/mydb").await?;
@@ -340,7 +340,7 @@ See [examples/database_tools_usage.rs](examples/database_tools_usage.rs) for a c
 ZDK supports MCP for **dynamic tool loading** from external servers!
 
 ```rust
-use rak_mcp::{McpToolset, StdioConnectionParams};
+use zdk_mcp::{McpToolset, StdioConnectionParams};
 
 // Connect to PostgreSQL MCP server
 let postgres_mcp = Arc::new(
@@ -407,7 +407,7 @@ ZDK provides comprehensive observability through OpenTelemetry and structured lo
 ### Telemetry Setup
 
 ```rust
-use rak_telemetry::init_telemetry;
+use zdk_telemetry::init_telemetry;
 
 #[tokio::main]
 async fn main() {
@@ -427,7 +427,7 @@ Control logging with the `RUST_LOG` environment variable:
 RUST_LOG=debug cargo run --example quickstart
 
 # Module-specific logging
-RUST_LOG=rak_agent=debug,rak_runner=info cargo run
+RUST_LOG=zdk_agent=debug,rak_runner=info cargo run
 
 # Production logging (info and above)
 RUST_LOG=info cargo run
@@ -598,7 +598,7 @@ ZDK follows a modular architecture:
 Start a server with the `zdk-server` crate:
 
 ```rust
-use rak_server::create_router;
+use zdk_server::create_router;
 
 let router = create_router(runner, session_service);
 let listener = tokio::net::TcpListener::bind("127.0.0.1:8080").await?;

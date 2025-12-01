@@ -1,4 +1,4 @@
-//! Web and Search Tools for RAK
+//! Web and Search Tools for ZDK
 //!
 //! This crate provides tools for web search and scraping, optimized for Gemini models.
 //!

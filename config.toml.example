@@ -1,4 +1,4 @@
-# RAK Configuration Example
+# ZDK Configuration Example
 #
 # 🔒 SECURITY: This file contains sensitive API keys
 #
@@ -20,7 +20,7 @@
 # =============================================================================
 # Authentication Configuration
 # =============================================================================
-# RAK supports two authentication methods:
+# ZDK supports two authentication methods:
 # 1. API Key (Public Gemini API) - Good for quick start and development
 # 2. Google Cloud (gcloud) - Best for production and enterprise use
 #
@@ -131,4 +131,4 @@ provider = "in-memory"
 # =============================================================================
 # [observability]
 # otel_endpoint = "http://localhost:4317"
-# service_name = "rak-agent"
+# service_name = "zdk-agent"

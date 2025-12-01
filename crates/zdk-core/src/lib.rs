@@ -1,4 +1,4 @@
-//! Core traits and types for RAK
+//! Core traits and types for ZDK
 //!
 //! This crate provides the foundational abstractions for building AI agents.
 
@@ -12,7 +12,7 @@ pub mod traits;
 
 // Re-exports
 pub use auth::{AuthCredentials, AuthProvider, ApiKeyConfig, GCloudConfig};
-pub use config::RakConfig;
+pub use config::ZdkConfig;
 pub use content::{Content, FunctionCall, FunctionResponse, InlineData, Part};
 pub use context::{InvocationContext, ReadonlyContext, ToolContext};
 pub use error::{Error, Result};

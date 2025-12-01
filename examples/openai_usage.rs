@@ -1,5 +1,5 @@
 use zdk_agent::LLMAgent;
-use zdk_core::{Content, RakConfig};
+use zdk_core::{Content, ZdkConfig};
 use zdk_model::OpenAIModel;
 use zdk_runner::Runner;
 use zdk_session::{inmemory::InMemorySessionService, SessionService};
@@ -16,11 +16,11 @@ async fn main() -> anyhow::Result<()> {
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
 
-    common::print_header("RAK OpenAI Example");
+    common::print_header("ZDK OpenAI Example");
 
     // Load configuration
     println!("Loading configuration...");
-    let config = RakConfig::load()?;
+    let config = ZdkConfig::load()?;
     
     // Get OpenAI API key from config
     // You can set it in config.toml:

@@ -1,4 +1,4 @@
-//! Authentication abstraction for RAK
+//! Authentication abstraction for ZDK
 //!
 //! Provides a unified interface for different authentication methods,
 //! allowing users to configure their preferred auth provider in config.toml.
@@ -9,7 +9,7 @@ use std::process::Command;
 
 /// Authentication provider configuration
 ///
-/// This enum represents the different authentication methods supported by RAK.
+/// This enum represents the different authentication methods supported by ZDK.
 /// Users configure their preferred provider in config.toml.
 ///
 /// # Examples

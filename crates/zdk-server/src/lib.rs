@@ -1,4 +1,4 @@
-//! Server implementations for RAK
+//! Server implementations for ZDK
 
 pub mod rest;
 pub mod types;

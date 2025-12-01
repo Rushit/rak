@@ -17,7 +17,7 @@ async fn main() -> anyhow::Result<()> {
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
 
-    common::print_header("RAK Quickstart Example");
+    common::print_header("ZDK Quickstart Example");
 
     // Load configuration (drives authentication method)
     println!("Loading configuration...");
@@ -61,8 +61,8 @@ async fn main() -> anyhow::Result<()> {
     println!("Session created: {}\n", session.id());
 
     // Run agent
-    let message = Content::new_user_text("Hello! Can you explain what RAK is in one sentence?");
-    println!("User: Hello! Can you explain what RAK is in one sentence?\n");
+    let message = Content::new_user_text("Hello! Can you explain what ZDK is in one sentence?");
+    println!("User: Hello! Can you explain what ZDK is in one sentence?\n");
 
     let mut stream = runner
         .run(

@@ -164,7 +164,7 @@ cargo test
 ## Test Organization
 
 ```
-rak/
+zdk/
 ├── tests/
 │   ├── common.rs              # Shared test utilities (gcloud auth, etc.)
 │   ├── integration_test.rs    # E2E integration tests

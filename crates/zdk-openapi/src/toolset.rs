@@ -12,7 +12,7 @@ use tracing::{debug, info};
 /// A collection of tools generated from an OpenAPI specification.
 ///
 /// The `OpenApiToolset` parses an OpenAPI spec and creates a `RestApiTool` for
-/// each operation defined in the spec. All tools can then be used in RAK agents.
+/// each operation defined in the spec. All tools can then be used in ZDK agents.
 ///
 /// # Example
 ///
@@ -154,7 +154,7 @@ impl OpenApiToolset {
 
     /// Get all tools generated from the OpenAPI spec.
     ///
-    /// Returns a vector of tools that can be used in RAK agents.
+    /// Returns a vector of tools that can be used in ZDK agents.
     pub fn tools(&self) -> Vec<Arc<dyn Tool>> {
         self.tools.clone()
     }

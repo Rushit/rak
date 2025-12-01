@@ -31,7 +31,7 @@ impl OpenAIModel {
         format!("{}/chat/completions", self.base_url)
     }
 
-    /// Convert RAK Content format to OpenAI messages format
+    /// Convert ZDK Content format to OpenAI messages format
     fn convert_contents_to_messages(&self, contents: Vec<Content>) -> Vec<OpenAIMessage> {
         contents
             .into_iter()
@@ -65,7 +65,7 @@ impl OpenAIModel {
             .collect()
     }
 
-    /// Convert OpenAI response to RAK Content format
+    /// Convert OpenAI response to ZDK Content format
     fn convert_message_to_content(message: &OpenAIMessage) -> Content {
         Content {
             role: match message.role.as_str() {

@@ -14,7 +14,7 @@ async fn main() -> anyhow::Result<()> {
     // Setup logging
     tracing_subscriber::fmt::init();
 
-    common::print_header("RAK Tool Usage Example");
+    common::print_header("ZDK Tool Usage Example");
 
     // Load configuration (drives authentication method)
     println!("Loading configuration...");

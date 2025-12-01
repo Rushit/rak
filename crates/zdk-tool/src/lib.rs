@@ -1,4 +1,4 @@
-//! Tool system for RAK
+//! Tool system for ZDK
 //!
 //! This crate provides the tool execution framework, including:
 //! - Tool trait and utilities

@@ -67,15 +67,15 @@ impl Toolset for McpToolset {
             "Loaded tools from MCP server"
         );
 
-        // Wrap each MCP tool as RAK Tool
-        let rak_tools: Vec<Arc<dyn Tool>> = filtered
+        // Wrap each MCP tool as ZDK Tool
+        let zdk_tools: Vec<Arc<dyn Tool>> = filtered
             .into_iter()
             .map(|mcp_tool| {
                 Arc::new(McpToolWrapper::new(mcp_tool, self.client.clone())) as Arc<dyn Tool>
             })
             .collect();
 
-        Ok(rak_tools)
+        Ok(zdk_tools)
     }
 }
 

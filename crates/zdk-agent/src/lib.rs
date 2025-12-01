@@ -1,4 +1,4 @@
-//! Agent implementations for RAK
+//! Agent implementations for ZDK
 
 pub mod builder;
 pub mod llm_agent;

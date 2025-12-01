@@ -1,4 +1,4 @@
-//! # RAK Memory Service
+//! # ZDK Memory Service
 //!
 //! Long-term memory storage for AI agents, enabling knowledge retention
 //! and retrieval across multiple sessions.

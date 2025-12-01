@@ -1,4 +1,4 @@
-//! Database tools for RAK agents
+//! Database tools for ZDK agents
 //!
 //! This crate provides database interaction tools for PostgreSQL and SQLite,
 //! with security features like read-only mode, parameter binding, and query limits.

@@ -1,6 +1,6 @@
-//! # RAK OpenAPI Tool Generator
+//! # ZDK OpenAPI Tool Generator
 //!
-//! Automatically generates RAK tools from OpenAPI specifications.
+//! Automatically generates ZDK tools from OpenAPI specifications.
 //!
 //! ## Features
 //!

@@ -1,4 +1,4 @@
-//! MCP tool wrapper - bridges MCP tools to RAK Tool trait
+//! MCP tool wrapper - bridges MCP tools to ZDK Tool trait
 
 use crate::client::McpClient;
 use crate::types::McpToolInfo;
@@ -8,7 +8,7 @@ use serde_json::Value;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
-/// Wrapper that adapts an MCP tool to the RAK Tool trait
+/// Wrapper that adapts an MCP tool to the ZDK Tool trait
 pub struct McpToolWrapper {
     mcp_tool: McpToolInfo,
     client: Arc<Mutex<Option<McpClient>>>,

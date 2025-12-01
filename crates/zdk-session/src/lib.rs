@@ -1,4 +1,4 @@
-//! Session management for RAK
+//! Session management for ZDK
 
 use zdk_core::{Event, Result};
 use async_trait::async_trait;

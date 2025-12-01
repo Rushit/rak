@@ -18,17 +18,17 @@
 //! ```
 
 use anyhow::Result;
-use zdk_core::RakConfig;
+use zdk_core::ZdkConfig;
 use std::env;
 use std::path::Path;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    println!("=== RAK Configuration System Demo ===\n");
+    println!("=== ZDK Configuration System Demo ===\n");
 
     // Example 1: Load default config (config.toml)
     println!("1️⃣  Loading default configuration...");
-    match RakConfig::load() {
+    match ZdkConfig::load() {
         Ok(config) => {
             println!("   ✅ Config loaded successfully!");
             println!("   📁 Provider: {}", config.model.provider);
@@ -46,7 +46,7 @@ async fn main() -> Result<()> {
     }
 
     println!("\n2️⃣  Loading test configuration...");
-    match RakConfig::load_test() {
+    match ZdkConfig::load_test() {
         Ok(config) => {
             println!("   ✅ Test config loaded!");
             println!("   📁 Provider: {}", config.model.provider);
@@ -70,7 +70,7 @@ async fn main() -> Result<()> {
     }
 
     // Try to load config
-    if let Ok(config) = RakConfig::load() {
+    if let Ok(config) = ZdkConfig::load() {
         match config.api_key() {
             Ok(key) => {
                 println!("   📝 Resolved API key: Set (length: {})", key.len());
@@ -96,7 +96,7 @@ async fn main() -> Result<()> {
         let path = Path::new(config_file);
         if path.exists() {
             println!("\n   📄 Found custom config: {}", config_file);
-            if let Ok(config) = RakConfig::load_from(Some(path)) {
+            if let Ok(config) = ZdkConfig::load_from(Some(path)) {
                 println!("      ✅ Loaded successfully");
                 println!("      🤖 Model: {}", config.model.model_name);
             }

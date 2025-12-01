@@ -1,6 +1,6 @@
 //! Database Tools Example
 //!
-//! Demonstrates how to use native PostgreSQL and SQLite tools with RAK agents.
+//! Demonstrates how to use native PostgreSQL and SQLite tools with ZDK agents.
 //! Shows both read-only (default) and write-enabled modes.
 
 #[path = "common.rs"]

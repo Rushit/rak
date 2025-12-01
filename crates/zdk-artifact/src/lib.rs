@@ -1,6 +1,6 @@
-//! # RAK Artifact Service
+//! # ZDK Artifact Service
 //!
-//! This crate provides artifact storage and retrieval services for RAK.
+//! This crate provides artifact storage and retrieval services for ZDK.
 //! Artifacts are files identified by application name, user ID, session ID, and filename,
 //! with support for versioning.
 //!
