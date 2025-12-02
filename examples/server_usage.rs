@@ -72,7 +72,7 @@ use anyhow::{Context, Result};
 use std::env;
 use std::path::PathBuf;
 use std::sync::Arc;
-use tokio::time::{sleep, timeout, Duration};
+use tokio::time::{Duration, sleep, timeout};
 use zdk_agent::LLMAgent;
 use zdk_core::{AuthCredentials, Provider, ZConfig};
 use zdk_runner::Runner;
@@ -146,7 +146,7 @@ async fn main() -> Result<()> {
     println!("   POST /api/v1/sessions/:id/run                   - Run agent (batch)");
     println!("   POST /api/v1/sessions/:id/run/sse               - Run agent (SSE stream)");
     println!("   GET  /api/v1/sessions/:id/run/ws                - WebSocket connection");
-    
+
     println!("\n🧪 Running example workflow...");
     run_example_workflow(server_url, app, listener).await?;
 
@@ -173,7 +173,7 @@ async fn run_example_workflow(
     sleep(Duration::from_millis(500)).await;
 
     let client = reqwest::Client::new();
-    
+
     // Step 1: Health check
     println!("\n📋 Step 1: Health Check");
     let health_url = format!("{}/health", server_url);
@@ -200,25 +200,24 @@ async fn run_example_workflow(
         "appName": "example-app",
         "userId": "demo-user"
     });
-    
+
     let session_response = timeout(
         Duration::from_secs(5),
-        client.post(&session_url)
-            .json(&session_payload)
-            .send()
-    ).await
-        .context("Session creation timed out")?
-        .context("Failed to create session")?;
-    
+        client.post(&session_url).json(&session_payload).send(),
+    )
+    .await
+    .context("Session creation timed out")?
+    .context("Failed to create session")?;
+
     if !session_response.status().is_success() {
         anyhow::bail!("Session creation failed: {}", session_response.status());
     }
-    
+
     let session_data: serde_json::Value = session_response.json().await?;
     let session_id = session_data["sessionId"]
         .as_str()
         .context("Session ID not found in response")?;
-    
+
     println!("   ✅ Session created: {}", session_id);
 
     // Step 3: Send message to agent (batch mode for simplicity)
@@ -231,32 +230,35 @@ async fn run_example_workflow(
         },
         "streaming": false
     });
-    
+
     println!("   💬 Sending: 'Hello! Can you tell me what 2+2 equals?'");
-    
+
     let agent_response = timeout(
         Duration::from_secs(10),
-        client.post(&run_url)
-            .json(&message_payload)
-            .send()
-    ).await
-        .context("Agent interaction timed out")?
-        .context("Failed to run agent")?;
-    
+        client.post(&run_url).json(&message_payload).send(),
+    )
+    .await
+    .context("Agent interaction timed out")?
+    .context("Failed to run agent")?;
+
     if !agent_response.status().is_success() {
         anyhow::bail!("Agent interaction failed: {}", agent_response.status());
     }
-    
+
     let response_data: serde_json::Value = agent_response.json().await?;
     println!("   ✅ Agent responded successfully");
-    
+
     // Extract and display response text from events
     if let Some(events) = response_data.get("events").and_then(|e| e.as_array()) {
         // Look for the final response event
         for event in events.iter().rev() {
             if let Some(content) = event.get("content") {
                 if let Some(parts) = content.get("parts").and_then(|p| p.as_array()) {
-                    if let Some(text) = parts.first().and_then(|p| p.get("text")).and_then(|t| t.as_str()) {
+                    if let Some(text) = parts
+                        .first()
+                        .and_then(|p| p.get("text"))
+                        .and_then(|t| t.as_str())
+                    {
                         // Truncate long responses for display
                         let display_text = if text.len() > 100 {
                             format!("{}...", &text[..100])
@@ -275,11 +277,11 @@ async fn run_example_workflow(
     println!("\n📋 Step 4: Cleanup");
     server_handle.abort();
     println!("   ✅ Server shutdown gracefully");
-    
+
     println!("\n╔═══════════════════════════════════════════════════════════╗");
     println!("║              Example Completed Successfully!             ║");
     println!("╚═══════════════════════════════════════════════════════════╝\n");
-    
+
     Ok(())
 }
 
@@ -328,7 +330,8 @@ fn describe_auth(creds: &AuthCredentials) -> String {
 /// selects the appropriate provider and authentication method.
 fn create_model_from_auth(_creds: AuthCredentials, config: &ZConfig) -> Result<Arc<dyn Provider>> {
     use zdk_core::ZConfigExt;
-    config.create_provider()
+    config
+        .create_provider()
         .context("Failed to create provider from configuration")
 }
 

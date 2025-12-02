@@ -10,7 +10,6 @@
 //!   cargo test openapi_usage_test -- --ignored --nocapture
 
 use tracing::{error, info};
-use tracing_subscriber;
 use zdk_openapi::{AuthConfig, OpenApiToolset};
 
 #[tokio::test]
@@ -71,7 +70,7 @@ paths:
           description: Deleted
 "#;
 
-    match OpenApiToolset::from_str(yaml_spec) {
+    match OpenApiToolset::parse_from_str(yaml_spec) {
         Ok(toolset) => {
             info!("✓ Successfully parsed OpenAPI spec");
             assert_eq!(toolset.len(), 3, "Should generate 3 tools");
@@ -110,7 +109,7 @@ paths:
     info!("\n---");
     info!("Example: Bearer Token Authentication");
 
-    let toolset_bearer = OpenApiToolset::from_str(yaml_spec)
+    let toolset_bearer = OpenApiToolset::parse_from_str(yaml_spec)
         .unwrap()
         .with_auth(AuthConfig::bearer("my-bearer-token"));
     info!("✓ Configured Bearer token authentication");
@@ -120,7 +119,7 @@ paths:
     info!("\n---");
     info!("Example: Basic Authentication");
 
-    let toolset_basic = OpenApiToolset::from_str(yaml_spec)
+    let toolset_basic = OpenApiToolset::parse_from_str(yaml_spec)
         .unwrap()
         .with_auth(AuthConfig::basic("username", "password"));
     info!("✓ Configured Basic authentication");

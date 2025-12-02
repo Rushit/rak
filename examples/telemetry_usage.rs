@@ -45,7 +45,7 @@ async fn main() -> anyhow::Result<()> {
 
     // Create provider using the new unified provider system
     let provider = config.create_provider()?;
-    
+
     println!("✓ Provider created: {}", config.model.provider);
     println!("  Model: {}\n", config.model.model_name);
 
@@ -92,7 +92,7 @@ async fn main() -> anyhow::Result<()> {
     // Collect response and validate
     let mut full_response = String::new();
     let mut tool_executed = false;
-    
+
     while let Some(event_result) = stream.next().await {
         let event = event_result?;
 
@@ -116,26 +116,28 @@ async fn main() -> anyhow::Result<()> {
     }
 
     println!("Assistant: {}", full_response);
-    
+
     // Validate results
     println!("\nValidating example results...");
-    
+
     if !tool_executed {
         eprintln!("❌ VALIDATION FAILED: No tools were executed");
         std::process::exit(1);
     }
-    
+
     if full_response.is_empty() {
         eprintln!("❌ VALIDATION FAILED: No response text received from agent");
         std::process::exit(1);
     }
-    
+
     if !full_response.contains("105") {
-        eprintln!("❌ VALIDATION FAILED: Response doesn't contain expected calculation result (105)");
+        eprintln!(
+            "❌ VALIDATION FAILED: Response doesn't contain expected calculation result (105)"
+        );
         eprintln!("   Got: '{}'", full_response.trim());
         std::process::exit(1);
     }
-    
+
     println!("✅ VALIDATION PASSED: All checks successful");
     println!("\n✅ Example complete!");
     println!("\nKey telemetry features demonstrated:");

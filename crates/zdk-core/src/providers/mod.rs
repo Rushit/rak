@@ -54,4 +54,3 @@ pub use provider::{Capability, ModelInfo, Provider, ProviderMetadata};
 // Provider re-exports
 pub use gemini::{GeminiAuth, GeminiProvider};
 pub use openai::OpenAIProvider;
-

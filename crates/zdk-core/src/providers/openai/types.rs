@@ -67,4 +67,3 @@ pub struct OpenAIUsage {
     pub completion_tokens: u32,
     pub total_tokens: u32,
 }
-

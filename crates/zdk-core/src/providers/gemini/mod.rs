@@ -36,7 +36,7 @@ impl GeminiConfig {
             audio_model: Some("gemini-pro-audio".to_string()),
         }
     }
-    
+
     /// Create default configuration for Vertex AI (bearer token)
     pub fn default_vertex_ai(model: String, project_id: String, location: String) -> Self {
         Self {
@@ -65,14 +65,14 @@ impl GeminiBuilder {
             config: None,
         }
     }
-    
+
     /// Set API key authentication
     pub fn with_api_key(mut self, api_key: String, model: String) -> Self {
         self.auth = Some(GeminiAuth::ApiKey(api_key));
         self.config = Some(GeminiConfig::default_api_key(model));
         self
     }
-    
+
     /// Set bearer token authentication (Vertex AI)
     pub fn with_bearer_token(
         mut self,
@@ -85,13 +85,13 @@ impl GeminiBuilder {
         self.config = Some(GeminiConfig::default_vertex_ai(model, project_id, location));
         self
     }
-    
+
     /// Set custom configuration
     pub fn with_config(mut self, config: GeminiConfig) -> Self {
         self.config = Some(config);
         self
     }
-    
+
     /// Build the provider
     pub fn build(self) -> crate::Result<GeminiProvider> {
         let auth = self
@@ -100,7 +100,7 @@ impl GeminiBuilder {
         let config = self
             .config
             .ok_or_else(|| crate::Error::config_error("Configuration is required"))?;
-        
+
         Ok(GeminiProvider::new(auth, config))
     }
 }
@@ -110,4 +110,3 @@ impl Default for GeminiBuilder {
         Self::new()
     }
 }
-

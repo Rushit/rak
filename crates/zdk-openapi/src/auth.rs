@@ -120,7 +120,7 @@ impl AuthConfig {
     /// Apply authentication to a reqwest RequestBuilder.
     pub(crate) fn apply_to_request(
         &self,
-        mut builder: reqwest::RequestBuilder,
+        builder: reqwest::RequestBuilder,
     ) -> reqwest::RequestBuilder {
         match self {
             AuthConfig::None => builder,

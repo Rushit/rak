@@ -46,12 +46,15 @@ impl Default for DatabaseToolConfig {
 impl DatabaseToolConfig {
     /// Create a new config with write permissions enabled
     pub fn with_write_enabled() -> Self {
-        let mut config = Self::default();
-        config.read_only = false;
-        config.allowed_operations.insert(SqlOperation::Insert);
-        config.allowed_operations.insert(SqlOperation::Update);
-        config.allowed_operations.insert(SqlOperation::Delete);
-        config
+        let mut allowed_operations = std::collections::HashSet::new();
+        allowed_operations.insert(SqlOperation::Insert);
+        allowed_operations.insert(SqlOperation::Update);
+        allowed_operations.insert(SqlOperation::Delete);
+        Self {
+            read_only: false,
+            allowed_operations,
+            ..Default::default()
+        }
     }
 
     /// Create a new config with DDL permissions enabled

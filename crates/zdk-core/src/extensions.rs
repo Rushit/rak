@@ -1,8 +1,8 @@
 //! Extension traits for ZDK core types
 
 use crate::{
-    providers::{Capability, Provider, ProviderMetadata, ProviderRegistry},
     Result, ZConfig,
+    providers::{Capability, Provider, ProviderMetadata, ProviderRegistry},
 };
 use std::sync::Arc;
 
@@ -116,4 +116,3 @@ impl ZConfigExt for ZConfig {
         registry.find_by_capability(capability)
     }
 }
-

@@ -34,7 +34,7 @@ pub enum WsServerMessage {
     Event {
         #[serde(rename = "invocationId")]
         invocation_id: String,
-        data: Event,
+        data: Box<Event>,
     },
     /// Status response for a status query
     Status {

@@ -97,12 +97,12 @@ impl OpenApiToolset {
     ///       summary: List all users
     /// "#;
     ///
-    /// let toolset = OpenApiToolset::from_str(spec)?;
+    /// let toolset = OpenApiToolset::parse_from_str(spec)?;
     /// # Ok::<(), zdk_openapi::OpenApiError>(())
     /// ```
-    pub fn from_str(content: &str) -> Result<Self> {
+    pub fn parse_from_str(content: &str) -> Result<Self> {
         debug!("Parsing OpenAPI spec from string");
-        let parser = OpenApiParser::from_str(content)?;
+        let parser = OpenApiParser::parse_from_str(content)?;
         Self::from_parser(parser)
     }
 
@@ -225,7 +225,7 @@ paths:
 
     #[test]
     fn test_toolset_from_str() {
-        let toolset = OpenApiToolset::from_str(TEST_SPEC).unwrap();
+        let toolset = OpenApiToolset::parse_from_str(TEST_SPEC).unwrap();
         assert_eq!(toolset.len(), 2);
         assert!(!toolset.is_empty());
 
@@ -236,7 +236,7 @@ paths:
 
     #[test]
     fn test_get_tool_by_name() {
-        let toolset = OpenApiToolset::from_str(TEST_SPEC).unwrap();
+        let toolset = OpenApiToolset::parse_from_str(TEST_SPEC).unwrap();
 
         let tool = toolset.get_tool("list_users");
         assert!(tool.is_some());
@@ -248,7 +248,7 @@ paths:
 
     #[test]
     fn test_with_auth() {
-        let toolset = OpenApiToolset::from_str(TEST_SPEC)
+        let toolset = OpenApiToolset::parse_from_str(TEST_SPEC)
             .unwrap()
             .with_auth(AuthConfig::bearer("test-token"));
 

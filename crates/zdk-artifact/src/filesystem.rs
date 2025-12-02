@@ -63,12 +63,11 @@ impl FileSystemArtifactService {
 
         while let Some(entry) = entries.next_entry().await? {
             let path = entry.path();
-            if path.extension().and_then(|s| s.to_str()) == Some("json") {
-                if let Some(stem) = path.file_stem().and_then(|s| s.to_str()) {
-                    if let Ok(version) = stem.parse::<i64>() {
-                        versions.push(version);
-                    }
-                }
+            if path.extension().and_then(|s| s.to_str()) == Some("json")
+                && let Some(stem) = path.file_stem().and_then(|s| s.to_str())
+                && let Ok(version) = stem.parse::<i64>()
+            {
+                versions.push(version);
             }
         }
 
@@ -200,11 +199,11 @@ impl ArtifactService for FileSystemArtifactService {
         if session_dir.exists() {
             let mut entries = fs::read_dir(&session_dir).await?;
             while let Some(entry) = entries.next_entry().await? {
-                if entry.file_type().await?.is_dir() {
-                    if let Some(file_name) = entry.file_name().to_str() {
-                        // Reverse sanitization
-                        file_names.insert(file_name.to_string());
-                    }
+                if entry.file_type().await?.is_dir()
+                    && let Some(file_name) = entry.file_name().to_str()
+                {
+                    // Reverse sanitization
+                    file_names.insert(file_name.to_string());
                 }
             }
         }
@@ -213,10 +212,10 @@ impl ArtifactService for FileSystemArtifactService {
         if user_dir.exists() {
             let mut entries = fs::read_dir(&user_dir).await?;
             while let Some(entry) = entries.next_entry().await? {
-                if entry.file_type().await?.is_dir() {
-                    if let Some(file_name) = entry.file_name().to_str() {
-                        file_names.insert(file_name.to_string());
-                    }
+                if entry.file_type().await?.is_dir()
+                    && let Some(file_name) = entry.file_name().to_str()
+                {
+                    file_names.insert(file_name.to_string());
                 }
             }
         }

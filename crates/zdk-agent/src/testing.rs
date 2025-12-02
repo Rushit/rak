@@ -3,8 +3,6 @@
 //! This module provides common mock implementations that can be reused
 //! across all test modules, reducing duplication and ensuring consistency.
 
-#![cfg(test)]
-
 use async_stream::stream;
 use async_trait::async_trait;
 use futures::stream::Stream;

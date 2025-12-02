@@ -172,7 +172,7 @@ mod tests {
             .unwrap();
 
         // Consume stream
-        while let Some(_) = stream.next().await {}
+        while (stream.next().await).is_some() {}
 
         // Verify events persisted
         let session = session_service

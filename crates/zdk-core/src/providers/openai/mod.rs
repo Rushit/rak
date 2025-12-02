@@ -32,7 +32,7 @@ impl OpenAIConfig {
             embedding_model: Some("text-embedding-3-small".to_string()),
         }
     }
-    
+
     /// Create configuration with custom base URL (e.g., for Ollama)
     pub fn with_base_url(model: String, base_url: String) -> Self {
         Self {
@@ -57,14 +57,14 @@ impl OpenAIBuilder {
             config: None,
         }
     }
-    
+
     /// Set API key
     pub fn with_api_key(mut self, api_key: String, model: String) -> Self {
         self.api_key = Some(api_key);
         self.config = Some(OpenAIConfig::default(model));
         self
     }
-    
+
     /// Set API key with custom base URL
     pub fn with_api_key_and_base_url(
         mut self,
@@ -76,13 +76,13 @@ impl OpenAIBuilder {
         self.config = Some(OpenAIConfig::with_base_url(model, base_url));
         self
     }
-    
+
     /// Set custom configuration
     pub fn with_config(mut self, config: OpenAIConfig) -> Self {
         self.config = Some(config);
         self
     }
-    
+
     /// Build the provider
     pub fn build(self) -> crate::Result<OpenAIProvider> {
         let api_key = self
@@ -91,7 +91,7 @@ impl OpenAIBuilder {
         let config = self
             .config
             .ok_or_else(|| crate::Error::config_error("Configuration is required"))?;
-        
+
         Ok(OpenAIProvider::new(api_key, config))
     }
 }
@@ -101,4 +101,3 @@ impl Default for OpenAIBuilder {
         Self::new()
     }
 }
-

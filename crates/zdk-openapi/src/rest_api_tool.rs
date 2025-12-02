@@ -25,6 +25,7 @@ pub struct RestApiTool {
     /// Operation parameters
     pub(crate) parameters: Vec<ApiParameter>,
     /// Response schema
+    #[allow(dead_code)]
     pub(crate) response_schema: Option<Value>,
     /// Authentication configuration
     pub(crate) auth: AuthConfig,

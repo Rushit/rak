@@ -115,7 +115,7 @@ async fn handle_run(
             Ok(event) => {
                 let event_msg = WsServerMessage::Event {
                     invocation_id: invocation_id.clone(),
-                    data: event,
+                    data: Box::new(event),
                 };
                 if let Err(e) = send_message(sender, &event_msg).await {
                     error!("Failed to send event: {}", e);

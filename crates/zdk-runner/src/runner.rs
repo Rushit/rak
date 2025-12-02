@@ -90,15 +90,15 @@ impl Runner {
 
             loop {
                 // Check cancellation
-                if let Some(ref token) = cancel_token {
-                    if token.is_cancelled() {
-                        // Create cancellation event
-                        let mut cancel_event = Event::new(invocation_id.clone(), "system".to_string());
-                        cancel_event.error_message = "Invocation cancelled".to_string();
-                        cancel_event.turn_complete = true;
-                        yield Ok(cancel_event);
-                        return;
-                    }
+                if let Some(ref token) = cancel_token
+                    && token.is_cancelled()
+                {
+                    // Create cancellation event
+                    let mut cancel_event = Event::new(invocation_id.clone(), "system".to_string());
+                    cancel_event.error_message = "Invocation cancelled".to_string();
+                    cancel_event.turn_complete = true;
+                    yield Ok(cancel_event);
+                    return;
                 }
 
                 // Get next event
@@ -107,11 +107,11 @@ impl Runner {
                         match event_result {
                             Ok(event) => {
                                 // Append non-partial events to session
-                                if !event.partial {
-                                    if let Err(e) = session_service.append_event(&session_id_clone, event.clone()).await {
-                                        yield Err(e);
-                                        return;
-                                    }
+                                if !event.partial
+                                    && let Err(e) = session_service.append_event(&session_id_clone, event.clone()).await
+                                {
+                                    yield Err(e);
+                                    return;
                                 }
 
                                 yield Ok(event);

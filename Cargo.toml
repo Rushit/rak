@@ -85,6 +85,10 @@ path = "examples/config_usage.rs"
 name = "gemini_gcloud_usage"
 path = "examples/gemini_gcloud_usage.rs"
 
+[[example]]
+name = "mcp_toolset_usage"
+path = "examples/mcp_toolset_usage.rs"
+
 # Exclude common.rs from being treated as an example
 # (it's a shared module included by other examples, not a standalone example)
 # We use a nonexistent feature to effectively disable it

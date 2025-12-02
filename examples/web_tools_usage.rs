@@ -53,7 +53,7 @@ async fn main() -> anyhow::Result<()> {
 
     // Create provider using the unified provider system
     let provider = config.create_provider()?;
-    
+
     println!("🔑 Provider created: {}", config.model.provider);
     println!("🔑 Note: NO additional API keys needed for web tools!\n");
 
@@ -240,17 +240,17 @@ async fn main() -> anyhow::Result<()> {
 
     // Validate all responses were received
     println!("\nValidating responses...");
-    
+
     if response1.trim().is_empty() {
         eprintln!("❌ VALIDATION FAILED: No response from web search example");
         std::process::exit(1);
     }
-    
+
     if response2.trim().is_empty() {
         eprintln!("❌ VALIDATION FAILED: No response from URL reading example");
         std::process::exit(1);
     }
-    
+
     if response3.trim().is_empty() {
         eprintln!("❌ VALIDATION FAILED: No response from web scraping example");
         std::process::exit(1);

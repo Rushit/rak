@@ -2,7 +2,7 @@
 //!
 //! Defines the unified Provider trait that supports multiple capabilities.
 
-use crate::{capabilities::*, Error, LLMRequest, LLMResponse, Result};
+use crate::{Error, LLMRequest, LLMResponse, Result, capabilities::*};
 use async_trait::async_trait;
 use futures::stream::Stream;
 use serde::{Deserialize, Serialize};
@@ -61,14 +61,14 @@ pub struct ModelInfo {
 pub trait Provider: crate::LLM {
     /// Get provider metadata
     fn metadata(&self) -> ProviderMetadata;
-    
+
     /// Check if provider supports a capability
     fn supports(&self, capability: Capability) -> bool {
         self.metadata().capabilities.contains(&capability)
     }
-    
+
     // ===== Text Generation Capability =====
-    
+
     /// Generate text content (LLM completion)
     ///
     /// # Arguments
@@ -86,9 +86,9 @@ pub trait Provider: crate::LLM {
             "Provider does not support text generation capability"
         )))
     }
-    
+
     // ===== Embedding Capability =====
-    
+
     /// Embed texts into vector representations
     ///
     /// # Arguments
@@ -101,23 +101,23 @@ pub trait Provider: crate::LLM {
             "Provider does not support embedding capability"
         )))
     }
-    
+
     /// Get embedding dimensions for this provider
     ///
     /// Returns None if provider doesn't support embeddings
     fn embedding_dimensions(&self) -> Option<usize> {
         None
     }
-    
+
     /// Get maximum batch size for embeddings
     ///
     /// Returns None if provider doesn't support embeddings
     fn max_embedding_batch_size(&self) -> Option<usize> {
         None
     }
-    
+
     // ===== Transcription Capability =====
-    
+
     /// Transcribe audio to text
     ///
     /// # Arguments
@@ -130,16 +130,16 @@ pub trait Provider: crate::LLM {
             "Provider does not support transcription capability"
         )))
     }
-    
+
     /// Get supported audio formats for transcription
     ///
     /// Returns None if provider doesn't support transcription
     fn supported_audio_formats(&self) -> Option<&[&str]> {
         None
     }
-    
+
     // ===== Image Generation Capability =====
-    
+
     /// Generate image from text prompt
     ///
     /// # Arguments
@@ -152,9 +152,9 @@ pub trait Provider: crate::LLM {
             "Provider does not support image generation capability"
         )))
     }
-    
+
     // ===== Audio Generation Capability =====
-    
+
     /// Generate audio from text (text-to-speech)
     ///
     /// # Arguments
@@ -168,4 +168,3 @@ pub trait Provider: crate::LLM {
         )))
     }
 }
-

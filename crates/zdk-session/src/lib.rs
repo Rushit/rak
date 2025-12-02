@@ -90,7 +90,7 @@ mod tests {
     async fn test_append_events() {
         let service = InMemorySessionService::new();
 
-        let session = service
+        let _session = service
             .create(&CreateRequest {
                 app_name: "test-app".to_string(),
                 user_id: "user1".to_string(),

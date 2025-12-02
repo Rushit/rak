@@ -11,11 +11,11 @@ use std::sync::Arc;
 /// Global provider registry
 static REGISTRY: Lazy<ProviderRegistry> = Lazy::new(|| {
     let registry = ProviderRegistry::new();
-    
+
     // Register all providers (all included by default, no feature flags)
     registry.register("gemini", Box::new(GeminiFactory));
     registry.register("openai", Box::new(OpenAIFactory));
-    
+
     registry
 });
 
@@ -31,12 +31,12 @@ impl ProviderRegistry {
             providers: DashMap::new(),
         }
     }
-    
+
     /// Get the global registry instance
     pub fn global() -> &'static Self {
         &REGISTRY
     }
-    
+
     /// Register a provider factory
     ///
     /// # Arguments
@@ -45,7 +45,7 @@ impl ProviderRegistry {
     pub fn register(&self, name: &str, factory: Box<dyn ProviderFactory>) {
         self.providers.insert(name.to_string(), factory);
     }
-    
+
     /// Create a provider by name
     ///
     /// # Arguments
@@ -62,10 +62,10 @@ impl ProviderRegistry {
             .providers
             .get(name)
             .ok_or_else(|| Error::config_error(format!("Provider '{}' not found", name)))?;
-        
+
         factory.create(config)
     }
-    
+
     /// List all available providers
     ///
     /// # Returns
@@ -76,7 +76,7 @@ impl ProviderRegistry {
             .filter_map(|entry| entry.value().metadata().ok())
             .collect()
     }
-    
+
     /// Find providers by capability
     ///
     /// # Arguments
@@ -88,10 +88,10 @@ impl ProviderRegistry {
         self.providers
             .iter()
             .filter_map(|entry| {
-                if let Ok(meta) = entry.value().metadata() {
-                    if meta.capabilities.contains(&capability) {
-                        return Some(entry.key().clone());
-                    }
+                if let Ok(meta) = entry.value().metadata()
+                    && meta.capabilities.contains(&capability)
+                {
+                    return Some(entry.key().clone());
                 }
                 None
             })
@@ -117,7 +117,7 @@ pub trait ProviderFactory: Send + Sync {
     /// # Returns
     /// Provider instance wrapped in Arc
     fn create(&self, config: &ZConfig) -> Result<Arc<dyn Provider>>;
-    
+
     /// Get provider metadata
     ///
     /// # Returns
@@ -134,11 +134,11 @@ struct GeminiFactory;
 
 impl ProviderFactory for GeminiFactory {
     fn create(&self, config: &ZConfig) -> Result<Arc<dyn Provider>> {
-        use crate::providers::gemini::{GeminiAuth, GeminiConfig, GeminiProvider};
         use crate::AuthCredentials;
-        
+        use crate::providers::gemini::{GeminiAuth, GeminiConfig, GeminiProvider};
+
         let creds = config.get_auth_credentials()?;
-        
+
         let (auth, gemini_config) = match creds {
             AuthCredentials::ApiKey { key } => {
                 let auth = GeminiAuth::ApiKey(key);
@@ -160,10 +160,10 @@ impl ProviderFactory for GeminiFactory {
                 (auth, config)
             }
         };
-        
+
         Ok(Arc::new(GeminiProvider::new(auth, gemini_config)))
     }
-    
+
     fn metadata(&self) -> Result<ProviderMetadata> {
         use crate::providers::gemini::GeminiProvider;
         Ok(GeminiProvider::static_metadata())
@@ -176,7 +176,7 @@ struct OpenAIFactory;
 impl ProviderFactory for OpenAIFactory {
     fn create(&self, config: &ZConfig) -> Result<Arc<dyn Provider>> {
         use crate::providers::openai::{OpenAIConfig, OpenAIProvider};
-        
+
         let api_key = config
             .openai_api_key
             .clone()
@@ -185,19 +185,18 @@ impl ProviderFactory for OpenAIFactory {
                     "OpenAI API key not found. Set openai_api_key in config.toml or OPENAI_API_KEY env var"
                 )
             })?;
-        
+
         let openai_config = if let Some(ref base_url) = config.openai_base_url {
             OpenAIConfig::with_base_url(config.model.model_name.clone(), base_url.clone())
         } else {
             OpenAIConfig::default(config.model.model_name.clone())
         };
-        
+
         Ok(Arc::new(OpenAIProvider::new(api_key, openai_config)))
     }
-    
+
     fn metadata(&self) -> Result<ProviderMetadata> {
         use crate::providers::openai::OpenAIProvider;
         Ok(OpenAIProvider::static_metadata())
     }
 }
-

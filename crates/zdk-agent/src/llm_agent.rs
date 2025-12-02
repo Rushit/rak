@@ -15,7 +15,9 @@ pub struct LLMAgent {
     pub(crate) name: Arc<str>,
     pub(crate) description: Arc<str>,
     pub(crate) model: Arc<dyn LLM>,
+    #[allow(dead_code)]
     pub(crate) system_instruction: Option<String>,
+    #[allow(dead_code)]
     pub(crate) sub_agents: Vec<Arc<dyn Agent>>,
     pub(crate) tools: HashMap<String, Arc<dyn Tool>>,
     pub(crate) toolsets: Vec<Arc<dyn Toolset>>,

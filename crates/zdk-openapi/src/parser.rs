@@ -47,7 +47,7 @@ impl OpenApiParser {
     /// Parse an OpenAPI spec from a string.
     ///
     /// Automatically detects JSON or YAML format.
-    pub fn from_str(content: &str) -> Result<Self> {
+    pub fn parse_from_str(content: &str) -> Result<Self> {
         // Try JSON first
         let spec = serde_json::from_str(content)
             .or_else(|_| serde_yaml::from_str(content))
@@ -65,7 +65,7 @@ impl OpenApiParser {
             .spec
             .servers
             .first()
-            .and_then(|s| Some(s.url.clone()))
+            .map(|s| s.url.clone())
             .unwrap_or_default();
 
         debug!("Base URL: {}", base_url);
@@ -141,7 +141,7 @@ impl OpenApiParser {
             .description
             .as_ref()
             .or(operation.summary.as_ref())
-            .map(|s| s.clone())
+            .cloned()
             .unwrap_or_else(|| format!("{} {}", method.to_uppercase(), path));
 
         // Parse parameters
@@ -149,10 +149,10 @@ impl OpenApiParser {
 
         // Add path-level parameters
         for param_ref in path_params {
-            if let ReferenceOr::Item(param) = param_ref {
-                if let Some(api_param) = self.parse_parameter(param)? {
-                    parameters.push(api_param);
-                }
+            if let ReferenceOr::Item(param) = param_ref
+                && let Some(api_param) = self.parse_parameter(param)?
+            {
+                parameters.push(api_param);
             }
         }
 
@@ -180,25 +180,24 @@ impl OpenApiParser {
                         .content
                         .get("application/json")
                         .or_else(|| request_body.content.values().next())
+                        && let Some(schema_ref) = &media_type.schema
                     {
-                        if let Some(schema_ref) = &media_type.schema {
-                            match schema_ref {
-                                ReferenceOr::Item(schema) => {
-                                    let schema_json = serde_json::to_value(schema)
-                                        .unwrap_or(Value::Object(Default::default()));
+                        match schema_ref {
+                            ReferenceOr::Item(schema) => {
+                                let schema_json = serde_json::to_value(schema)
+                                    .unwrap_or(Value::Object(Default::default()));
 
-                                    parameters.push(ApiParameter {
-                                        original_name: "body".to_string(),
-                                        name: "body".to_string(),
-                                        location: ParameterLocation::Body,
-                                        required: request_body.required,
-                                        schema: schema_json,
-                                        description: request_body.description.clone(),
-                                    });
-                                }
-                                ReferenceOr::Reference { .. } => {
-                                    warn!("Schema references not yet supported");
-                                }
+                                parameters.push(ApiParameter {
+                                    original_name: "body".to_string(),
+                                    name: "body".to_string(),
+                                    location: ParameterLocation::Body,
+                                    required: request_body.required,
+                                    schema: schema_json,
+                                    description: request_body.description.clone(),
+                                });
+                            }
+                            ReferenceOr::Reference { .. } => {
+                                warn!("Schema references not yet supported");
                             }
                         }
                     }
@@ -232,7 +231,7 @@ impl OpenApiParser {
             .responses
             .responses
             .get(&openapiv3::StatusCode::Code(200))
-            .or_else(|| operation.responses.default.as_ref())
+            .or(operation.responses.default.as_ref())
             .and_then(|resp_ref| match resp_ref {
                 ReferenceOr::Item(response) => response
                     .content

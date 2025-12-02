@@ -1,12 +1,11 @@
 //! SQLite database tools
 
-use crate::config::{DatabaseToolConfig, SqlOperation};
-use crate::types::{ColumnInfo, ConstraintInfo, IndexInfo, TableInfo, TableSchema};
-use async_trait::async_trait;
+use crate::config::DatabaseToolConfig;
+use crate::types::{ColumnInfo, TableInfo, TableSchema};
 use sqlx::{sqlite::SqlitePoolOptions, Column, Pool, Row, Sqlite};
 use std::sync::Arc;
 use std::time::Duration;
-use zdk_core::{Error as ZError, Result as ZResult, Tool, ToolContext, ToolResponse};
+use zdk_core::{Error as ZError, Result as ZResult, Tool, ToolResponse};
 use zdk_tool::{FunctionTool, ToolSchema};
 
 /// Create SQLite tools with default configuration (read-only)
@@ -226,7 +225,7 @@ fn create_query_tool(pool: Pool<Sqlite>, config: DatabaseToolConfig) -> ZResult<
 }
 
 /// Create a tool to execute INSERT/UPDATE/DELETE queries
-fn create_execute_tool(pool: Pool<Sqlite>, config: DatabaseToolConfig) -> ZResult<FunctionTool> {
+fn create_execute_tool(pool: Pool<Sqlite>, _config: DatabaseToolConfig) -> ZResult<FunctionTool> {
     let schema = ToolSchema::new()
         .property(
             "sql",

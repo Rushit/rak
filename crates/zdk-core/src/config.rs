@@ -75,7 +75,7 @@ pub struct SessionConfig {
 }
 
 /// Observability configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct ObservabilityConfig {
     pub otel_endpoint: Option<String>,
     pub service_name: Option<String>,
@@ -105,15 +105,6 @@ impl Default for SessionConfig {
         Self {
             provider: default_session_provider(),
             connection_string: None,
-        }
-    }
-}
-
-impl Default for ObservabilityConfig {
-    fn default() -> Self {
-        Self {
-            otel_endpoint: None,
-            service_name: None,
         }
     }
 }
@@ -185,10 +176,10 @@ impl ZConfig {
     /// Resolve ${VAR_NAME} references to environment variables
     fn resolve_env_vars(&mut self) -> Result<()> {
         // Resolve auth.api_key.key
-        if let AuthProvider::ApiKey { ref mut config } = self.auth {
-            if let Some(resolved) = Self::resolve_env_var(&config.key) {
-                config.key = resolved;
-            }
+        if let AuthProvider::ApiKey { ref mut config } = self.auth
+            && let Some(resolved) = Self::resolve_env_var(&config.key)
+        {
+            config.key = resolved;
         }
 
         // Resolve model.api_key (legacy support)
@@ -218,10 +209,10 @@ impl ZConfig {
         }
 
         // Resolve openai_base_url
-        if let Some(ref url) = self.openai_base_url {
-            if let Some(resolved) = Self::resolve_env_var(url) {
-                self.openai_base_url = Some(resolved);
-            }
+        if let Some(ref url) = self.openai_base_url
+            && let Some(resolved) = Self::resolve_env_var(url)
+        {
+            self.openai_base_url = Some(resolved);
         }
 
         // Resolve anthropic_api_key
@@ -238,10 +229,10 @@ impl ZConfig {
         }
 
         // Resolve session.connection_string
-        if let Some(ref conn) = self.session.connection_string {
-            if let Some(resolved) = Self::resolve_env_var(conn) {
-                self.session.connection_string = Some(resolved);
-            }
+        if let Some(ref conn) = self.session.connection_string
+            && let Some(resolved) = Self::resolve_env_var(conn)
+        {
+            self.session.connection_string = Some(resolved);
         }
 
         Ok(())

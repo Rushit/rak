@@ -84,11 +84,13 @@ pub fn trace_tool_call(attrs: ToolSpanAttributes) {
 }
 
 /// Helper to safely serialize to JSON string
+#[allow(dead_code)]
 pub fn safe_serialize<T: serde::Serialize>(value: &T) -> String {
     serde_json::to_string(value).unwrap_or_else(|_| "<not serializable>".to_string())
 }
 
 /// Helper to safely serialize to pretty JSON string
+#[allow(dead_code)]
 pub fn safe_serialize_pretty<T: serde::Serialize>(value: &T) -> String {
     serde_json::to_string_pretty(value).unwrap_or_else(|_| "<not serializable>".to_string())
 }

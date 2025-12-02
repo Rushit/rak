@@ -1,9 +1,9 @@
 //! Gemini provider implementation
 
-use super::{auth::GeminiAuth, types::*, GeminiConfig};
+use super::{GeminiConfig, auth::GeminiAuth, types::*};
 use crate::{
-    providers::provider::{Capability, ModelInfo, Provider, ProviderMetadata},
     EmbeddingVector, LLMRequest, LLMResponse, Result,
+    providers::provider::{Capability, ModelInfo, Provider, ProviderMetadata},
 };
 use async_trait::async_trait;
 use futures::stream::Stream;
@@ -25,7 +25,7 @@ impl GeminiProvider {
             config,
         }
     }
-    
+
     /// Get static metadata (for factory)
     pub fn static_metadata() -> ProviderMetadata {
         ProviderMetadata {
@@ -62,14 +62,14 @@ impl GeminiProvider {
             ],
         }
     }
-    
+
     fn build_url(&self, stream: bool) -> String {
         let method = if stream {
             "streamGenerateContent"
         } else {
             "generateContent"
         };
-        
+
         match &self.auth {
             GeminiAuth::ApiKey(key) => {
                 format!(
@@ -94,7 +94,8 @@ impl crate::LLM for GeminiProvider {
         &self,
         request: crate::LLMRequest,
         do_stream: bool,
-    ) -> Box<dyn futures::stream::Stream<Item = crate::Result<crate::LLMResponse>> + Send + Unpin> {
+    ) -> Box<dyn futures::stream::Stream<Item = crate::Result<crate::LLMResponse>> + Send + Unpin>
+    {
         <Self as Provider>::generate_content(self, request, do_stream)
             .await
             .unwrap() // Safe because our implementation never returns Err at this level
@@ -106,7 +107,7 @@ impl Provider for GeminiProvider {
     fn metadata(&self) -> ProviderMetadata {
         Self::static_metadata()
     }
-    
+
     async fn generate_content(
         &self,
         request: LLMRequest,
@@ -114,7 +115,7 @@ impl Provider for GeminiProvider {
     ) -> Result<Box<dyn Stream<Item = Result<LLMResponse>> + Send + Unpin>> {
         use async_stream::stream;
         use futures::stream::StreamExt;
-        
+
         let url = self.build_url(do_stream);
         let client = self.client.clone();
         let auth = self.auth.clone();
@@ -183,7 +184,7 @@ impl Provider for GeminiProvider {
                                                         )));
                                                         return;
                                                     }
-                                                    
+
                                                     if let Some(candidate) = gemini_resp.candidates.first() {
                                                         yield Ok(LLMResponse {
                                                             content: Some(candidate.content.clone()),
@@ -250,7 +251,7 @@ impl Provider for GeminiProvider {
                                     )));
                                     return;
                                 }
-                                
+
                                 if let Some(candidate) = gemini_resp.candidates.first() {
                                     yield Ok(LLMResponse {
                                         content: Some(candidate.content.clone()),
@@ -275,16 +276,16 @@ impl Provider for GeminiProvider {
             })))
         }
     }
-    
+
     async fn embed_texts(&self, texts: Vec<String>) -> Result<Vec<EmbeddingVector>> {
         use serde_json::json;
-        
+
         let embedding_model = self
             .config
             .embedding_model
             .clone()
             .unwrap_or_else(|| "text-embedding-004".to_string());
-        
+
         // Build batch embedding request
         let requests: Vec<_> = texts
             .iter()
@@ -307,13 +308,14 @@ impl Provider for GeminiProvider {
         );
 
         let mut req_builder = self.client.post(&url).json(&request_body);
-        
+
         // Apply authentication
         req_builder = self.auth.apply(req_builder);
 
-        let response = req_builder.send().await.map_err(|e| {
-            crate::Error::LLMError(format!("Embedding request failed: {}", e))
-        })?;
+        let response = req_builder
+            .send()
+            .await
+            .map_err(|e| crate::Error::LLMError(format!("Embedding request failed: {}", e)))?;
 
         if !response.status().is_success() {
             let status = response.status();
@@ -339,9 +341,9 @@ impl Provider for GeminiProvider {
         let results = embeddings
             .iter()
             .map(|emb| {
-                let values = emb["values"].as_array().ok_or_else(|| {
-                    crate::Error::LLMError("Missing embedding values".into())
-                })?;
+                let values = emb["values"]
+                    .as_array()
+                    .ok_or_else(|| crate::Error::LLMError("Missing embedding values".into()))?;
 
                 let vector: Vec<f32> = values
                     .iter()
@@ -354,11 +356,11 @@ impl Provider for GeminiProvider {
 
         Ok(results)
     }
-    
+
     fn embedding_dimensions(&self) -> Option<usize> {
         Some(768)
     }
-    
+
     fn max_embedding_batch_size(&self) -> Option<usize> {
         Some(100)
     }
@@ -400,4 +402,3 @@ fn extract_json(buffer: &mut String) -> Option<String> {
 
     None
 }
-

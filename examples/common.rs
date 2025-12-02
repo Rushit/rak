@@ -259,23 +259,20 @@ pub fn validation_failed(message: &str) -> ! {
 ///
 /// ```rust
 /// use futures::StreamExt;
-/// 
+///
 /// let mut stream = runner.run(...).await?;
 /// let response = common::collect_text_response(&mut stream, "example execution").await?;
 /// common::validate_response(&response, "agent response");
 /// ```
-pub async fn collect_text_response<S>(
-    stream: &mut S,
-    context: &str,
-) -> Result<String>
+pub async fn collect_text_response<S>(stream: &mut S, context: &str) -> Result<String>
 where
     S: futures::Stream<Item = Result<zdk_core::Event, zdk_core::Error>> + Unpin,
 {
     use futures::StreamExt;
     use zdk_core::Part;
-    
+
     let mut response = String::new();
-    
+
     while let Some(result) = stream.next().await {
         match result {
             Ok(event) => {
@@ -292,7 +289,7 @@ where
             }
         }
     }
-    
+
     Ok(response)
 }
 
@@ -306,18 +303,15 @@ where
 /// let mut stream = runner.run(...).await?;
 /// let response = common::collect_and_print_response(&mut stream, "example").await?;
 /// ```
-pub async fn collect_and_print_response<S>(
-    stream: &mut S,
-    context: &str,
-) -> Result<String>
+pub async fn collect_and_print_response<S>(stream: &mut S, context: &str) -> Result<String>
 where
     S: futures::Stream<Item = Result<zdk_core::Event, zdk_core::Error>> + Unpin,
 {
     use futures::StreamExt;
     use zdk_core::Part;
-    
+
     let mut response = String::new();
-    
+
     while let Some(result) = stream.next().await {
         match result {
             Ok(event) => {
@@ -339,7 +333,7 @@ where
             }
         }
     }
-    
+
     Ok(response)
 }
 
@@ -356,7 +350,7 @@ where
 /// ```
 pub fn tool_was_called(events: &[zdk_core::Event], tool_name: &str) -> bool {
     use zdk_core::Part;
-    
+
     events.iter().any(|event| {
         if let Some(content) = &event.content {
             content.parts.iter().any(|part| {

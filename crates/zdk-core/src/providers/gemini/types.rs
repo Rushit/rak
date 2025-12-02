@@ -1,7 +1,7 @@
 //! Gemini API types
 
-use serde::{Deserialize, Serialize};
 use crate::Content;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GeminiRequest {
@@ -81,4 +81,3 @@ pub struct UsageMetadata {
     pub candidates_token_count: Option<u32>,
     pub total_token_count: Option<u32>,
 }
-

@@ -69,11 +69,9 @@ pub async fn load_toolsets(
     let toolset_results = futures::future::join_all(toolset_futures).await;
 
     // Merge loaded tools into the tools HashMap
-    for tools_opt in toolset_results {
-        if let Some(toolset_tools) = tools_opt {
-            for tool in toolset_tools {
-                tools.insert(tool.name().to_string(), tool);
-            }
+    for tools_opt in toolset_results.into_iter().flatten() {
+        for tool in tools_opt {
+            tools.insert(tool.name().to_string(), tool);
         }
     }
 

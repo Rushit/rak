@@ -25,7 +25,8 @@ async fn main() -> anyhow::Result<()> {
     println!();
 
     // Create model factory function using config-driven auth
-    let create_model = || -> anyhow::Result<Arc<dyn Provider>> { common::create_gemini_model(&config) };
+    let create_model =
+        || -> anyhow::Result<Arc<dyn Provider>> { common::create_gemini_model(&config) };
 
     // ===================================================================
     // Example 1: Sequential Workflow

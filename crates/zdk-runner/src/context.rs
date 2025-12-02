@@ -8,6 +8,7 @@ pub struct DefaultInvocationContext {
     user_id: String,
     session_id: String,
     user_content: Option<Content>,
+    #[allow(dead_code)]
     agent: Arc<dyn Agent>,
 }
 

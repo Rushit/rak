@@ -1,9 +1,9 @@
 //! OpenAI provider implementation
 
-use super::{types::*, OpenAIConfig};
+use super::{OpenAIConfig, types::*};
 use crate::{
-    providers::provider::{Capability, ModelInfo, Provider, ProviderMetadata},
     AudioInput, EmbeddingVector, LLMRequest, LLMResponse, Result, TranscriptionResult,
+    providers::provider::{Capability, ModelInfo, Provider, ProviderMetadata},
 };
 use async_trait::async_trait;
 use futures::stream::Stream;
@@ -25,11 +25,11 @@ impl OpenAIProvider {
             config,
         }
     }
-    
+
     /// Convert ZDK Content format to OpenAI messages format
     fn convert_contents_to_messages(&self, contents: Vec<crate::Content>) -> Vec<OpenAIMessage> {
         use crate::Part;
-        
+
         contents
             .into_iter()
             .map(|content| {
@@ -65,7 +65,7 @@ impl OpenAIProvider {
     /// Convert OpenAI response to ZDK Content format
     fn convert_message_to_content(message: &OpenAIMessage) -> crate::Content {
         use crate::Part;
-        
+
         crate::Content {
             role: match message.role.as_str() {
                 "assistant" => "model".to_string(),
@@ -78,7 +78,7 @@ impl OpenAIProvider {
             }],
         }
     }
-    
+
     /// Get static metadata (for factory)
     pub fn static_metadata() -> ProviderMetadata {
         ProviderMetadata {
@@ -135,7 +135,8 @@ impl crate::LLM for OpenAIProvider {
         &self,
         request: crate::LLMRequest,
         do_stream: bool,
-    ) -> Box<dyn futures::stream::Stream<Item = crate::Result<crate::LLMResponse>> + Send + Unpin> {
+    ) -> Box<dyn futures::stream::Stream<Item = crate::Result<crate::LLMResponse>> + Send + Unpin>
+    {
         <Self as Provider>::generate_content(self, request, do_stream)
             .await
             .unwrap() // Safe because our implementation never returns Err at this level
@@ -147,16 +148,16 @@ impl Provider for OpenAIProvider {
     fn metadata(&self) -> ProviderMetadata {
         Self::static_metadata()
     }
-    
+
     async fn generate_content(
         &self,
         request: LLMRequest,
         do_stream: bool,
     ) -> Result<Box<dyn Stream<Item = Result<LLMResponse>> + Send + Unpin>> {
+        use crate::{Content, Part};
         use async_stream::stream;
         use futures::stream::StreamExt;
-        use crate::{Content, Part};
-        
+
         let url = format!("{}/chat/completions", self.config.base_url);
         let client = self.client.clone();
         let api_key = self.api_key.clone();
@@ -200,9 +201,7 @@ impl Provider for OpenAIProvider {
                                     if let Ok(text) = std::str::from_utf8(&bytes) {
                                         // Parse SSE format: "data: {json}\n\n"
                                         for line in text.lines() {
-                                            if line.starts_with("data: ") {
-                                                let json_str = &line[6..];
-
+                                            if let Some(json_str) = line.strip_prefix("data: ") {
                                                 // Check for end of stream
                                                 if json_str.trim() == "[DONE]" {
                                                     continue;
@@ -210,24 +209,24 @@ impl Provider for OpenAIProvider {
 
                                                 match serde_json::from_str::<OpenAIStreamResponse>(json_str) {
                                                     Ok(stream_resp) => {
-                                                        if let Some(choice) = stream_resp.choices.first() {
-                                                            if let Some(ref content) = choice.delta.content {
-                                                                let finish_reason = choice.finish_reason.clone();
-                                                                let is_done = finish_reason.is_some();
+                                                        if let Some(choice) = stream_resp.choices.first()
+                                                            && let Some(ref content) = choice.delta.content
+                                                        {
+                                                            let finish_reason = choice.finish_reason.clone();
+                                                            let is_done = finish_reason.is_some();
 
-                                                                yield Ok(LLMResponse {
-                                                                    content: Some(Content {
-                                                                        role: "model".to_string(),
-                                                                        parts: vec![Part::Text { text: content.clone() }],
-                                                                    }),
-                                                                    partial: true,
-                                                                    turn_complete: is_done,
-                                                                    interrupted: false,
-                                                                    finish_reason,
-                                                                    error_code: None,
-                                                                    error_message: None,
-                                                                });
-                                                            }
+                                                            yield Ok(LLMResponse {
+                                                                content: Some(Content {
+                                                                    role: "model".to_string(),
+                                                                    parts: vec![Part::Text { text: content.clone() }],
+                                                                }),
+                                                                partial: true,
+                                                                turn_complete: is_done,
+                                                                interrupted: false,
+                                                                finish_reason,
+                                                                error_code: None,
+                                                                error_message: None,
+                                                            });
                                                         }
                                                     }
                                                     Err(_e) => {
@@ -308,18 +307,18 @@ impl Provider for OpenAIProvider {
             })))
         }
     }
-    
+
     async fn embed_texts(&self, texts: Vec<String>) -> Result<Vec<EmbeddingVector>> {
         use serde_json::json;
-        
+
         let embedding_model = self
             .config
             .embedding_model
             .clone()
             .unwrap_or_else(|| "text-embedding-3-small".to_string());
-        
+
         let url = format!("{}/embeddings", self.config.base_url);
-        
+
         let request_body = json!({
             "input": texts,
             "model": embedding_model,
@@ -333,9 +332,7 @@ impl Provider for OpenAIProvider {
             .json(&request_body)
             .send()
             .await
-            .map_err(|e| {
-                crate::Error::LLMError(format!("Embedding request failed: {}", e))
-            })?;
+            .map_err(|e| crate::Error::LLMError(format!("Embedding request failed: {}", e)))?;
 
         if !response.status().is_success() {
             let status = response.status();
@@ -361,9 +358,9 @@ impl Provider for OpenAIProvider {
         let results = data
             .iter()
             .map(|item| {
-                let embedding = item["embedding"].as_array().ok_or_else(|| {
-                    crate::Error::LLMError("Missing embedding array".into())
-                })?;
+                let embedding = item["embedding"]
+                    .as_array()
+                    .ok_or_else(|| crate::Error::LLMError("Missing embedding array".into()))?;
 
                 let vector: Vec<f32> = embedding
                     .iter()
@@ -376,35 +373,35 @@ impl Provider for OpenAIProvider {
 
         Ok(results)
     }
-    
+
     fn embedding_dimensions(&self) -> Option<usize> {
         Some(1536)
     }
-    
+
     fn max_embedding_batch_size(&self) -> Option<usize> {
         Some(2048)
     }
-    
+
     async fn transcribe_audio(&self, audio: AudioInput) -> Result<TranscriptionResult> {
         use reqwest::multipart;
-        
+
         let url = format!("{}/audio/transcriptions", self.config.base_url);
-        
+
         // Create multipart form
         let file_part = multipart::Part::bytes(audio.data)
             .file_name(format!("audio.{}", audio.format))
             .mime_str(&format!("audio/{}", audio.format))
             .map_err(|e| crate::Error::LLMError(format!("Invalid mime type: {}", e)))?;
-        
+
         let mut form = multipart::Form::new()
             .part("file", file_part)
             .text("model", "whisper-1");
-        
+
         // Add language if specified
         if let Some(language) = audio.language {
             form = form.text("language", language);
         }
-        
+
         let response = self
             .client
             .post(&url)
@@ -412,9 +409,7 @@ impl Provider for OpenAIProvider {
             .multipart(form)
             .send()
             .await
-            .map_err(|e| {
-                crate::Error::LLMError(format!("Transcription request failed: {}", e))
-            })?;
+            .map_err(|e| crate::Error::LLMError(format!("Transcription request failed: {}", e)))?;
 
         if !response.status().is_success() {
             let status = response.status();
@@ -436,7 +431,7 @@ impl Provider for OpenAIProvider {
             .as_str()
             .ok_or_else(|| crate::Error::LLMError("Missing text field in response".into()))?
             .to_string();
-        
+
         let language = json["language"].as_str().map(|s| s.to_string());
         let duration = json["duration"].as_f64().map(|d| d as f32);
 
@@ -447,9 +442,8 @@ impl Provider for OpenAIProvider {
             segments: None, // OpenAI Whisper API doesn't return segments by default
         })
     }
-    
+
     fn supported_audio_formats(&self) -> Option<&[&str]> {
         Some(&["mp3", "mp4", "mpeg", "mpga", "m4a", "wav", "webm"])
     }
 }
-

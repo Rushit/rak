@@ -67,7 +67,7 @@ async fn main() -> anyhow::Result<()> {
     let mut tool_called = false;
     let mut final_answer = String::new();
     let mut had_error = false;
-    
+
     while let Some(result) = stream.next().await {
         match result {
             Ok(event) => {
@@ -123,22 +123,22 @@ async fn main() -> anyhow::Result<()> {
 
     // Validate results
     println!("Validating example results...");
-    
+
     if had_error {
         eprintln!("❌ VALIDATION FAILED: Errors occurred during execution");
         std::process::exit(1);
     }
-    
+
     if !tool_called {
         eprintln!("❌ VALIDATION FAILED: Calculator tool was not called");
         std::process::exit(1);
     }
-    
+
     if final_answer.is_empty() {
         eprintln!("❌ VALIDATION FAILED: No final text response received from agent");
         std::process::exit(1);
     }
-    
+
     if !final_answer.contains("445") {
         eprintln!("❌ VALIDATION FAILED: Final answer doesn't contain expected result (445)");
         eprintln!("   Got: '{}'", final_answer.trim());

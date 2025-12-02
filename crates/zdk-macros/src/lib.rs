@@ -107,14 +107,12 @@ fn parse_tool_attributes(args: TokenStream) -> std::collections::HashMap<String,
 
     if let Ok(metas) = parsed {
         for meta in metas {
-            if let syn::Meta::NameValue(nv) = meta {
-                if nv.path.is_ident("description") {
-                    if let syn::Expr::Lit(expr_lit) = &nv.value {
-                        if let Lit::Str(s) = &expr_lit.lit {
-                            attrs.insert("description".to_string(), s.value());
-                        }
-                    }
-                }
+            if let syn::Meta::NameValue(nv) = meta
+                && nv.path.is_ident("description")
+                && let syn::Expr::Lit(expr_lit) = &nv.value
+                && let Lit::Str(s) = &expr_lit.lit
+            {
+                attrs.insert("description".to_string(), s.value());
             }
         }
     }

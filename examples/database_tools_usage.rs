@@ -249,4 +249,3 @@ async fn run_postgres_example(model: Arc<dyn zdk_core::LLM>, connection_url: &st
 
     Ok(())
 }
-

@@ -5,7 +5,6 @@
 //!
 //! Run with: cargo run --example database_session
 
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("=== ZDK Database Session Example ===\n");

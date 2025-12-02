@@ -97,6 +97,7 @@ pub fn init_telemetry() {
 }
 
 /// Get the global tracer provider if initialized
+#[allow(dead_code)]
 pub fn tracer_provider() -> Option<Arc<TracerProvider>> {
     TRACER_PROVIDER.get().cloned()
 }
