@@ -4,9 +4,9 @@
 //! **inside the Gemini API**, not locally.
 
 use async_trait::async_trait;
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 use std::sync::Arc;
-use zdk_core::{Result as ZResult, Tool, ToolContext, ToolResponse};
+use zdk_core::{GeminiBuiltinToolType, Result as ZResult, Tool, ToolContext, ToolResponse};
 
 /// Gemini Google Search Tool
 ///
@@ -127,17 +127,23 @@ impl Tool for GeminiGoogleSearchTool {
             "required": ["query"]
         })
     }
+    
+    fn gemini_builtin_type(&self) -> Option<GeminiBuiltinToolType> {
+        Some(GeminiBuiltinToolType::GoogleSearch)
+    }
 
     async fn execute(&self, _ctx: Arc<dyn ToolContext>, _params: Value) -> ZResult<ToolResponse> {
-        // This tool doesn't execute locally - it's handled by Gemini API
-        // When model-level tool support is added, this will never be called
+        // This tool doesn't execute locally - it's handled by Gemini API internally
+        // This execute method should never be called if the provider properly handles
+        // built-in tools by adding them to the API request configuration.
         //
-        // For now, return a helpful message
+        // If this is called, it means the tool was treated as a regular function call
+        // instead of being passed to Gemini as a built-in tool.
         Ok(ToolResponse {
             result: json!({
-                "info": "This is a Gemini built-in tool. It requires model-level configuration support in zdk-model.",
-                "status": "Model integration pending",
-                "documentation": "See gemini_google_search.rs for implementation details"
+                "error": "This is a Gemini built-in tool that must be configured at the API level, not executed locally.",
+                "hint": "Ensure you're using a Gemini provider that supports built-in tools.",
+                "tool_type": "google_search"
             }),
         })
     }

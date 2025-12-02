@@ -30,5 +30,6 @@ pub use providers::{
     ProviderMetadata, ProviderRegistry,
 };
 pub use traits::{
-    Agent, GenerateConfig, LLM, LLMRequest, LLMResponse, Tool, ToolResponse, Toolset,
+    Agent, GeminiBuiltinToolType, GenerateConfig, LLM, LLMRequest, LLMResponse, Tool, ToolResponse,
+    Toolset,
 };

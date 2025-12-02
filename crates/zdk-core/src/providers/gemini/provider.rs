@@ -2,7 +2,7 @@
 
 use super::{GeminiConfig, auth::GeminiAuth, types::*};
 use crate::{
-    EmbeddingVector, LLMRequest, LLMResponse, Result,
+    EmbeddingVector, GeminiBuiltinToolType, LLMRequest, LLMResponse, Result,
     providers::provider::{Capability, ModelInfo, Provider, ProviderMetadata},
 };
 use async_trait::async_trait;
@@ -120,22 +120,66 @@ impl Provider for GeminiProvider {
         let client = self.client.clone();
         let auth = self.auth.clone();
 
-        // Convert tools to Gemini format
-        let tools = if request.tools.is_empty() {
-            vec![]
-        } else {
-            vec![GeminiTool {
-                function_declarations: request
-                    .tools
-                    .iter()
-                    .map(|tool| GeminiFunctionDeclaration {
+        // Separate regular tools from Gemini built-in tools
+        let mut function_tools = Vec::new();
+        let mut has_google_search = false;
+        let mut has_url_context = false;
+        let mut has_code_execution = false;
+
+        for tool in &request.tools {
+            match tool.gemini_builtin_type() {
+                Some(GeminiBuiltinToolType::GoogleSearch) => {
+                    has_google_search = true;
+                }
+                Some(GeminiBuiltinToolType::UrlContext) => {
+                    has_url_context = true;
+                }
+                Some(GeminiBuiltinToolType::CodeExecution) => {
+                    has_code_execution = true;
+                }
+                None => {
+                    // Regular tool - add to function declarations
+                    function_tools.push(GeminiFunctionDeclaration {
                         name: tool.name().to_string(),
                         description: tool.description().to_string(),
                         parameters: tool.schema(),
-                    })
-                    .collect(),
-            }]
-        };
+                    });
+                }
+            }
+        }
+
+        // Build tools array
+        let mut tools = Vec::new();
+        
+        // If we have any built-in tools, create a tool entry for each
+        if has_google_search {
+            tools.push(GeminiTool {
+                google_search: Some(GoogleSearch {}),
+                ..Default::default()
+            });
+        }
+        
+        if has_url_context {
+            tools.push(GeminiTool {
+                url_context: Some(UrlContext {}),
+                ..Default::default()
+            });
+        }
+        
+        if has_code_execution {
+            tools.push(GeminiTool {
+                code_execution: Some(CodeExecution {}),
+                ..Default::default()
+            });
+        }
+        
+        // Add function declarations if any
+        if !function_tools.is_empty() {
+            tools.push(GeminiTool {
+                function_declarations: function_tools,
+                ..Default::default()
+            });
+        }
 
         // Convert LLMRequest to GeminiRequest
         let gemini_req = GeminiRequest {

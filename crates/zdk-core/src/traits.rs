@@ -41,6 +41,17 @@ pub trait LLM: Send + Sync {
     ) -> Box<dyn Stream<Item = Result<LLMResponse>> + Send + Unpin>;
 }
 
+/// Gemini built-in tool type
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GeminiBuiltinToolType {
+    /// Google Search tool
+    GoogleSearch,
+    /// URL Context tool
+    UrlContext,
+    /// Code Execution tool
+    CodeExecution,
+}
+
 /// Tool trait - abstraction for callable tools
 #[async_trait]
 pub trait Tool: Send + Sync {
@@ -56,6 +67,14 @@ pub trait Tool: Send + Sync {
     /// Indicates whether this is a long-running tool
     fn is_long_running(&self) -> bool {
         false
+    }
+    
+    /// Indicates if this is a Gemini built-in tool
+    ///
+    /// Gemini built-in tools (like google_search) are executed inside the Gemini API,
+    /// not locally. They require special handling in the API request.
+    fn gemini_builtin_type(&self) -> Option<GeminiBuiltinToolType> {
+        None
     }
 
     /// Executes the tool with given parameters

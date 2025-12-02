@@ -15,10 +15,35 @@ pub struct GeminiRequest {
 }
 
 /// Tool definition for Gemini API
-#[derive(Debug, Clone, Serialize, Deserialize)]
+///
+/// Can contain function declarations, built-in tools, or both.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct GeminiTool {
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub function_declarations: Vec<GeminiFunctionDeclaration>,
+    
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub google_search: Option<GoogleSearch>,
+    
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub url_context: Option<UrlContext>,
+    
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub code_execution: Option<CodeExecution>,
 }
+
+/// Google Search built-in tool configuration
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct GoogleSearch {}
+
+/// URL Context built-in tool configuration
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct UrlContext {}
+
+/// Code Execution built-in tool configuration
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct CodeExecution {}
 
 /// Function declaration for Gemini API
 #[derive(Debug, Clone, Serialize, Deserialize)]
