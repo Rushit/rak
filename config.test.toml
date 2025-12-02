@@ -22,7 +22,7 @@ provider = "gcloud"
 # =============================================================================
 [model]
 provider = "gemini"
-model_name = "gemini-2.0-flash-exp"
+model_name = "gemini-2.0-flash-lite"
 
 # Legacy API key support (fallback for backward compatibility)
 # Not needed when using gcloud auth above
